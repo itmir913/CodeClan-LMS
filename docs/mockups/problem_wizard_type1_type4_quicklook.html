@@ -1,0 +1,57 @@
+
+<h2 class="sr-only">유형① 실행결과 맞히기와 유형④ 빈칸채우기의 3단계 설정 화면 핵심 차이점을 빠르게 보여주는 목업. ①은 정답 코드와 노출 방식 토글, ④는 Monaco 에디터의 편집구간 마커 지정 도구를 보여줌</h2>
+
+<div style="display:flex; flex-direction:column; gap:1.5rem; font-size:13px;">
+
+  <div>
+    <div style="font-weight:500; margin-bottom:8px; color:var(--color-text-secondary);">①실행결과 맞히기 — 핵심 차이</div>
+    <div style="border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-lg); padding:1rem; display:flex; flex-direction:column; gap:10px;">
+      <div>
+        <label style="display:block; font-weight:500; margin-bottom:6px;">정답 코드 (학생에게 표시됨)</label>
+        <div style="background:var(--color-background-secondary); border-radius:var(--border-radius-md); padding:10px; font-family:var(--font-mono); font-size:12px;">
+          for i in range(1, n+1):<br/>&nbsp;&nbsp;&nbsp;&nbsp;print(i, end=' ')
+        </div>
+      </div>
+      <div>
+        <label style="display:block; font-weight:500; margin-bottom:6px;">입력 케이스 (TestCaseEditor 재사용, 출력은 자동생성)</label>
+        <div style="display:flex; gap:8px;">
+          <div style="flex:1; border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md); padding:8px; display:flex; justify-content:space-between;"><span>n = 5</span><span style="color:var(--color-text-tertiary);">→ "1 2 3 4 5 "</span></div>
+          <div style="flex:1; border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md); padding:8px; display:flex; justify-content:space-between;"><span>n = 3</span><span style="color:var(--color-text-tertiary);">→ "1 2 3 "</span></div>
+        </div>
+      </div>
+      <div>
+        <label style="display:block; font-weight:500; margin-bottom:6px;">학생 노출 방식</label>
+        <div style="display:flex; gap:16px;">
+          <label style="display:flex; align-items:center; gap:6px;"><input type="radio" name="ex" checked style="width:auto;"/>케이스 중 1개만 랜덤 노출</label>
+          <label style="display:flex; align-items:center; gap:6px;"><input type="radio" name="ex" style="width:auto;"/>전체 케이스 노출 (모두 답 입력)</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div style="font-weight:500; margin-bottom:8px; color:var(--color-text-secondary);">④빈칸채우기 — 핵심 차이 (MonacoMarkerEditor)</div>
+    <div style="border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-lg); padding:1rem; display:flex; flex-direction:column; gap:10px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <label style="font-weight:500;">템플릿 코드</label>
+        <div style="display:flex; gap:6px;">
+          <span style="font-size:11px; color:var(--color-text-tertiary); padding:2px 8px; border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md);">텍스트 드래그 선택 후</span>
+          <button style="padding:4px 10px; font-size:12px; background:var(--color-background-info); color:var(--color-text-info); border-color:transparent; font-weight:500;"><i class="ti ti-box-multiple" style="margin-right:4px;" aria-hidden="true"></i>편집 구간으로 지정</button>
+        </div>
+      </div>
+      <div style="background:var(--color-background-secondary); border-radius:var(--border-radius-md); padding:10px; font-family:var(--font-mono); font-size:12px; line-height:1.8;">
+        def factorial(n):<br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span style="background:var(--color-background-info); color:var(--color-text-info); padding:1px 4px; border-radius:3px;">if n &lt;= 1: return 1</span><br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span style="background:var(--color-background-info); color:var(--color-text-info); padding:1px 4px; border-radius:3px;">return n * factorial(n-1)</span><br/>
+        <br/>
+        print(<span style="background:var(--color-background-info); color:var(--color-text-info); padding:1px 4px; border-radius:3px;">factorial(5)</span>)
+      </div>
+      <div style="display:flex; gap:8px; font-size:12px;">
+        <span style="background:var(--color-background-info); color:var(--color-text-info); padding:2px 8px; border-radius:var(--border-radius-md);">구간#1 (함수 본문) <i class="ti ti-x" style="margin-left:4px;" aria-hidden="true"></i></span>
+        <span style="background:var(--color-background-info); color:var(--color-text-info); padding:2px 8px; border-radius:var(--border-radius-md);">구간#2 (호출부) <i class="ti ti-x" style="margin-left:4px;" aria-hidden="true"></i></span>
+      </div>
+      <div style="color:var(--color-text-tertiary); font-size:12px;">↓ 나머지 설정은 ②와 동일 (TestCaseEditor / LanguageSelector / AdvancedLimitsPanel / StructureCheckPanel 재사용)</div>
+    </div>
+  </div>
+
+</div>

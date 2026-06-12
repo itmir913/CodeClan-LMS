@@ -1,0 +1,4 @@
+[build]
+# Rust 1.95의 강화된 coherence_leak_check가 cookie 0.18 / tauri-utils 2.9의
+# blanket From impl을 E0119로 거부함. 업스트림 패치 전까지 린트를 allow 처리.
+rustflags = ["-A", "coherence_leak_check"]

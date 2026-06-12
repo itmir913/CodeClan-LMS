@@ -1,0 +1,55 @@
+
+<h2 class="sr-only">최초 부팅 시 표시되는 환영/초기 설정 화면. 학교 이름을 입력하면 이후 로그인 화면에 환영 인사로 사용되고, 관리자 계정을 생성하면 설정이 완료됨</h2>
+
+<div style="background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 2rem; display: flex; justify-content: center;">
+  <div style="width: 100%; max-width: 360px; background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.5rem;">
+
+    <div style="text-align: center; margin-bottom: 1.5rem;">
+      <i class="ti ti-school" style="font-size: 28px; color: var(--color-text-secondary);" aria-hidden="true"></i>
+      <div style="font-weight: 500; font-size: 16px; margin-top: 8px;">School LMS 초기 설정</div>
+      <div style="font-size: 12px; color: var(--color-text-tertiary); margin-top: 4px;">처음 실행 시 한 번만 설정합니다</div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 1rem;">
+      <label style="font-size: 12px; color: var(--color-text-secondary);">학교 이름</label>
+      <input type="text" placeholder="예: 한국고등학교" style="width: 100%;" />
+      <div style="font-size: 11px; color: var(--color-text-tertiary); margin-top: 2px;">
+        <i class="ti ti-info-circle" style="margin-right: 4px;" aria-hidden="true"></i>로그인 화면에 "환영합니다, OO고등학교 LMS입니다"로 표시됩니다
+      </div>
+    </div>
+
+    <div style="border-top: 0.5px solid var(--color-border-tertiary); margin: 1rem 0; padding-top: 1rem;">
+      <div style="font-weight: 500; font-size: 13px; margin-bottom: 8px;">
+        <i class="ti ti-user-cog" style="margin-right: 6px; font-size: 16px; vertical-align: -2px;" aria-hidden="true"></i>관리자 계정 생성
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <label style="font-size: 12px; color: var(--color-text-secondary);">이름</label>
+          <input type="text" placeholder="예: 박교사" style="width: 100%;" />
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <label style="font-size: 12px; color: var(--color-text-secondary);">아이디</label>
+          <input type="text" placeholder="예: admin" style="width: 100%;" />
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <label style="font-size: 12px; color: var(--color-text-secondary);">비밀번호</label>
+          <input type="password" placeholder="8자 이상" style="width: 100%;" />
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <label style="font-size: 12px; color: var(--color-text-secondary);">비밀번호 확인</label>
+          <input type="password" style="width: 100%;" />
+        </div>
+      </div>
+    </div>
+
+    <button style="width: 100%; margin-top: 1.25rem; font-weight: 500; background: var(--color-background-info); color: var(--color-text-info); border-color: transparent;">
+      <i class="ti ti-check" style="margin-right: 6px;" aria-hidden="true"></i>설정 완료
+    </button>
+
+    <div style="font-size: 11px; color: var(--color-text-tertiary); margin-top: 10px; text-align: center;">
+      이 계정은 자동으로 "관리자" 권한으로 생성됩니다
+    </div>
+
+  </div>
+</div>

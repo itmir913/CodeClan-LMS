@@ -1,0 +1,90 @@
+
+<div style="display:flex; flex-direction:column; gap:1.5rem;">
+
+<div style="background:var(--color-background-secondary); border-radius:var(--border-radius-lg); padding:1rem;">
+  <span style="display:inline-block; font-size:12px; font-weight:500; padding:2px 10px; border-radius:var(--border-radius-md); background:var(--color-background-info); color:var(--color-text-info); margin-bottom:10px;">② 코드작성형 (온라인 저지)</span>
+  <div style="background:var(--color-background-primary); border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-lg); padding:1rem 1.25rem;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+      <p style="font-size:14px; font-weight:500; margin:0;">12번. 두 수의 최대공약수 구하기</p>
+      <span style="font-size:12px; color:var(--color-text-secondary);">배점 20점</span>
+    </div>
+    <div style="display:flex; gap:8px; margin-bottom:12px;">
+      <span style="font-size:12px; color:var(--color-text-secondary); background:var(--color-background-secondary); padding:2px 8px; border-radius:var(--border-radius-md);">시간제한 1s</span>
+      <span style="font-size:12px; color:var(--color-text-secondary); background:var(--color-background-secondary); padding:2px 8px; border-radius:var(--border-radius-md);">메모리 256MB</span>
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <select style="width:140px;">
+        <option>Python 3</option>
+        <option>C</option>
+        <option>Java</option>
+      </select>
+      <div style="display:flex; gap:8px;">
+        <button><i class="ti ti-player-play" aria-hidden="true" style="font-size:14px; vertical-align:-2px; margin-right:4px;"></i>테스트 실행</button>
+        <button>제출</button>
+      </div>
+    </div>
+    <div style="display:flex; background:var(--color-background-secondary); border-radius:var(--border-radius-md); overflow:hidden; margin-bottom:12px;">
+      <div style="font-family:var(--font-mono); font-size:13px; line-height:1.6; color:var(--color-text-tertiary); padding:12px 8px; text-align:right; user-select:none;">1
+2
+3
+4
+5</div>
+      <pre style="font-family:var(--font-mono); font-size:13px; line-height:1.6; padding:12px 8px; margin:0; flex:1; overflow-x:auto;">a, b = map(int, input().split())
+while b:
+    a, b = b, a % b
+print(a)</pre>
+    </div>
+    <table style="width:100%; font-size:13px; border-collapse:collapse;">
+      <tr style="color:var(--color-text-secondary); text-align:left;">
+        <td style="padding:4px 0;">테스트케이스</td><td>결과</td><td>실행시간</td>
+      </tr>
+      <tr><td style="padding:4px 0;">#1</td><td><span style="color:var(--color-text-success);">통과</span></td><td>12ms</td></tr>
+      <tr><td style="padding:4px 0;">#2</td><td><span style="color:var(--color-text-success);">통과</span></td><td>11ms</td></tr>
+      <tr><td style="padding:4px 0;">#3</td><td><span style="color:var(--color-text-danger);">실패</span></td><td>9ms</td></tr>
+    </table>
+  </div>
+</div>
+
+<div style="background:var(--color-background-secondary); border-radius:var(--border-radius-lg); padding:1rem;">
+  <span style="display:inline-block; font-size:12px; font-weight:500; padding:2px 10px; border-radius:var(--border-radius-md); background:var(--color-background-info); color:var(--color-text-info); margin-bottom:10px;">③ 과제형 (보고서 + 코드 2단보기)</span>
+  <div style="background:var(--color-background-primary); border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-lg); padding:1rem 1.25rem;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <p style="font-size:14px; font-weight:500; margin:0;">15번. 정렬 알고리즘 비교 보고서</p>
+      <span style="font-size:12px; color:var(--color-text-secondary);">배점 30점 · 수기채점</span>
+    </div>
+    <div style="display:flex; gap:6px; margin-bottom:10px;">
+      <button style="font-size:12px; padding:4px 10px;">문서만</button>
+      <button style="font-size:12px; padding:4px 10px;">코드만</button>
+      <button style="font-size:12px; padding:4px 10px; border:0.5px solid var(--color-border-info); color:var(--color-text-info);">2단 보기</button>
+    </div>
+    <div style="display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap:10px;">
+      <div style="display:flex; background:var(--color-background-secondary); border-radius:var(--border-radius-md); overflow:hidden;">
+        <div style="font-family:var(--font-mono); font-size:12px; line-height:1.6; color:var(--color-text-tertiary); padding:10px 6px; text-align:right; user-select:none;">1
+2
+3</div>
+        <pre style="font-family:var(--font-mono); font-size:12px; line-height:1.6; padding:10px 6px; margin:0; flex:1; overflow-x:auto;">def bubble_sort(a):
+    ...
+    return a</pre>
+      </div>
+      <div style="background:var(--color-background-primary); border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md); padding:0; display:flex; flex-direction:column;">
+        <div style="display:flex; gap:4px; padding:6px 8px; border-bottom:0.5px solid var(--color-border-tertiary);">
+          <i class="ti ti-bold" aria-hidden="true" style="font-size:14px;"></i>
+          <i class="ti ti-italic" aria-hidden="true" style="font-size:14px;"></i>
+          <i class="ti ti-underline" aria-hidden="true" style="font-size:14px;"></i>
+          <i class="ti ti-list" aria-hidden="true" style="font-size:14px;"></i>
+          <i class="ti ti-align-left" aria-hidden="true" style="font-size:14px;"></i>
+        </div>
+        <div style="padding:10px 12px; font-size:13px; line-height:1.7;">
+          <p style="margin:0 0 6px; font-weight:500;">실험 결과</p>
+          <p style="margin:0;">버블 정렬은 입력 크기가 커질수록 시간이 급격히 증가했다. 반면 퀵 정렬은...</p>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+      <span style="font-size:12px; color:var(--color-text-tertiary);"><i class="ti ti-check" aria-hidden="true" style="font-size:14px; vertical-align:-2px;"></i> 자동저장됨 · 14:32</span>
+      <button>제출</button>
+    </div>
+  </div>
+</div>
+
+</div>

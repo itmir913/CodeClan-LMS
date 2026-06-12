@@ -1,0 +1,65 @@
+
+<h2 class="sr-only">교사 계정 및 권한 관리 화면. 등록된 교사 계정 목록과 권한 레벨, 담당 분반 배정을 확인하고 신규 계정을 추가할 수 있음</h2>
+
+<div style="display:flex; flex-direction:column; gap:1rem; font-size:13px;">
+
+  <div style="display:flex; align-items:center; justify-content:space-between;">
+    <div style="display:flex; align-items:center; gap:8px; color:var(--color-text-secondary);">
+      <i class="ti ti-user-cog" style="font-size:16px;" aria-hidden="true"></i>
+      <span style="color:var(--color-text-primary); font-weight:500;">계정 설정</span>
+    </div>
+    <button style="padding:4px 10px; font-size:12px; font-weight:500;"><i class="ti ti-user-plus" style="margin-right:4px;" aria-hidden="true"></i>교사 계정 추가</button>
+  </div>
+
+  <div style="background:var(--color-background-primary); border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-lg); overflow:hidden;">
+    <table style="width:100%; border-collapse:collapse; font-size:13px;">
+      <tr style="background:var(--color-background-secondary);">
+        <td style="padding:8px 12px; color:var(--color-text-secondary); font-size:12px;">이름</td>
+        <td style="padding:8px 12px; color:var(--color-text-secondary); font-size:12px;">아이디</td>
+        <td style="padding:8px 12px; color:var(--color-text-secondary); font-size:12px;">권한</td>
+        <td style="padding:8px 12px; color:var(--color-text-secondary); font-size:12px;">담당 분반</td>
+        <td style="padding:8px 12px; color:var(--color-text-secondary); font-size:12px;"></td>
+      </tr>
+      <tr style="border-top:0.5px solid var(--color-border-tertiary);">
+        <td style="padding:10px 12px; font-weight:500;">박교사</td>
+        <td style="padding:10px 12px; color:var(--color-text-secondary);">teacher_park</td>
+        <td style="padding:10px 12px;"><span style="background:var(--color-background-info); color:var(--color-text-info); font-size:11px; padding:2px 8px; border-radius:var(--border-radius-md); font-weight:500;">관리자</span></td>
+        <td style="padding:10px 12px;">3학년 1반, 3학년 2반</td>
+        <td style="padding:10px 12px; text-align:right;"><button style="padding:3px 8px; font-size:11px;">편집</button></td>
+      </tr>
+      <tr style="border-top:0.5px solid var(--color-border-tertiary);">
+        <td style="padding:10px 12px; font-weight:500;">이정훈</td>
+        <td style="padding:10px 12px; color:var(--color-text-secondary);">teacher_lee</td>
+        <td style="padding:10px 12px;"><span style="background:var(--color-background-secondary); color:var(--color-text-secondary); font-size:11px; padding:2px 8px; border-radius:var(--border-radius-md); font-weight:500;">일반 교사</span></td>
+        <td style="padding:10px 12px;">3학년 3반</td>
+        <td style="padding:10px 12px; text-align:right;"><button style="padding:3px 8px; font-size:11px;">편집</button></td>
+      </tr>
+      <tr style="border-top:0.5px solid var(--color-border-tertiary);">
+        <td style="padding:10px 12px; font-weight:500;">최수영</td>
+        <td style="padding:10px 12px; color:var(--color-text-secondary);">teacher_choi</td>
+        <td style="padding:10px 12px;"><span style="background:var(--color-background-secondary); color:var(--color-text-secondary); font-size:11px; padding:2px 8px; border-radius:var(--border-radius-md); font-weight:500;">일반 교사</span></td>
+        <td style="padding:10px 12px; color:var(--color-text-tertiary);">프로그래밍 308</td>
+        <td style="padding:10px 12px; text-align:right;"><button style="padding:3px 8px; font-size:11px;">편집</button></td>
+      </tr>
+    </table>
+  </div>
+
+  <div style="background:var(--color-background-primary); border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-lg); padding:1rem 1.25rem;">
+    <div style="font-weight:500; margin-bottom:8px;">권한 레벨 안내</div>
+    <div style="display:flex; flex-direction:column; gap:6px;">
+      <div style="display:flex; gap:10px; align-items:flex-start; font-size:12px;">
+        <span style="background:var(--color-background-info); color:var(--color-text-info); font-size:11px; padding:2px 8px; border-radius:var(--border-radius-md); font-weight:500; min-width:60px; text-align:center;">관리자</span>
+        <span style="color:var(--color-text-secondary);">모든 분반/교과 공유 리소스(문제 은행, 수행평가) 편집 권한, 교사 계정 관리, 백업/시스템 설정, 감사 로그 전체 조회</span>
+      </div>
+      <div style="display:flex; gap:10px; align-items:flex-start; font-size:12px;">
+        <span style="background:var(--color-background-secondary); color:var(--color-text-secondary); font-size:11px; padding:2px 8px; border-radius:var(--border-radius-md); font-weight:500; min-width:60px; text-align:center;">일반 교사</span>
+        <span style="color:var(--color-text-secondary);">담당 분반의 차시 운영/세션 진행, 교과 공유 리소스(문제 은행, 수행평가) 조회·사용 가능. 계정 관리·백업 설정 접근 불가</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="font-size:11px; color:var(--color-text-tertiary);">
+    <i class="ti ti-info-circle" style="margin-right:4px;" aria-hidden="true"></i>비밀번호 재설정은 "편집"에서 가능하며, 변경 시 감사 로그에 기록됩니다.
+  </div>
+
+</div>

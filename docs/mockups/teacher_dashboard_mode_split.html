@@ -1,0 +1,114 @@
+
+<h2 class="sr-only">교사 대시보드를 수업 준비 모드와 수업 운영 모드 두 영역으로 분리한 화면. 수업 준비에서는 문제 은행/차시/수행평가를 미리 작성하고, 수업 운영에서는 분반에 들어가 차시를 설명하거나 시험 세션을 진행함</h2>
+
+<div style="display:flex; gap:0; border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-lg); overflow:hidden; min-height:480px; font-size:13px;">
+
+  <div style="width:180px; background:var(--color-background-secondary); border-right:0.5px solid var(--color-border-tertiary); padding:1rem 0; flex-shrink:0;">
+    <div style="padding:0 1rem 1rem; font-weight:500; font-size:14px; border-bottom:0.5px solid var(--color-border-tertiary); margin-bottom:0.5rem;">
+      <i class="ti ti-school" style="margin-right:6px;" aria-hidden="true"></i>School LMS
+    </div>
+    <div style="display:flex; flex-direction:column; gap:2px; padding:0 0.5rem;">
+      <div style="padding:8px 10px; border-radius:var(--border-radius-md); background:var(--color-background-info); color:var(--color-text-info); font-weight:500; display:flex; align-items:center; gap:8px;"><i class="ti ti-layout-dashboard" aria-hidden="true"></i>대시보드</div>
+    </div>
+
+    <div style="padding:12px 1rem 4px; font-size:11px; color:var(--color-text-tertiary); font-weight:500;">수업</div>
+    <div style="display:flex; flex-direction:column; gap:2px; padding:0 0.5rem;">
+      <div style="padding:8px 10px; border-radius:var(--border-radius-md); color:var(--color-text-secondary); display:flex; align-items:center; gap:8px;"><i class="ti ti-player-play" aria-hidden="true"></i>시험 세션 운영</div>
+    </div>
+
+    <div style="padding:12px 1rem 4px; font-size:11px; color:var(--color-text-tertiary); font-weight:500;">준비</div>
+    <div style="display:flex; flex-direction:column; gap:2px; padding:0 0.5rem;">
+      <div style="padding:8px 10px; border-radius:var(--border-radius-md); color:var(--color-text-secondary); display:flex; align-items:center; gap:8px;"><i class="ti ti-database" aria-hidden="true"></i>문제 은행</div>
+      <div style="padding:8px 10px; border-radius:var(--border-radius-md); color:var(--color-text-secondary); display:flex; align-items:center; gap:8px;"><i class="ti ti-list" aria-hidden="true"></i>차시 관리</div>
+      <div style="padding:8px 10px; border-radius:var(--border-radius-md); color:var(--color-text-secondary); display:flex; align-items:center; gap:8px;"><i class="ti ti-file-text" aria-hidden="true"></i>수행평가</div>
+    </div>
+
+    <div style="padding:12px 1rem 4px; font-size:11px; color:var(--color-text-tertiary); font-weight:500;">관리</div>
+    <div style="display:flex; flex-direction:column; gap:2px; padding:0 0.5rem;">
+      <div style="padding:8px 10px; border-radius:var(--border-radius-md); color:var(--color-text-secondary); display:flex; align-items:center; gap:8px;"><i class="ti ti-users" aria-hidden="true"></i>학생/반 관리</div>
+      <div style="padding:8px 10px; border-radius:var(--border-radius-md); color:var(--color-text-secondary); display:flex; align-items:center; gap:8px;"><i class="ti ti-history" aria-hidden="true"></i>감사 로그</div>
+      <div style="padding:8px 10px; border-radius:var(--border-radius-md); color:var(--color-text-secondary); display:flex; align-items:center; gap:8px;"><i class="ti ti-cloud-download" aria-hidden="true"></i>백업/시스템</div>
+      <div style="padding:8px 10px; border-radius:var(--border-radius-md); color:var(--color-text-secondary); display:flex; align-items:center; gap:8px;"><i class="ti ti-user-cog" aria-hidden="true"></i>계정 설정</div>
+    </div>
+  </div>
+
+  <div style="flex:1; padding:1.25rem; display:flex; flex-direction:column; gap:1.25rem; min-width:0;">
+
+    <div>
+      <div style="font-weight:500; font-size:16px;">안녕하세요, 정보과 박교사 님</div>
+      <div style="color:var(--color-text-secondary); font-size:12px; margin-top:2px;">담당 교과: 정보과학 · 담당 분반 2개</div>
+    </div>
+
+    <!-- 수업 운영: 지금 당장 들어갈 분반/액션 -->
+    <div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+        <i class="ti ti-player-play" style="font-size:16px; color:var(--color-text-success);" aria-hidden="true"></i>
+        <span style="font-weight:500;">수업 운영 - 지금 들어가기</span>
+        <span style="font-size:11px; color:var(--color-text-tertiary);">분반에 입장해 차시를 설명하거나 수행평가 세션을 진행합니다</span>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px;">
+
+        <div style="border:2px solid var(--color-border-danger); background:var(--color-background-danger); border-radius:var(--border-radius-lg); padding:1rem; display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:500; color:var(--color-text-danger); font-size:15px;">3학년 1반</span>
+            <span style="font-size:11px; font-weight:500; color:var(--color-text-danger); background:var(--color-background-primary); padding:2px 8px; border-radius:var(--border-radius-md);">
+              <i class="ti ti-alert-triangle" style="margin-right:4px;" aria-hidden="true"></i>세션 운영중
+            </span>
+          </div>
+          <div style="font-size:12px; color:var(--color-text-danger);">1차 수행평가 - 자료구조 활용 · 18/24 제출 · 24:18 남음</div>
+          <button style="padding:4px 10px; font-size:12px; font-weight:500; margin-top:4px;"><i class="ti ti-arrow-right" style="margin-right:4px;" aria-hidden="true"></i>세션 운영 화면으로</button>
+        </div>
+
+        <div style="border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-lg); padding:1rem; display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:500; font-size:15px;">3학년 2반</span>
+            <span style="font-size:11px; color:var(--color-text-tertiary);">오늘 수업: 4차시</span>
+          </div>
+          <div style="font-size:12px; color:var(--color-text-secondary);">4차시 - 함수와 모듈화 (미공개)</div>
+          <div style="display:flex; gap:8px; margin-top:4px;">
+            <button style="padding:4px 10px; font-size:12px; font-weight:500;"><i class="ti ti-presentation" style="margin-right:4px;" aria-hidden="true"></i>차시 운영 시작</button>
+            <button style="padding:4px 10px; font-size:12px;"><i class="ti ti-player-play" style="margin-right:4px;" aria-hidden="true"></i>수행평가 세션</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 수업 준비: 미리 작업하는 영역 -->
+    <div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+        <i class="ti ti-edit" style="font-size:16px; color:var(--color-text-secondary);" aria-hidden="true"></i>
+        <span style="font-weight:500;">수업 준비</span>
+        <span style="font-size:11px; color:var(--color-text-tertiary);">차시·문항·수행평가는 수업 전에 미리 작성/배정해 둡니다</span>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px;">
+
+        <div style="border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-lg); padding:0.75rem; display:flex; flex-direction:column; gap:6px;">
+          <i class="ti ti-database" style="font-size:20px; color:var(--color-text-secondary);" aria-hidden="true"></i>
+          <div style="font-weight:500;">문제 은행</div>
+          <div style="font-size:11px; color:var(--color-text-secondary);">전체 87문항 (교과 공유)</div>
+        </div>
+
+        <div style="border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-lg); padding:0.75rem; display:flex; flex-direction:column; gap:6px;">
+          <i class="ti ti-list" style="font-size:20px; color:var(--color-text-secondary);" aria-hidden="true"></i>
+          <div style="font-weight:500;">차시 관리</div>
+          <div style="font-size:11px; color:var(--color-text-secondary);">분반별 배정/공개 설정</div>
+        </div>
+
+        <div style="border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-lg); padding:0.75rem; display:flex; flex-direction:column; gap:6px;">
+          <i class="ti ti-file-text" style="font-size:20px; color:var(--color-text-secondary);" aria-hidden="true"></i>
+          <div style="font-weight:500;">수행평가 관리</div>
+          <div style="font-size:11px; color:var(--color-text-secondary);">전체 3건 (교과 공유)</div>
+        </div>
+
+        <div style="border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-lg); padding:0.75rem; display:flex; flex-direction:column; gap:6px;">
+          <i class="ti ti-users" style="font-size:20px; color:var(--color-text-secondary);" aria-hidden="true"></i>
+          <div style="font-weight:500;">학생/반 관리</div>
+          <div style="font-size:11px; color:var(--color-text-secondary);">명부/출결 기록</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>

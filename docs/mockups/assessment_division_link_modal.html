@@ -1,0 +1,51 @@
+
+<h2 class="sr-only">수행평가에 분반을 연결하거나 연결을 해제하는 모달. 세션이 RUNNING인 분반은 연결 해제가 불가능하며 잠금 표시됨</h2>
+
+<div style="display:flex; flex-direction:column; gap:1rem; font-size:13px; width:420px; background:var(--color-background-primary); border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-lg); padding:1.25rem;">
+
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <div style="font-weight:500; font-size:15px;">분반 연결 관리</div>
+    <i class="ti ti-x" style="font-size:16px; color:var(--color-text-tertiary);" aria-hidden="true"></i>
+  </div>
+  <div style="color:var(--color-text-secondary); font-size:12px;">대상: 1차 수행평가 - 자료구조 활용</div>
+
+  <div style="display:flex; flex-direction:column; gap:6px;">
+
+    <label style="display:flex; align-items:center; gap:10px; padding:8px 10px; border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md);">
+      <input type="checkbox" checked disabled />
+      <span style="flex:1;">3학년 1반</span>
+      <span style="background:var(--color-background-danger); color:var(--color-text-danger); font-size:11px; padding:2px 8px; border-radius:var(--border-radius-md); font-weight:500;"><i class="ti ti-lock" style="margin-right:2px; font-size:11px;" aria-hidden="true"></i>세션 운영중 · 해제 불가</span>
+    </label>
+
+    <label style="display:flex; align-items:center; gap:10px; padding:8px 10px; border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md);">
+      <input type="checkbox" checked />
+      <span style="flex:1;">3학년 2반</span>
+    </label>
+
+    <label style="display:flex; align-items:center; gap:10px; padding:8px 10px; border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md);">
+      <input type="checkbox" checked />
+      <span style="flex:1;">3학년 3반</span>
+    </label>
+
+    <label style="display:flex; align-items:center; gap:10px; padding:8px 10px; border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md); color:var(--color-text-secondary);">
+      <input type="checkbox" />
+      <span style="flex:1;">3학년 4반</span>
+    </label>
+
+    <label style="display:flex; align-items:center; gap:10px; padding:8px 10px; border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md); color:var(--color-text-secondary);">
+      <input type="checkbox" />
+      <span style="flex:1;">프로그래밍 308</span>
+    </label>
+
+  </div>
+
+  <div style="font-size:11px; color:var(--color-text-tertiary);">
+    <i class="ti ti-info-circle" style="margin-right:4px;" aria-hidden="true"></i>연결 해제 시 해당 분반의 학생은 이 수행평가를 더 이상 볼 수 없습니다. 단, 이미 생성된 세션/제출 기록은 보존됩니다.
+  </div>
+
+  <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:4px;">
+    <button style="padding:5px 14px; font-size:12px;">취소</button>
+    <button style="padding:5px 14px; font-size:12px; font-weight:500; background:var(--color-background-info); color:var(--color-text-info); border-color:transparent;">저장</button>
+  </div>
+
+</div>

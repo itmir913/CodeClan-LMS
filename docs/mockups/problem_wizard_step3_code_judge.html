@@ -1,0 +1,100 @@
+
+<h2 class="sr-only">문항 등록 마법사 3단계, 코드 작성형(온라인 저지) 문항의 세부 설정 폼. 문제 설명, 테스트케이스 목록, 허용 언어, 제한시간/메모리, 구조 검사 옵션을 포함</h2>
+
+<div style="display:flex; flex-direction:column; gap:1.25rem; font-size:13px;">
+
+  <div style="display:flex; align-items:center; gap:8px; color:var(--color-text-secondary);">
+    <span style="color:var(--color-text-success);"><i class="ti ti-circle-check" aria-hidden="true"></i> 1. 기본 정보</span>
+    <i class="ti ti-chevron-right" aria-hidden="true"></i>
+    <span style="color:var(--color-text-success);"><i class="ti ti-circle-check" aria-hidden="true"></i> 2. 유형 선택 (코드 작성형)</span>
+    <i class="ti ti-chevron-right" aria-hidden="true"></i>
+    <span style="color:var(--color-text-info); font-weight:500;">3. 세부 설정</span>
+    <i class="ti ti-chevron-right" aria-hidden="true"></i>
+    <span style="color:var(--color-text-tertiary);">4. 미리보기/저장</span>
+  </div>
+
+  <div>
+    <label style="display:block; font-weight:500; margin-bottom:6px;">문제 설명</label>
+    <div style="border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md); padding:0.75rem; min-height:70px; color:var(--color-text-secondary);">
+      정수 N이 주어지면, 1부터 N까지의 합을 출력하는 프로그램을 작성하시오.
+      <div style="margin-top:6px; font-size:12px;"><i class="ti ti-markdown" style="margin-right:4px;" aria-hidden="true"></i>마크다운 / 이미지 첨부 지원</div>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px;">
+    <div>
+      <label style="display:block; font-weight:500; margin-bottom:6px;">허용 언어</label>
+      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        <span style="background:var(--color-background-info); color:var(--color-text-info); padding:4px 10px; border-radius:var(--border-radius-md); font-weight:500;">Python <i class="ti ti-x" style="margin-left:4px; font-size:11px;" aria-hidden="true"></i></span>
+        <span style="background:var(--color-background-info); color:var(--color-text-info); padding:4px 10px; border-radius:var(--border-radius-md); font-weight:500;">C <i class="ti ti-x" style="margin-left:4px; font-size:11px;" aria-hidden="true"></i></span>
+        <span style="border:0.5px solid var(--color-border-tertiary); color:var(--color-text-tertiary); padding:4px 10px; border-radius:var(--border-radius-md);"><i class="ti ti-plus" style="margin-right:4px; font-size:11px;" aria-hidden="true"></i>추가</span>
+      </div>
+    </div>
+    <div>
+      <label style="display:block; font-weight:500; margin-bottom:6px;">시간 제한</label>
+      <input type="text" value="1.0초" style="width:100%;"/>
+    </div>
+    <div>
+      <label style="display:block; font-weight:500; margin-bottom:6px;">메모리 제한</label>
+      <input type="text" value="256MB" style="width:100%;"/>
+    </div>
+  </div>
+
+  <div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+      <label style="font-weight:500;">테스트케이스</label>
+      <button style="padding:4px 10px; font-size:12px;"><i class="ti ti-plus" style="margin-right:4px;" aria-hidden="true"></i>케이스 추가</button>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+
+      <div style="display:flex; gap:10px; align-items:center; border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md); padding:8px 10px;">
+        <span style="font-size:12px; color:var(--color-text-tertiary); min-width:50px;">#1</span>
+        <input type="text" value="5" placeholder="입력" style="flex:1;"/>
+        <i class="ti ti-arrow-right" style="color:var(--color-text-tertiary);" aria-hidden="true"></i>
+        <input type="text" value="15" placeholder="출력" style="flex:1;"/>
+        <label style="display:flex; align-items:center; gap:4px; font-size:12px; color:var(--color-text-secondary);"><input type="checkbox" checked style="width:auto;"/>예시 공개</label>
+        <i class="ti ti-trash" style="color:var(--color-text-tertiary); cursor:pointer;" aria-hidden="true"></i>
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:center; border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md); padding:8px 10px;">
+        <span style="font-size:12px; color:var(--color-text-tertiary); min-width:50px;">#2</span>
+        <input type="text" value="100" placeholder="입력" style="flex:1;"/>
+        <i class="ti ti-arrow-right" style="color:var(--color-text-tertiary);" aria-hidden="true"></i>
+        <input type="text" value="5050" placeholder="출력" style="flex:1;"/>
+        <label style="display:flex; align-items:center; gap:4px; font-size:12px; color:var(--color-text-secondary);"><input type="checkbox" style="width:auto;"/>예시 공개</label>
+        <i class="ti ti-trash" style="color:var(--color-text-tertiary); cursor:pointer;" aria-hidden="true"></i>
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:center; border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md); padding:8px 10px;">
+        <span style="font-size:12px; color:var(--color-text-tertiary); min-width:50px;">#3</span>
+        <input type="text" value="1" placeholder="입력" style="flex:1;"/>
+        <i class="ti ti-arrow-right" style="color:var(--color-text-tertiary);" aria-hidden="true"></i>
+        <input type="text" value="1" placeholder="출력" style="flex:1;"/>
+        <label style="display:flex; align-items:center; gap:4px; font-size:12px; color:var(--color-text-secondary);"><input type="checkbox" style="width:auto;"/>예시 공개</label>
+        <i class="ti ti-trash" style="color:var(--color-text-tertiary); cursor:pointer;" aria-hidden="true"></i>
+      </div>
+
+    </div>
+    <div style="font-size:12px; color:var(--color-text-tertiary); margin-top:6px;">
+      <i class="ti ti-info-circle" style="margin-right:4px;" aria-hidden="true"></i>"예시 공개" 체크된 케이스만 학생에게 문제 설명과 함께 노출됩니다. 나머지는 채점에만 사용.
+    </div>
+  </div>
+
+  <div style="border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-md); padding:0.75rem 1rem;">
+    <label style="display:flex; align-items:center; gap:8px; font-weight:500; cursor:pointer;">
+      <input type="checkbox" style="width:auto;"/>구조 요건 검사 추가 (사전 게이트)
+    </label>
+    <div style="font-size:12px; color:var(--color-text-tertiary); margin-top:4px; margin-left:24px;">
+      예: 코드에 "for" 또는 "while" 키워드가 없으면 테스트케이스 실행 없이 즉시 오답(구조 요건 미달) 처리
+    </div>
+  </div>
+
+  <div style="display:flex; justify-content:space-between;">
+    <button style="padding:6px 14px;"><i class="ti ti-arrow-left" style="margin-right:4px;" aria-hidden="true"></i>이전</button>
+    <div style="display:flex; gap:8px;">
+      <button style="padding:6px 14px;"><i class="ti ti-device-floppy" style="margin-right:4px;" aria-hidden="true"></i>임시저장</button>
+      <button style="padding:6px 14px; background:var(--color-background-info); color:var(--color-text-info); font-weight:500; border-color:transparent;">다음<i class="ti ti-arrow-right" style="margin-left:4px;" aria-hidden="true"></i></button>
+    </div>
+  </div>
+
+</div>
