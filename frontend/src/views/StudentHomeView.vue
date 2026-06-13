@@ -13,30 +13,12 @@
     </div>
 
     <!-- 시험 모드 (RUNNING) -->
-    <div v-else-if="store.activeSession?.status === 'RUNNING'" class="exam-overlay">
-      <div class="exam-header">
-        <span class="exam-icon">⚠</span>
-        <span class="exam-title">수행평가 진행 중 — {{ store.activeSession.assessment_title }}</span>
-        <span v-if="store.activeSession.time_limit_min" class="exam-timer">
-          제한시간 {{ store.activeSession.time_limit_min }}분
-        </span>
-      </div>
-      <div class="exam-body">
-        <p class="exam-notice">
-          시험이 진행 중입니다. 선생님의 안내에 따라 응시하세요.
-        </p>
-        <p class="exam-notice exam-notice--sub">
-          시험 종료 전까지 수업(차시) 화면에 접근할 수 없습니다.
-        </p>
-        <div v-if="store.activeSession.is_paused" class="pause-badge">
-          일시정지 중
-        </div>
-      </div>
-      <div class="exam-footer">
-        <span class="exam-footer-text">{{ auth.schoolName }} · {{ auth.student?.name }}</span>
-        <button class="btn-ghost" @click="logout">로그아웃</button>
-      </div>
-    </div>
+    <StudentExamView
+      v-else-if="store.activeSession?.status === 'RUNNING'"
+      :session="store.activeSession"
+      :student-name="auth.student?.name ?? ''"
+      @logout="logout"
+    />
 
     <!-- 일반 화면 -->
     <template v-else>
@@ -155,6 +137,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useStudentStore } from '@/stores/student'
+import StudentExamView from './StudentExamView.vue'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -267,78 +250,6 @@ function sessionBadgeClass(status: SessionStatus): string {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
-}
-
-/* ── 시험 오버레이 (RUNNING) ───────────────────────── */
-
-.exam-overlay {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  border: 2px solid var(--color-border-danger);
-}
-
-.exam-header {
-  background: var(--color-background-danger);
-  color: var(--color-text-danger);
-  padding: 14px 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 500;
-  font-size: 14px;
-}
-
-.exam-icon {
-  font-size: 16px;
-}
-
-.exam-title {
-  flex: 1;
-}
-
-.exam-timer {
-  font-size: 13px;
-}
-
-.exam-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 3rem 1.5rem;
-}
-
-.exam-notice {
-  font-size: 15px;
-  color: var(--color-text-primary);
-  text-align: center;
-}
-
-.exam-notice--sub {
-  font-size: 12px;
-  color: var(--color-text-tertiary);
-}
-
-.pause-badge {
-  font-size: 12px;
-  color: var(--color-text-warning);
-  background: var(--color-background-warning);
-  padding: 4px 12px;
-  border-radius: var(--border-radius-md);
-  border: 0.5px solid var(--color-background-warning);
-}
-
-.exam-footer {
-  padding: 12px 1.5rem;
-  border-top: 0.5px solid var(--color-border-secondary);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 12px;
-  color: var(--color-text-tertiary);
 }
 
 /* ── LOBBY 배너 ────────────────────────────────────── */

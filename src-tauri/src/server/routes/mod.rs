@@ -7,4 +7,5 @@ pub mod problems;
 pub mod sessions;
 pub mod setup;
 pub mod student;
+pub mod submissions;
 pub mod teachers;

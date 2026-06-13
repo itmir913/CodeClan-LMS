@@ -57,6 +57,12 @@ const router = createRouter({
       meta: { requiresTeacherAuth: true },
     },
     {
+      path: '/sessions/:id/grading',
+      name: 'session-grading',
+      component: () => import('@/views/SessionGradingView.vue'),
+      meta: { requiresTeacherAuth: true },
+    },
+    {
       path: '/student',
       name: 'student-home',
       component: () => import('@/views/StudentHomeView.vue'),

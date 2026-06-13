@@ -20,6 +20,8 @@ async function request<T>(
   return res.json()
 }
 
+// ─── 인증 ─────────────────────────────────────────────────────
+
 export interface TeacherUser {
   id: number
   username: string
@@ -36,37 +38,7 @@ export interface StudentUser {
   password_reset_required: boolean
 }
 
-// ─── 학생 전용 ───────────────────────────────────────────────
-
-export interface StudentLessonRow {
-  id: number
-  title: string
-  description: string
-  order_no: number
-  problem_count: number
-  released_at: string | null
-}
-
-export interface StudentAssessmentRow {
-  id: number
-  title: string
-  description: string
-  problem_count: number
-  session_id: number | null
-  session_status: 'CREATED' | 'LOBBY' | 'RUNNING' | 'CLOSED' | null
-  is_result_released: boolean
-}
-
-export interface StudentActiveSession {
-  id: number
-  assessment_id: number
-  assessment_title: string
-  status: 'LOBBY' | 'RUNNING'
-  time_limit_min: number | null
-  start_at: string | null
-  is_paused: boolean
-  is_result_released: boolean
-}
+// ─── 대시보드 ──────────────────────────────────────────────────
 
 export interface DashboardResponse {
   teacher_name: string
@@ -142,7 +114,7 @@ export interface BulkImportResult {
   errors: string[]
 }
 
-// ─── 수행평가 관리 ──────────────────────────────────────
+// ─── 수행평가 관리 ──────────────────────────────────────────
 
 export interface AssessmentRow {
   id: number
@@ -174,7 +146,7 @@ export interface AssessmentDetail extends AssessmentRow {
   divisions: AssessmentDivisionRow[]
 }
 
-// ─── 차시 관리 ───────────────────────────────────────────
+// ─── 차시 관리 ───────────────────────────────────────────────
 
 export interface LessonRow {
   id: number
@@ -205,7 +177,7 @@ export interface LessonDetail extends LessonRow {
   releases: LessonRelease[]
 }
 
-// ─── 문제 은행 ───────────────────────────────────────────
+// ─── 문제 은행 ───────────────────────────────────────────────
 
 export const PROBLEM_TYPE_LABELS = {
   1: '①실행결과맞히기',
@@ -249,7 +221,7 @@ export interface UpdateProblemInput {
   is_structure_check?: boolean
 }
 
-// ─── 세션 관리 ───────────────────────────────────────────
+// ─── 세션 관리 ───────────────────────────────────────────────
 
 export interface SessionRow {
   id: number
@@ -277,6 +249,83 @@ export interface CreateSessionInput {
   student_ids?: number[]
 }
 
+// ─── 학생 전용 ───────────────────────────────────────────────
+
+export interface StudentLessonRow {
+  id: number
+  title: string
+  description: string
+  order_no: number
+  problem_count: number
+  released_at: string | null
+}
+
+export interface StudentAssessmentRow {
+  id: number
+  title: string
+  description: string
+  problem_count: number
+  session_id: number | null
+  session_status: 'CREATED' | 'LOBBY' | 'RUNNING' | 'CLOSED' | null
+  is_result_released: boolean
+}
+
+export interface StudentActiveSession {
+  id: number
+  assessment_id: number
+  assessment_title: string
+  status: 'LOBBY' | 'RUNNING'
+  time_limit_min: number | null
+  start_at: string | null
+  is_paused: boolean
+  is_result_released: boolean
+}
+
+// ─── 제출 / 채점 ─────────────────────────────────────────────
+
+export interface SessionProblemRow {
+  ap_id: number
+  order_no: number
+  max_score: number
+  problem_id: number
+  problem_type: number
+  title: string
+  description: string
+  type_config: string
+  is_structure_check: boolean
+  submission_id: number | null
+  submitted_content: string | null
+  submitted_language: string | null
+  verdict: string | null
+  submitted_score: number | null
+}
+
+export interface SubmissionResult {
+  submission_id: number
+  verdict: string | null
+  score: number | null
+}
+
+export interface SubmissionRow {
+  id: number
+  student_id: number
+  student_name: string
+  student_number: string
+  problem_id: number
+  problem_type: number
+  problem_title: string
+  problem_order: number
+  max_score: number
+  content: string
+  language: string | null
+  verdict: string | null
+  score: number | null
+  submission_no: number
+  created_at: string
+}
+
+// ─── API 객체 ─────────────────────────────────────────────────
+
 export const api = {
   dashboard: {
     get: () => request<DashboardResponse>('GET', '/dashboard'),
@@ -285,7 +334,8 @@ export const api = {
   divisions: {
     list: () => request<DivisionRow[]>('GET', '/divisions'),
     create: (name: string) => request<DivisionRow>('POST', '/divisions', { name }),
-    update: (id: number, name: string) => request<{ ok: boolean }>('PUT', `/divisions/${id}`, { name }),
+    update: (id: number, name: string) =>
+      request<{ ok: boolean }>('PUT', `/divisions/${id}`, { name }),
     delete: (id: number) => request<{ ok: boolean }>('DELETE', `/divisions/${id}`),
     getTeachers: (id: number) => request<TeacherBrief[]>('GET', `/divisions/${id}/teachers`),
     setTeachers: (id: number, teacher_ids: number[]) =>
@@ -339,7 +389,9 @@ export const api = {
     setProblems: (id: number, problem_ids: number[]) =>
       request<{ ok: boolean }>('PUT', `/lessons/${id}/problems`, { problem_ids }),
     toggleRelease: (id: number, division_id: number, is_released: boolean) =>
-      request<{ ok: boolean; released_at: string | null }>('PUT', `/lessons/${id}/release`, { division_id, is_released }),
+      request<{ ok: boolean; released_at: string | null }>(
+        'PUT', `/lessons/${id}/release`, { division_id, is_released }
+      ),
   },
 
   problems: {
@@ -369,15 +421,28 @@ export const api = {
     create: (data: CreateSessionInput) => request<SessionRow>('POST', '/sessions', data),
     transition: (id: number, action: string) =>
       request<{ ok: boolean; status: string }>('POST', `/sessions/${id}/transition`, { action }),
-    pause: (id: number) => request<{ ok: boolean; is_paused: boolean }>('POST', `/sessions/${id}/pause`),
+    pause: (id: number) =>
+      request<{ ok: boolean; is_paused: boolean }>('POST', `/sessions/${id}/pause`),
     toggleResultRelease: (id: number) =>
-      request<{ ok: boolean; is_result_released: boolean }>('POST', `/sessions/${id}/result-release`),
+      request<{ ok: boolean; is_result_released: boolean }>(
+        'POST', `/sessions/${id}/result-release`
+      ),
   },
 
   student: {
     lessons: () => request<StudentLessonRow[]>('GET', '/student/lessons'),
     assessments: () => request<StudentAssessmentRow[]>('GET', '/student/assessments'),
     activeSession: () => request<StudentActiveSession | null>('GET', '/student/active-session'),
+    sessionProblems: () => request<SessionProblemRow[]>('GET', '/student/session-problems'),
+    submit: (data: { problem_id: number; content: string; language?: string }) =>
+      request<SubmissionResult>('POST', '/student/submit', data),
+  },
+
+  submissions: {
+    forSession: (session_id: number) =>
+      request<SubmissionRow[]>('GET', `/sessions/${session_id}/submissions`),
+    grade: (id: number, score: number) =>
+      request<{ ok: boolean }>('POST', `/submissions/${id}/grade`, { score }),
   },
 
   setup: {
@@ -393,9 +458,7 @@ export const api = {
   auth: {
     loginTeacher: (username: string, password: string) =>
       request<{ ok: boolean; user: TeacherUser }>(
-        'POST',
-        '/auth/login/teacher',
-        { username, password },
+        'POST', '/auth/login/teacher', { username, password },
       ),
     logout: () => request<{ ok: boolean }>('POST', '/auth/logout'),
     me: () => request<TeacherUser>('GET', '/auth/me'),
@@ -403,17 +466,13 @@ export const api = {
 
     loginStudent: (student_number: string, password: string) =>
       request<{ ok: boolean; user: StudentUser }>(
-        'POST',
-        '/auth/login/student',
-        { student_number, password },
+        'POST', '/auth/login/student', { student_number, password },
       ),
     logoutStudent: () => request<{ ok: boolean }>('POST', '/auth/logout/student'),
     studentMe: () => request<StudentUser>('GET', '/auth/student/me'),
     studentChangePassword: (current_password: string, new_password: string) =>
       request<{ ok: boolean }>(
-        'POST',
-        '/auth/student/change-password',
-        { current_password, new_password },
+        'POST', '/auth/student/change-password', { current_password, new_password },
       ),
   },
 }

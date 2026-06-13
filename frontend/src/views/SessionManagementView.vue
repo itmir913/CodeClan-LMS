@@ -169,6 +169,15 @@
               <IconEyeOff v-else :size="16" />
               {{ selected.is_result_released ? '결과 비공개' : '결과 공개' }}
             </button>
+
+            <!-- RUNNING/CLOSED → 채점 -->
+            <RouterLink
+              v-if="selected.status === 'RUNNING' || selected.status === 'CLOSED'"
+              :to="{ name: 'session-grading', params: { id: selected.id } }"
+              class="btn btn-secondary"
+            >
+              채점하기
+            </RouterLink>
           </div>
         </div>
 
