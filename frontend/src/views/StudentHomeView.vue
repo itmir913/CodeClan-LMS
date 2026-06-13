@@ -137,6 +137,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useStudentStore } from '@/stores/student'
+import { api } from '@/api/client'
 import StudentExamView from './StudentExamView.vue'
 
 const router = useRouter()
@@ -147,6 +148,7 @@ const activeTab = ref<'lessons' | 'assessments'>('lessons')
 const initialLoading = ref(false)
 const initError = ref<string | null>(null)
 let pollTimer: ReturnType<typeof setInterval> | null = null
+let heartbeatTimer: ReturnType<typeof setInterval> | null = null
 
 async function init() {
   initialLoading.value = true
@@ -176,6 +178,13 @@ function startPolling() {
   pollTimer = setInterval(() => {
     store.fetchActiveSession()
   }, 5000)
+
+  heartbeatTimer = setInterval(() => {
+    const s = store.activeSession
+    if (s && (s.status === 'LOBBY' || s.status === 'RUNNING')) {
+      api.attendance.heartbeat('session', s.id).catch(() => {})
+    }
+  }, 15000)
 }
 
 onMounted(async () => {
@@ -185,10 +194,12 @@ onMounted(async () => {
 
 onUnmounted(() => {
   if (pollTimer !== null) clearInterval(pollTimer)
+  if (heartbeatTimer !== null) clearInterval(heartbeatTimer)
 })
 
 async function logout() {
   if (pollTimer !== null) clearInterval(pollTimer)
+  if (heartbeatTimer !== null) clearInterval(heartbeatTimer)
   await auth.logoutStudent()
   router.replace({ name: 'login' })
 }

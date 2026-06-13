@@ -181,6 +181,13 @@
           </div>
         </div>
 
+        <!-- 출결 위젯 (LOBBY / RUNNING) -->
+        <AttendanceWidget
+          v-if="selected.status === 'LOBBY' || selected.status === 'RUNNING'"
+          :session-id="selected.id"
+          class="attendance-section"
+        />
+
         <!-- 세션 정보 -->
         <div class="info-section">
           <h3 class="section-title">세션 정보</h3>
@@ -270,6 +277,7 @@ import {
 import { useSessionStore } from '@/stores/session'
 import { useDivisionStore } from '@/stores/division'
 import { useAssessmentStore } from '@/stores/assessment'
+import AttendanceWidget from '@/components/AttendanceWidget.vue'
 import type { SessionRow } from '@/api/client'
 
 const sessionStore = useSessionStore()
@@ -671,6 +679,10 @@ async function doCreateSession() {
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.attendance-section {
   margin-bottom: var(--space-4);
 }
 

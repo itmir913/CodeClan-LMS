@@ -69,9 +69,12 @@ pub fn build_router(state: AppState) -> Router {
         .route("/student/active-session", get(routes::student::get_active_session))
         .route("/student/session-problems", get(routes::submissions::get_session_problems))
         .route("/student/submit", post(routes::submissions::submit_answer))
+        .route("/student/heartbeat", post(routes::attendance::student_heartbeat))
         // 제출/채점 (교사)
         .route("/sessions/:id/submissions", get(routes::submissions::get_session_submissions))
-        .route("/submissions/:id/grade", post(routes::submissions::grade_submission));
+        .route("/submissions/:id/grade", post(routes::submissions::grade_submission))
+        // 출결 현황
+        .route("/sessions/:id/attendance", get(routes::attendance::get_session_attendance));
 
     Router::new()
         .nest("/api", api)

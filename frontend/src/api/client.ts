@@ -281,6 +281,18 @@ export interface StudentActiveSession {
   is_result_released: boolean
 }
 
+// ─── 출결 현황 ───────────────────────────────────────────────
+
+export interface AttendanceRow {
+  student_id: number
+  name: string
+  student_number: string
+  is_online: boolean
+  joined_at: string | null
+  last_seen_at: string | null
+  is_late: boolean
+}
+
 // ─── 제출 / 채점 ─────────────────────────────────────────────
 
 export interface SessionProblemRow {
@@ -443,6 +455,13 @@ export const api = {
       request<SubmissionRow[]>('GET', `/sessions/${session_id}/submissions`),
     grade: (id: number, score: number) =>
       request<{ ok: boolean }>('POST', `/submissions/${id}/grade`, { score }),
+  },
+
+  attendance: {
+    forSession: (session_id: number) =>
+      request<AttendanceRow[]>('GET', `/sessions/${session_id}/attendance`),
+    heartbeat: (context_type: 'session' | 'lesson', context_id: number) =>
+      request<{ ok: boolean }>('POST', '/student/heartbeat', { context_type, context_id }),
   },
 
   setup: {
