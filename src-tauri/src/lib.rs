@@ -1,6 +1,6 @@
 mod db;
-mod error;
-mod server;
+pub mod error;
+pub mod server;
 
 use server::state::AppState;
 use tauri::{

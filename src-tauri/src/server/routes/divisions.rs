@@ -386,8 +386,8 @@ pub async fn add_student(
         .to_string();
 
     let id = sqlx::query(
-        r#"INSERT INTO students (division_id, student_number, name, birth_date, password_hash, password_reset_required)
-           VALUES (?, ?, ?, '', ?, 1)"#,
+        r#"INSERT INTO students (division_id, student_number, name, password_hash, password_reset_required)
+           VALUES (?, ?, ?, ?, 1)"#,
     )
     .bind(division_id)
     .bind(&student_number)
@@ -478,8 +478,8 @@ pub async fn bulk_import_students(
         };
 
         let result = sqlx::query(
-            r#"INSERT OR IGNORE INTO students (division_id, student_number, name, birth_date, password_hash, password_reset_required)
-               VALUES (?, ?, ?, '', ?, 1)"#,
+            r#"INSERT OR IGNORE INTO students (division_id, student_number, name, password_hash, password_reset_required)
+               VALUES (?, ?, ?, ?, 1)"#,
         )
         .bind(division_id)
         .bind(&student_number)

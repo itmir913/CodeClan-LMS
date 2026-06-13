@@ -10,7 +10,7 @@ use tower_http::cors::{Any, CorsLayer};
 
 use state::AppState;
 
-pub async fn start(state: AppState) -> anyhow::Result<()> {
+pub fn build_router(state: AppState) -> Router {
     let cors = CorsLayer::new()
         .allow_origin(Any)
         .allow_methods(Any)
@@ -73,10 +73,14 @@ pub async fn start(state: AppState) -> anyhow::Result<()> {
         .route("/sessions/:id/submissions", get(routes::submissions::get_session_submissions))
         .route("/submissions/:id/grade", post(routes::submissions::grade_submission));
 
-    let app = Router::new()
+    Router::new()
         .nest("/api", api)
         .layer(cors)
-        .with_state(state);
+        .with_state(state)
+}
+
+pub async fn start(state: AppState) -> anyhow::Result<()> {
+    let app = build_router(state);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
     tracing::info!("Axum server listening on {addr}");
