@@ -4,8 +4,8 @@
   "version": "0.1.0",
   "identifier": "kr.codeclan.lms",
   "build": {
-    "beforeDevCommand": "cd ../frontend && npm run dev",
-    "beforeBuildCommand": "cd ../frontend && npm run build",
+    "beforeDevCommand": "npm run dev --prefix ./frontend",
+    "beforeBuildCommand": "npm run build --prefix ./frontend",
     "devUrl": "http://localhost:5173",
     "frontendDist": "../frontend/dist"
   },
@@ -15,10 +15,10 @@
       {
         "label": "main",
         "title": "CodeClan LMS",
-        "width": 1280,
-        "height": 800,
+        "width": 1024,
+        "height": 640,
         "minWidth": 1024,
-        "minHeight": 600
+        "minHeight": 640
       }
     ],
     "security": {

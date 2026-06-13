@@ -1,0 +1,19 @@
+{
+  "name": "codeclan-lms",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "tauri dev",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "concurrently --names \"VITE,AXUM\" --prefix-colors \"cyan,green\" \"npm run dev --prefix frontend\" \"cargo run --manifest-path src-tauri/Cargo.toml\"",
+    "build": "npm run build --prefix frontend && tauri build",
+    "build:frontend": "npm run build --prefix frontend",
+    "build:backend": "cargo build --manifest-path src-tauri/Cargo.toml",
+    "check": "cargo check --manifest-path src-tauri/Cargo.toml",
+    "install:frontend": "npm install --prefix frontend"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.11.2",
+    "concurrently": "^10.0.3"
+  }
+}
