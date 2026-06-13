@@ -1,34 +1,6 @@
 <template>
   <div class="layout">
-    <aside class="sidebar">
-      <div class="sidebar-logo">
-        <IconSchool :size="18" stroke-width="1.5" />
-        <span>{{ auth.schoolName || 'CodeClan LMS' }}</span>
-      </div>
-      <nav class="sidebar-nav">
-        <RouterLink :to="{ name: 'dashboard' }" class="nav-item">
-          <IconLayoutDashboard :size="16" stroke-width="1.5" />대시보드
-        </RouterLink>
-        <div class="nav-group-label">수업</div>
-        <a href="#" class="nav-item"><IconPlayerPlay :size="16" stroke-width="1.5" />시험 세션 운영</a>
-        <div class="nav-group-label">준비</div>
-        <a href="#" class="nav-item active"><IconDatabase :size="16" stroke-width="1.5" />문제 은행</a>
-        <a href="#" class="nav-item"><IconList :size="16" stroke-width="1.5" />차시 관리</a>
-        <a href="#" class="nav-item"><IconFileText :size="16" stroke-width="1.5" />수행평가</a>
-        <div class="nav-group-label">관리</div>
-        <RouterLink :to="{ name: 'division-management' }" class="nav-item">
-          <IconUsers :size="16" stroke-width="1.5" />학생/반 관리
-        </RouterLink>
-        <a href="#" class="nav-item"><IconHistory :size="16" stroke-width="1.5" />감사 로그</a>
-      </nav>
-      <div class="sidebar-footer">
-        <div class="user-info" v-if="auth.teacher">
-          <span class="user-name">{{ auth.teacher.name }}</span>
-          <span class="user-role">{{ auth.teacher.role === 'admin' ? '관리자' : '교사' }}</span>
-        </div>
-        <button class="logout-btn" @click="logout">로그아웃</button>
-      </div>
-    </aside>
+    <AppSidebar />
 
     <div class="main-split">
       <!-- 좌: 문제 목록 -->
@@ -156,9 +128,9 @@ import { useProblemStore } from '@/stores/problem'
 import { PROBLEM_TYPE_LABELS, type ProblemRow, type CreateProblemInput, type UpdateProblemInput } from '@/api/client'
 import ProblemEditor from '@/components/ProblemEditor.vue'
 import {
-  IconSchool, IconLayoutDashboard, IconPlayerPlay, IconDatabase, IconList,
-  IconFileText, IconUsers, IconHistory, IconPlus, IconPencil, IconTrash, IconX,
+  IconDatabase, IconPlus, IconPencil, IconTrash, IconX,
 } from '@tabler/icons-vue'
+import AppSidebar from '@/components/AppSidebar.vue'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -248,10 +220,6 @@ async function confirmDelete() {
   }
 }
 
-async function logout() {
-  await auth.logoutTeacher()
-  router.replace({ name: 'login' })
-}
 
 onMounted(async () => {
   if (!auth.isTeacherLoggedIn) {
@@ -264,65 +232,6 @@ onMounted(async () => {
 
 <style scoped>
 .layout { display: flex; height: 100vh; overflow: hidden; }
-
-.sidebar {
-  width: 200px;
-  flex-shrink: 0;
-  background: var(--color-background-primary);
-  border-right: 1px solid var(--color-border-secondary);
-  display: flex;
-  flex-direction: column;
-}
-
-.sidebar-logo {
-  padding: 14px 16px;
-  font-weight: 700;
-  font-size: 14px;
-  border-bottom: 1px solid var(--color-border-secondary);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.sidebar-nav { flex: 1; padding: 8px 0; overflow-y: auto; }
-
-.nav-group-label {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--color-text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 12px 16px 4px;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 10px 7px 16px;
-  font-size: 13px;
-  color: var(--color-text-secondary);
-  text-decoration: none;
-  margin: 0 6px;
-  border-radius: var(--border-radius-md);
-  transition: background 0.1s;
-}
-
-.nav-item:hover { background: var(--color-background-secondary); color: var(--color-text-primary); }
-.nav-item.active { background: var(--color-background-info); color: var(--color-text-info); font-weight: 500; }
-
-.sidebar-footer {
-  padding: 12px 16px;
-  border-top: 1px solid var(--color-border-secondary);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.user-info { display: flex; align-items: center; gap: 8px; }
-.user-name { font-size: 13px; font-weight: 500; }
-.user-role { font-size: 10px; background: var(--color-background-info); color: var(--color-text-info); padding: 2px 6px; border-radius: 4px; }
-.logout-btn { font-size: 12px; color: var(--color-text-secondary); padding: 4px 0; border: none; background: none; cursor: pointer; text-align: left; }
 
 /* ── 2단 레이아웃 ── */
 .main-split { flex: 1; display: flex; overflow: hidden; }

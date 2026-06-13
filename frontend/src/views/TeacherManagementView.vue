@@ -1,30 +1,6 @@
 <template>
   <div class="layout">
-    <aside class="sidebar">
-      <div class="sidebar-logo">
-        <IconSchool :size="18" stroke-width="1.5" />
-        <span>{{ auth.schoolName || 'CodeClan LMS' }}</span>
-      </div>
-      <nav class="sidebar-nav">
-        <RouterLink :to="{ name: 'dashboard' }" class="nav-item">
-          <IconLayoutDashboard :size="16" stroke-width="1.5" />대시보드
-        </RouterLink>
-        <div class="nav-group-label">관리</div>
-        <RouterLink :to="{ name: 'division-management' }" class="nav-item">
-          <IconUsers :size="16" stroke-width="1.5" />학생/반 관리
-        </RouterLink>
-        <a href="#" class="nav-item active">
-          <IconUserCog :size="16" stroke-width="1.5" />교사 계정
-        </a>
-      </nav>
-      <div class="sidebar-footer">
-        <div class="user-info" v-if="auth.teacher">
-          <span class="user-name">{{ auth.teacher.name }}</span>
-          <span class="user-role">관리자</span>
-        </div>
-        <button class="logout-btn" @click="logout">로그아웃</button>
-      </div>
-    </aside>
+    <AppSidebar />
 
     <main class="main-content">
       <div class="page-header">
@@ -138,9 +114,9 @@ import { useAuthStore } from '@/stores/auth'
 import { useTeacherStore } from '@/stores/teacher'
 import type { TeacherRow } from '@/api/client'
 import {
-  IconSchool, IconLayoutDashboard, IconUsers, IconUserCog,
   IconPlus, IconPencil, IconTrash, IconAlertTriangle,
 } from '@tabler/icons-vue'
+import AppSidebar from '@/components/AppSidebar.vue'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -217,10 +193,6 @@ async function confirmDelete(t: TeacherRow) {
   }
 }
 
-async function logout() {
-  await auth.logoutTeacher()
-  router.replace({ name: 'login' })
-}
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' })
@@ -238,65 +210,6 @@ onMounted(async () => {
 
 <style scoped>
 .layout { display: flex; height: 100vh; overflow: hidden; }
-
-.sidebar {
-  width: 200px;
-  flex-shrink: 0;
-  background: var(--color-background-primary);
-  border-right: 1px solid var(--color-border-secondary);
-  display: flex;
-  flex-direction: column;
-}
-
-.sidebar-logo {
-  padding: 14px 16px;
-  font-weight: 700;
-  font-size: 14px;
-  border-bottom: 1px solid var(--color-border-secondary);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.sidebar-nav { flex: 1; padding: 8px 0; }
-
-.nav-group-label {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--color-text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 12px 16px 4px;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 10px 7px 16px;
-  font-size: 13px;
-  color: var(--color-text-secondary);
-  text-decoration: none;
-  margin: 0 6px;
-  border-radius: var(--border-radius-md);
-  transition: background 0.1s;
-}
-
-.nav-item:hover { background: var(--color-background-secondary); color: var(--color-text-primary); }
-.nav-item.active { background: var(--color-background-info); color: var(--color-text-info); font-weight: 500; }
-
-.sidebar-footer {
-  padding: 12px 16px;
-  border-top: 1px solid var(--color-border-secondary);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.user-info { display: flex; align-items: center; gap: 8px; }
-.user-name { font-size: 13px; font-weight: 500; }
-.user-role { font-size: 10px; background: var(--color-background-info); color: var(--color-text-info); padding: 2px 6px; border-radius: 4px; }
-.logout-btn { font-size: 12px; color: var(--color-text-secondary); padding: 4px 0; border: none; background: none; cursor: pointer; text-align: left; }
 
 /* ── 메인 ── */
 .main-content {
