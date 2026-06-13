@@ -19,7 +19,7 @@
 - **Pinia store = 단일 진실의 원천(Single Source of Truth)**
 - 서버에서 받은 데이터는 반드시 store에 저장 후 컴포넌트에서 참조한다.
 - `stores/auth.ts`: 교사 세션 상태, 역할(admin/teacher), 학교 이름, 로그인 여부
-- 향후 추가: `stores/subject.ts` (과목 목록 + 현재 선택 과목), `stores/lesson.ts`, `stores/assessment.ts`, `stores/problem.ts`, `stores/student.ts`
+- 향후 추가: `stores/class.ts` (수업 목록 + 현재 선택 수업), `stores/lesson.ts`, `stores/assessment.ts`, `stores/problem.ts`, `stores/student.ts`
 
 ---
 
@@ -38,7 +38,9 @@
 - **Tailwind CSS v4** 사용. `@tailwindcss/vite` 플러그인 기반. 유틸리티 클래스 우선, `<style scoped>`는 Tailwind로 표현 불가한 경우에만 보조 사용.
 - **최소 폰트 크기: `text-base` (16px)**. `text-sm`, `text-xs` 등 더 작은 클래스 사용 금지. 모든 텍스트는 `text-base` 이상이어야 한다.
 - **아이콘: `@tabler/icons-vue` 패키지** 사용. 패키지가 없는 경우 SVG inline 대체.
-- 모든 교사 화면은 **과목 사이드바(좌) + 메인 콘텐츠(우)** 레이아웃. 사이드바에는 내 과목 목록만 표시. 상단 분반 탭으로 현재 분반 컨텍스트를 항상 명시.
+- **홈 화면(교사·학생 공통)**: 사이드바 없음. 수업 카드 그리드만 표시.
+- **수업 내부 화면(교사)**: 좌측 사이드바(차시·수행평가·세션·출석부·학생) + 우측 메인 콘텐츠.
+- **시험 응시 화면(학생)**: 사이드바·네비게이션 완전 숨김. 타이머·문제·에디터·제출 버튼만.
 - 로딩 상태와 에러 상태를 반드시 UI에 표시한다 (스피너, 에러 배너).
 - 교사 화면: 최소 1024px 기준 / 학생 화면: 768px 이상 기준.
 - 구현 시 **`docs/mockups/*.html`** 을 참고한다. 레이아웃·색상 구조를 그대로 따른다. (목업이 구현보다 항상 선행한다 — 목업 없이 화면 구현 금지)
@@ -80,6 +82,10 @@
 - **미구현 stub 방치**: placeholder는 최소한 로딩/에러 상태 UI를 갖춰야 한다.
 - **CSS 하드코딩 색상**: 반드시 CSS 변수 사용. `#2563eb` 직접 사용 금지.
 - **`text-sm` 이하 폰트 클래스**: `text-sm`, `text-xs` 등 `text-base`(16px)보다 작은 Tailwind 폰트 클래스 사용 금지.
+- **외부 CDN 폰트·아이콘**: `fonts.googleapis.com` 등 외부 CDN 링크 사용 금지. 모든 폰트·아이콘은 npm 패키지로 번들에 포함.
+- **UI 텍스트 한국어 하드코딩**: 모든 UI 텍스트는 `$t('key')` 형태로만 출력. 컴포넌트 템플릿에 한국어 문자열 직접 삽입 금지.
+- **색만으로 상태 전달**: 상태 표시 시 색 + 텍스트를 항상 함께 사용. 색각 이상 사용자를 고려.
+- **파일 임포트 시 열 인덱스 사용**: CSV/XLSX 파싱 시 열 인덱스(0, 1, 2...) 접근 금지. 반드시 열 이름으로 매핑하며, 매핑 사전을 통해 동의어 처리.
 
 ---
 
@@ -144,14 +150,25 @@ frontend/
 
 ### 도메인 모델 (핵심 계층)
 ```
-subjects (과목)
-  └─ subject_divisions: subject_id + division_id + teacher_id
-       └─ divisions (분반) → students (학생)
-  └─ lessons (차시, subject_id FK)
-  └─ assessments (수행평가, subject_id FK)
-       └─ sessions: assessment_id + division_id (세션)
+classes (수업: 과목+분반 조합, 예: "정보과학 1반")
+  └─ teacher_id (담당 교사)
+  └─ students (학생 명단)
+  └─ lessons (차시)
+  └─ assessments (수행평가)
+       └─ sessions: assessment_id + class_id
             └─ submissions (제출)
-problems (문항) — 전역 공유, 과목 구분 없음
+            └─ submission_drafts (임시저장)
+problems (문항) — 전역 공유
+attendance_records (출석 스냅샷)
+```
+
+### 파일 임포트 열 이름 매핑 사전
+CSV/XLSX 임포트 시 아래 매핑 사전을 사용. 열 인덱스 접근 금지.
+```
+student_number: ["번호", "학번", "No", "number", "student_no"]
+name:           ["이름", "성명", "학생명", "name", "student_name"]
+grade:          ["학년", "grade", "year"]
+class_no:       ["반", "학반", "class", "division"]
 ```
 
 ---
