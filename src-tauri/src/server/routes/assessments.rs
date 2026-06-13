@@ -49,10 +49,6 @@ pub struct AssessmentDetail {
     pub created_at: String,
 }
 
-fn total_score(problems: &[AssessmentProblemRow]) -> i64 {
-    problems.iter().map(|p| p.score).sum()
-}
-
 // ─── 수행평가 목록 ─────────────────────────────────────────
 
 pub async fn list_assessments(
