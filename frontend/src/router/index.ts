@@ -18,7 +18,55 @@ const router = createRouter({
       path: '/dashboard',
       name: 'dashboard',
       component: () => import('@/views/DashboardView.vue'),
-      meta: { requiresAuth: true },
+      meta: { requiresTeacherAuth: true },
+    },
+    {
+      path: '/assessments',
+      name: 'assessment-management',
+      component: () => import('@/views/AssessmentManagementView.vue'),
+      meta: { requiresTeacherAuth: true },
+    },
+    {
+      path: '/lessons',
+      name: 'lesson-management',
+      component: () => import('@/views/LessonManagementView.vue'),
+      meta: { requiresTeacherAuth: true },
+    },
+    {
+      path: '/problems',
+      name: 'problem-bank',
+      component: () => import('@/views/ProblemBankView.vue'),
+      meta: { requiresTeacherAuth: true },
+    },
+    {
+      path: '/divisions',
+      name: 'division-management',
+      component: () => import('@/views/DivisionManagementView.vue'),
+      meta: { requiresTeacherAuth: true },
+    },
+    {
+      path: '/teachers',
+      name: 'teacher-management',
+      component: () => import('@/views/TeacherManagementView.vue'),
+      meta: { requiresTeacherAuth: true },
+    },
+    {
+      path: '/sessions',
+      name: 'session-management',
+      component: () => import('@/views/SessionManagementView.vue'),
+      meta: { requiresTeacherAuth: true },
+    },
+    {
+      path: '/student',
+      name: 'student-home',
+      component: () => import('@/views/StudentHomeView.vue'),
+      meta: { requiresStudentAuth: true },
+    },
+    {
+      path: '/student/change-password',
+      name: 'student-change-password',
+      component: () => import('@/views/StudentChangePasswordView.vue'),
+      meta: { requiresStudentAuth: true },
     },
     {
       path: '/:pathMatch(.*)*',
@@ -27,7 +75,7 @@ const router = createRouter({
   ],
 })
 
-// 전역 네비게이션 가드: 최초 부팅 체크 + 인증 체크
+// 전역 네비게이션 가드: 초기 설정 체크 + 인증 체크
 router.beforeEach(async (to) => {
   try {
     const { needs_setup } = await api.setup.status()
@@ -40,11 +88,15 @@ router.beforeEach(async (to) => {
       return { name: 'login' }
     }
 
-    if (to.meta.requiresAuth) {
+    if (to.meta.requiresTeacherAuth) {
       await api.auth.me()
     }
+
+    if (to.meta.requiresStudentAuth) {
+      await api.auth.studentMe()
+    }
   } catch {
-    if (to.meta.requiresAuth) {
+    if (to.meta.requiresTeacherAuth || to.meta.requiresStudentAuth) {
       return { name: 'login' }
     }
   }

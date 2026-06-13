@@ -21,7 +21,7 @@
             type="text"
             placeholder="예: 한국고등학교"
             autocomplete="off"
-            :disabled="loading"
+            :disabled="auth.loading"
           />
           <div class="field-hint">
             로그인 화면에 "환영합니다, OO고등학교 LMS입니다"로 표시됩니다
@@ -47,7 +47,7 @@
                 type="text"
                 placeholder="예: 박교사"
                 autocomplete="off"
-                :disabled="loading"
+                :disabled="auth.loading"
               />
             </div>
 
@@ -59,7 +59,7 @@
                 type="text"
                 placeholder="예: admin"
                 autocomplete="off"
-                :disabled="loading"
+                :disabled="auth.loading"
               />
             </div>
 
@@ -71,7 +71,7 @@
                 type="password"
                 placeholder="8자 이상"
                 autocomplete="new-password"
-                :disabled="loading"
+                :disabled="auth.loading"
               />
             </div>
 
@@ -82,17 +82,17 @@
                 v-model="form.adminPasswordConfirm"
                 type="password"
                 autocomplete="new-password"
-                :disabled="loading"
+                :disabled="auth.loading"
               />
             </div>
           </div>
         </div>
 
         <!-- 오류 메시지 -->
-        <div v-if="error" class="error-msg">{{ error }}</div>
+        <div v-if="displayError" class="error-msg">{{ displayError }}</div>
 
-        <button type="submit" class="primary submit-btn" :disabled="loading">
-          <span v-if="loading">설정 중...</span>
+        <button type="submit" class="primary submit-btn" :disabled="auth.loading">
+          <span v-if="auth.loading">설정 중...</span>
           <span v-else>✓ 설정 완료</span>
         </button>
 
@@ -103,11 +103,12 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { api } from '@/api/client'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const auth = useAuthStore()
 
 const form = reactive({
   schoolName: '',
@@ -117,46 +118,38 @@ const form = reactive({
   adminPasswordConfirm: '',
 })
 
-const loading = ref(false)
-const error = ref('')
+const localError = computed(() => {
+  if (!form.schoolName.trim()) return null
+  if (!form.adminName.trim()) return null
+  if (!form.adminUsername.trim()) return null
+  if (form.adminPassword.length > 0 && form.adminPassword.length < 8)
+    return '비밀번호는 8자 이상이어야 합니다'
+  if (form.adminPassword && form.adminPasswordConfirm && form.adminPassword !== form.adminPasswordConfirm)
+    return '비밀번호가 일치하지 않습니다'
+  return null
+})
+
+const displayError = computed(() => localError.value ?? auth.error)
 
 async function onSubmit() {
-  error.value = ''
+  auth.clearError()
 
-  if (!form.schoolName.trim()) {
-    error.value = '학교 이름을 입력해주세요'
-    return
-  }
-  if (!form.adminName.trim()) {
-    error.value = '관리자 이름을 입력해주세요'
-    return
-  }
-  if (!form.adminUsername.trim()) {
-    error.value = '아이디를 입력해주세요'
-    return
-  }
-  if (form.adminPassword.length < 8) {
-    error.value = '비밀번호는 8자 이상이어야 합니다'
-    return
-  }
-  if (form.adminPassword !== form.adminPasswordConfirm) {
-    error.value = '비밀번호가 일치하지 않습니다'
-    return
-  }
+  if (!form.schoolName.trim()) { auth.error = '학교 이름을 입력해주세요'; return }
+  if (!form.adminName.trim()) { auth.error = '관리자 이름을 입력해주세요'; return }
+  if (!form.adminUsername.trim()) { auth.error = '아이디를 입력해주세요'; return }
+  if (form.adminPassword.length < 8) { auth.error = '비밀번호는 8자 이상이어야 합니다'; return }
+  if (form.adminPassword !== form.adminPasswordConfirm) { auth.error = '비밀번호가 일치하지 않습니다'; return }
 
-  loading.value = true
   try {
-    await api.setup.complete({
+    await auth.completeSetup({
       school_name: form.schoolName.trim(),
       admin_name: form.adminName.trim(),
       admin_username: form.adminUsername.trim(),
       admin_password: form.adminPassword,
     })
     router.replace({ name: 'login' })
-  } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : '설정 중 오류가 발생했습니다'
-  } finally {
-    loading.value = false
+  } catch {
+    // error already set by store
   }
 }
 </script>

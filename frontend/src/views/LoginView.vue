@@ -2,8 +2,8 @@
   <div class="page-bg">
     <div class="card">
       <div class="card-header">
-        <div class="welcome-msg" v-if="schoolName">
-          환영합니다, {{ schoolName }} LMS입니다
+        <div class="welcome-msg" v-if="auth.schoolName">
+          환영합니다, {{ auth.schoolName }} LMS입니다
         </div>
         <div class="welcome-msg" v-else>CodeClan LMS</div>
       </div>
@@ -38,7 +38,7 @@
             type="text"
             placeholder="아이디"
             autocomplete="username"
-            :disabled="loading"
+            :disabled="auth.loading"
           />
         </div>
         <div class="field-group">
@@ -49,14 +49,14 @@
             type="password"
             placeholder="비밀번호"
             autocomplete="current-password"
-            :disabled="loading"
+            :disabled="auth.loading"
           />
         </div>
 
-        <div v-if="error" class="error-msg">{{ error }}</div>
+        <div v-if="auth.error" class="error-msg">{{ auth.error }}</div>
 
-        <button type="submit" class="primary submit-btn" :disabled="loading">
-          {{ loading ? '로그인 중...' : '로그인' }}
+        <button type="submit" class="primary submit-btn" :disabled="auth.loading">
+          {{ auth.loading ? '로그인 중...' : '로그인' }}
         </button>
       </form>
 
@@ -70,26 +70,25 @@
             type="text"
             placeholder="학번 (예: 10101)"
             autocomplete="off"
-            :disabled="loading"
+            :disabled="auth.loading"
           />
         </div>
         <div class="field-group">
-          <label for="s-birth">생년월일</label>
+          <label for="s-password">비밀번호</label>
           <input
-            id="s-birth"
-            v-model="student.birthDate"
-            type="text"
-            placeholder="YYYYMMDD (예: 20090315)"
-            autocomplete="bday"
-            maxlength="8"
-            :disabled="loading"
+            id="s-password"
+            v-model="student.password"
+            type="password"
+            placeholder="비밀번호"
+            autocomplete="current-password"
+            :disabled="auth.loading"
           />
         </div>
 
-        <div v-if="error" class="error-msg">{{ error }}</div>
+        <div v-if="auth.error" class="error-msg">{{ auth.error }}</div>
 
-        <button type="submit" class="primary submit-btn" :disabled="loading">
-          {{ loading ? '로그인 중...' : '입장' }}
+        <button type="submit" class="primary submit-btn" :disabled="auth.loading">
+          {{ auth.loading ? '로그인 중...' : '입장' }}
         </button>
       </form>
     </div>
@@ -97,54 +96,53 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { api } from '@/api/client'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const auth = useAuthStore()
 
 const tab = ref<'teacher' | 'student'>('teacher')
-const loading = ref(false)
-const error = ref('')
-const schoolName = ref('')
-
 const teacher = reactive({ username: '', password: '' })
-const student = reactive({ studentNumber: '', birthDate: '' })
+const student = reactive({ studentNumber: '', password: '' })
 
 onMounted(async () => {
-  try {
-    const res = await api.auth.schoolName()
-    schoolName.value = res.school_name
-  } catch {
-    // 무시
-  }
+  await auth.fetchSchoolName()
 })
 
+watch(tab, () => auth.clearError())
+
 async function teacherLogin() {
-  error.value = ''
+  auth.clearError()
   if (!teacher.username || !teacher.password) {
-    error.value = '아이디와 비밀번호를 입력해주세요'
+    auth.error = '아이디와 비밀번호를 입력해주세요'
     return
   }
-  loading.value = true
   try {
-    await api.auth.loginTeacher(teacher.username, teacher.password)
+    await auth.loginTeacher(teacher.username, teacher.password)
     router.replace({ name: 'dashboard' })
-  } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : '로그인 실패'
-  } finally {
-    loading.value = false
+  } catch {
+    // error already set by store
   }
 }
 
 async function studentLogin() {
-  error.value = ''
-  if (!student.studentNumber || !student.birthDate) {
-    error.value = '학번과 생년월일을 입력해주세요'
+  auth.clearError()
+  if (!student.studentNumber || !student.password) {
+    auth.error = '학번과 비밀번호를 입력해주세요'
     return
   }
-  // TODO: 학생 로그인 API 구현 후 연결
-  error.value = '학생 로그인은 준비 중입니다'
+  try {
+    const user = await auth.loginStudent(student.studentNumber, student.password)
+    if (user.password_reset_required) {
+      router.replace({ name: 'student-change-password' })
+    } else {
+      router.replace({ name: 'student-home' })
+    }
+  } catch {
+    // error already set by store
+  }
 }
 </script>
 

@@ -5,16 +5,23 @@
   --color-background-tertiary: #ebebeb;
   --color-background-info: #eff6ff;
   --color-background-danger: #fef2f2;
+  --color-background-success: #f0fdf4;
+  --color-background-warning: #fffbeb;
 
   --color-text-primary: #111827;
   --color-text-secondary: #6b7280;
   --color-text-tertiary: #9ca3af;
   --color-text-info: #1d4ed8;
   --color-text-danger: #dc2626;
+  --color-text-success: #16a34a;
+  --color-text-warning: #d97706;
 
   --color-border-primary: #d1d5db;
   --color-border-secondary: #e5e7eb;
   --color-border-tertiary: #f3f4f6;
+  --color-border-info: #bfdbfe;
+  --color-border-danger: #fecaca;
+  --color-border-success: #bbf7d0;
 
   --color-accent: #2563eb;
   --color-accent-hover: #1d4ed8;
