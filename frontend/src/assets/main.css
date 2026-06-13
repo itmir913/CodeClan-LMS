@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 /* 디자인 토큰 */
 :root {
   --color-background-primary: #ffffff;

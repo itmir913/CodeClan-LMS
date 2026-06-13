@@ -35,7 +35,8 @@
 ## UI / DESIGN RULES
 
 - **CSS 변수(design token) 기반**: 색상, 간격, 반지름은 `frontend/src/assets/main.css`의 `:root` 변수를 참조한다. 인라인 하드코딩 금지.
-- Vue 컴포넌트 스타일은 `<style scoped>` 안에 작성한다.
+- **Tailwind CSS v4** 사용. `@tailwindcss/vite` 플러그인 기반. 유틸리티 클래스 우선, `<style scoped>`는 Tailwind로 표현 불가한 경우에만 보조 사용.
+- **최소 폰트 크기: `text-base` (16px)**. `text-sm`, `text-xs` 등 더 작은 클래스 사용 금지. 모든 텍스트는 `text-base` 이상이어야 한다.
 - **아이콘: `@tabler/icons-vue` 패키지** 사용. 패키지가 없는 경우 SVG inline 대체.
 - 모든 교사 화면은 **사이드바 + 메인 콘텐츠** 레이아웃.
 - 로딩 상태와 에러 상태를 반드시 UI에 표시한다 (스피너, 에러 배너).
@@ -78,6 +79,7 @@
 - **JWT**: 인증에 JWT 사용 금지. 쿠키 세션 방식만 사용.
 - **미구현 stub 방치**: placeholder는 최소한 로딩/에러 상태 UI를 갖춰야 한다.
 - **CSS 하드코딩 색상**: 반드시 CSS 변수 사용. `#2563eb` 직접 사용 금지.
+- **`text-sm` 이하 폰트 클래스**: `text-sm`, `text-xs` 등 `text-base`(16px)보다 작은 Tailwind 폰트 클래스 사용 금지.
 
 ---
 
