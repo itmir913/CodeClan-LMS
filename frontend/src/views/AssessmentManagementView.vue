@@ -461,10 +461,10 @@ onMounted(async () => {
 .prob-score { font-size: 12px; font-weight: 600; color: var(--color-text-info); }
 
 .type-badge { font-size: 10px; font-weight: 600; padding: 1px 5px; border-radius: 3px; color: #fff; white-space: nowrap; }
-.type-1 { background: #7c3aed; }
-.type-2 { background: #0369a1; }
-.type-3 { background: #065f46; }
-.type-4 { background: #92400e; }
+.type-1 { background: var(--color-type1-active-bg); }
+.type-2 { background: var(--color-type2-active-bg); }
+.type-3 { background: var(--color-type3-active-bg); }
+.type-4 { background: var(--color-type4-active-bg); }
 
 .division-list { display: flex; flex-direction: column; gap: 6px; }
 .division-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }

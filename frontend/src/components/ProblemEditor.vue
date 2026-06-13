@@ -167,10 +167,10 @@ if (!props.initial) fillTemplate()
   text-align: left;
 }
 
-.type-btn.active.type-1 { background: #7c3aed; color: #fff; border-color: transparent; }
-.type-btn.active.type-2 { background: #0369a1; color: #fff; border-color: transparent; }
-.type-btn.active.type-3 { background: #065f46; color: #fff; border-color: transparent; }
-.type-btn.active.type-4 { background: #92400e; color: #fff; border-color: transparent; }
+.type-btn.active.type-1 { background: var(--color-type1-active-bg); color: #fff; border-color: transparent; }
+.type-btn.active.type-2 { background: var(--color-type2-active-bg); color: #fff; border-color: transparent; }
+.type-btn.active.type-3 { background: var(--color-type3-active-bg); color: #fff; border-color: transparent; }
+.type-btn.active.type-4 { background: var(--color-type4-active-bg); color: #fff; border-color: transparent; }
 
 .type-label {
   font-size: 13px;

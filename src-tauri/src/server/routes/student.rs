@@ -3,7 +3,7 @@ use axum::{
     http::HeaderMap,
     Json,
 };
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use crate::{error::ApiError, server::state::AppState};
 use super::auth::parse_student_session;

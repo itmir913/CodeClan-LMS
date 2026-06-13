@@ -487,7 +487,7 @@ async function doGrade(sub: SubmissionRow) {
   border-radius: var(--border-radius-md);
 }
 
-.verdict-ac      { background: var(--color-background-success, #f0fdf4); color: var(--color-text-success); }
+.verdict-ac      { background: var(--color-background-success); color: var(--color-text-success); }
 .verdict-wa      { background: var(--color-background-danger); color: var(--color-text-danger); }
 .verdict-pending { background: var(--color-background-warning); color: var(--color-text-warning); }
 .verdict-graded  { background: var(--color-background-info); color: var(--color-text-info); }

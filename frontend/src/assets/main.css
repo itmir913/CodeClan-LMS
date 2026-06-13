@@ -31,6 +31,20 @@
   --border-radius-sm: 4px;
   --border-radius-md: 8px;
   --border-radius-lg: 12px;
+
+  /* 문항 유형별 색상 */
+  --color-type1-bg: #f5f3ff;
+  --color-type1-text: #7c3aed;
+  --color-type1-active-bg: #7c3aed;
+  --color-type2-bg: #eff6ff;
+  --color-type2-text: #0369a1;
+  --color-type2-active-bg: #0369a1;
+  --color-type3-bg: #f0fdf4;
+  --color-type3-text: #065f46;
+  --color-type3-active-bg: #065f46;
+  --color-type4-bg: #fffbeb;
+  --color-type4-text: #92400e;
+  --color-type4-active-bg: #92400e;
 }
 
 *, *::before, *::after {

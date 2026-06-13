@@ -331,10 +331,10 @@ onMounted(async () => {
   white-space: nowrap;
 }
 
-.type-1 { background: #7c3aed; }
-.type-2 { background: #0369a1; }
-.type-3 { background: #065f46; }
-.type-4 { background: #92400e; }
+.type-1 { background: var(--color-type1-active-bg); }
+.type-2 { background: var(--color-type2-active-bg); }
+.type-3 { background: var(--color-type3-active-bg); }
+.type-4 { background: var(--color-type4-active-bg); }
 
 .struct-badge {
   font-size: 10px;

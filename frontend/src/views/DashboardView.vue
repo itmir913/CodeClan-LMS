@@ -283,7 +283,7 @@ function formatTime(iso: string): string {
   font-weight: normal;
 }
 
-.icon-success { color: var(--color-text-success, #16a34a); }
+.icon-success { color: var(--color-text-success); }
 .icon-secondary { color: var(--color-text-secondary); }
 
 /* ── 분반 카드 ── */
