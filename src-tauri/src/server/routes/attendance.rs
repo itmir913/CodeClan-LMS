@@ -1,9 +1,14 @@
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     http::HeaderMap,
     Json,
 };
 use serde::{Deserialize, Serialize};
+
+#[derive(Deserialize)]
+pub struct AttendanceQuery {
+    pub division_id: Option<i64>,
+}
 
 use crate::{error::ApiError, server::state::AppState};
 use super::auth::{parse_student_session, parse_teacher_session};
@@ -153,6 +158,61 @@ pub async fn get_session_attendance(
                         .unwrap_or(false)
                 }).unwrap_or(false);
 
+                AttendanceRow {
+                    student_id: id,
+                    name,
+                    student_number,
+                    is_online,
+                    joined_at,
+                    last_seen_at,
+                    is_late: is_late.unwrap_or(0) != 0,
+                }
+            })
+            .collect(),
+    ))
+}
+
+// ─── 교사: 차시 출결 현황 ───────────────────────────────────
+
+/// GET /api/lessons/:id/attendance?division_id=X
+pub async fn get_lesson_attendance(
+    State(state): State<AppState>,
+    Path(lesson_id): Path<i64>,
+    Query(q): Query<AttendanceQuery>,
+    headers: HeaderMap,
+) -> Result<Json<Vec<AttendanceRow>>, ApiError> {
+    parse_teacher_session(&state.db, &headers).await?;
+
+    let division_id = q.division_id.ok_or(ApiError::BadRequest("division_id required".into()))?;
+
+    let rows = sqlx::query_as::<_, (i64, String, String, Option<String>, Option<String>, Option<i64>)>(
+        r#"SELECT s.id, s.name, s.student_number,
+                  ah.joined_at, ah.last_seen_at, ah.is_late
+           FROM students s
+           LEFT JOIN attendance_heartbeats ah
+             ON ah.student_id = s.id
+             AND ah.context_type = 'lesson'
+             AND ah.context_id = ?
+           WHERE s.division_id = ?
+           ORDER BY s.student_number"#,
+    )
+    .bind(lesson_id)
+    .bind(division_id)
+    .fetch_all(&state.db)
+    .await?;
+
+    let now_ts = chrono::Utc::now().timestamp();
+    const ONLINE_THRESHOLD_SECS: i64 = 30;
+
+    Ok(Json(
+        rows.into_iter()
+            .map(|(id, name, student_number, joined_at, last_seen_at, is_late)| {
+                let is_online = last_seen_at.as_deref().map(|ts| {
+                    chrono::NaiveDateTime::parse_from_str(ts, "%Y-%m-%d %H:%M:%S")
+                        .ok()
+                        .map(|dt| now_ts - dt.and_utc().timestamp() <= ONLINE_THRESHOLD_SECS)
+                        .unwrap_or(false)
+                }).unwrap_or(false);
                 AttendanceRow {
                     student_id: id,
                     name,

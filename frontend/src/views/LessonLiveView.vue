@@ -119,23 +119,12 @@
           </div>
         </div>
 
-        <!-- 우: 학생 목록 -->
+        <!-- 우: 실시간 출결 위젯 -->
         <div class="side-col">
-          <div class="card">
-            <div class="card-header">학생 목록 ({{ students.length }}명)</div>
-            <div v-if="studentsLoading" class="empty-note">로딩 중...</div>
-            <div v-else-if="students.length === 0" class="empty-note">등록된 학생이 없습니다</div>
-            <div v-else class="student-list">
-              <div
-                v-for="s in students"
-                :key="s.id"
-                class="student-row"
-              >
-                <span class="s-name">{{ s.name }}</span>
-                <span class="s-no">{{ s.student_number }}</span>
-              </div>
-            </div>
-          </div>
+          <AttendanceWidget
+            :lesson-id="lessonId"
+            :division-id="divisionId"
+          />
         </div>
       </div>
     </template>
@@ -146,7 +135,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { api, type LessonDetail, type DivisionAssessmentRow, type StudentRow } from '@/api/client'
+import { api, type LessonDetail, type DivisionAssessmentRow } from '@/api/client'
+import AttendanceWidget from '@/components/AttendanceWidget.vue'
 import {
   IconPresentation, IconChevronRight, IconX, IconEye, IconEyeOff,
   IconInfoCircle, IconArrowLeft, IconArrowRight, IconPlayerPlay,
@@ -161,9 +151,7 @@ const divisionId = Number(route.params.divisionId)
 
 const lesson = ref<LessonDetail | null>(null)
 const assessments = ref<DivisionAssessmentRow[]>([])
-const students = ref<StudentRow[]>([])
 const loading = ref(false)
-const studentsLoading = ref(false)
 const error = ref<string | null>(null)
 const toggling = ref(false)
 const currentProblemIdx = ref(0)
@@ -194,15 +182,6 @@ async function load() {
     error.value = e instanceof Error ? e.message : '차시 정보를 불러오지 못했습니다'
   } finally {
     loading.value = false
-  }
-
-  studentsLoading.value = true
-  try {
-    students.value = await api.divisions.getStudents(divisionId)
-  } catch {
-    // 학생 목록 오류는 조용히 무시
-  } finally {
-    studentsLoading.value = false
   }
 }
 

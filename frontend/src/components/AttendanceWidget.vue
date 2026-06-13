@@ -34,7 +34,11 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { api, type AttendanceRow } from '@/api/client'
 
-const props = defineProps<{ sessionId: number }>()
+const props = defineProps<{
+  sessionId?: number
+  lessonId?: number
+  divisionId?: number
+}>()
 
 const list = ref<AttendanceRow[]>([])
 const loading = ref(false)
@@ -47,7 +51,11 @@ const offlineCount = computed(() => list.value.filter(s => !s.is_online).length)
 async function refresh() {
   loading.value = true
   try {
-    list.value = await api.attendance.forSession(props.sessionId)
+    if (props.sessionId !== undefined) {
+      list.value = await api.attendance.forSession(props.sessionId)
+    } else if (props.lessonId !== undefined && props.divisionId !== undefined) {
+      list.value = await api.attendance.forLesson(props.lessonId, props.divisionId)
+    }
     error.value = null
   } catch (e) {
     error.value = e instanceof Error ? e.message : '출결 조회 실패'
