@@ -230,6 +230,62 @@
             <option v-for="d in divisions" :key="d.id" :value="d.id">{{ d.name }}</option>
           </select>
         </div>
+
+        <!-- 대상 선택 -->
+        <div class="form-group">
+          <label class="form-label">대상 *</label>
+          <div class="target-options">
+            <label class="target-option" :class="{ 'target-option--active': createForm.target_type === 'ALL' }">
+              <input type="radio" v-model="createForm.target_type" value="ALL" />
+              <div>
+                <div class="target-option-title">분반 전체</div>
+                <div class="target-option-desc">명부에 등록된 학생 전체가 참여합니다.</div>
+              </div>
+            </label>
+            <label class="target-option" :class="{ 'target-option--active': createForm.target_type === 'INDIVIDUAL' }">
+              <input type="radio" v-model="createForm.target_type" value="INDIVIDUAL" />
+              <div>
+                <div class="target-option-title">개별 학생 선택</div>
+                <div class="target-option-desc">재시험·추가시험 등 특정 학생만 대상으로 합니다.</div>
+              </div>
+            </label>
+          </div>
+
+          <!-- 개별 학생 체크리스트 -->
+          <div v-if="createForm.target_type === 'INDIVIDUAL'" class="student-checklist">
+            <div v-if="!createForm.division_id" class="checklist-empty">분반을 먼저 선택하세요</div>
+            <template v-else>
+              <div class="checklist-search">
+                <IconSearch :size="14" />
+                <input
+                  v-model="studentSearch"
+                  class="checklist-search-input"
+                  placeholder="이름 또는 학번 검색"
+                />
+              </div>
+              <div class="checklist-count">
+                {{ createForm.selected_student_ids.length }}명 선택됨
+              </div>
+              <div v-if="filteredStudents.length === 0" class="checklist-empty">학생이 없습니다</div>
+              <div v-else class="checklist-list">
+                <label
+                  v-for="s in filteredStudents"
+                  :key="s.id"
+                  class="checklist-item"
+                >
+                  <input
+                    type="checkbox"
+                    :value="s.id"
+                    v-model="createForm.selected_student_ids"
+                  />
+                  <span class="checklist-num">{{ s.student_number }}</span>
+                  <span class="checklist-name">{{ s.name }}</span>
+                </label>
+              </div>
+            </template>
+          </div>
+        </div>
+
         <div class="form-group">
           <label class="form-label">제한 시간 (분, 비워두면 무제한)</label>
           <input
@@ -240,6 +296,7 @@
             placeholder="예: 60"
           />
         </div>
+        <p class="form-hint">세션은 <strong>CREATED</strong> 상태로 생성됩니다. 이후 LOBBY로 전환해 학생을 대기시킨 뒤 시작할 수 있습니다.</p>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" @click="showCreateModal = false">취소</button>
@@ -268,17 +325,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import {
   IconArrowLeft, IconPlus, IconCalendarEvent,
   IconDoor, IconArrowBack, IconPlayerPlay, IconPlayerPause,
-  IconPlayerStop, IconEye, IconEyeOff,
+  IconPlayerStop, IconEye, IconEyeOff, IconSearch,
 } from '@tabler/icons-vue'
 import { useSessionStore } from '@/stores/session'
 import { useDivisionStore } from '@/stores/division'
 import { useAssessmentStore } from '@/stores/assessment'
 import AttendanceWidget from '@/components/AttendanceWidget.vue'
-import type { SessionRow } from '@/api/client'
+import { api } from '@/api/client'
+import type { SessionRow, StudentRow } from '@/api/client'
 
 const sessionStore = useSessionStore()
 const divisionStore = useDivisionStore()
@@ -313,6 +371,44 @@ const createForm = ref({
   assessment_id: 0,
   division_id: 0,
   time_limit_min: null as number | null,
+  target_type: 'ALL' as 'ALL' | 'INDIVIDUAL',
+  selected_student_ids: [] as number[],
+})
+const divisionStudents = ref<StudentRow[]>([])
+const studentSearch = ref('')
+
+const filteredStudents = computed(() => {
+  const q = studentSearch.value.trim().toLowerCase()
+  if (!q) return divisionStudents.value
+  return divisionStudents.value.filter(s =>
+    s.name.toLowerCase().includes(q) || s.student_number.includes(q)
+  )
+})
+
+watch(() => createForm.value.division_id, async (id) => {
+  createForm.value.selected_student_ids = []
+  studentSearch.value = ''
+  if (id) {
+    divisionStudents.value = await api.divisions.getStudents(id).catch(() => [])
+  } else {
+    divisionStudents.value = []
+  }
+})
+
+watch(() => createForm.value.target_type, () => {
+  createForm.value.selected_student_ids = []
+})
+
+watch(showCreateModal, (open) => {
+  if (!open) {
+    createForm.value = {
+      assessment_id: 0, division_id: 0, time_limit_min: null,
+      target_type: 'ALL', selected_student_ids: [],
+    }
+    divisionStudents.value = []
+    studentSearch.value = ''
+    createError.value = null
+  }
 })
 
 const confirmModal = ref({
@@ -416,6 +512,10 @@ async function doCreateSession() {
   createError.value = null
   if (!createForm.value.assessment_id) { createError.value = '수행평가를 선택하세요'; return }
   if (!createForm.value.division_id) { createError.value = '분반을 선택하세요'; return }
+  if (createForm.value.target_type === 'INDIVIDUAL' && createForm.value.selected_student_ids.length === 0) {
+    createError.value = '개별 학생을 1명 이상 선택하세요'
+    return
+  }
 
   creating.value = true
   try {
@@ -423,9 +523,18 @@ async function doCreateSession() {
       assessment_id: createForm.value.assessment_id,
       division_id: createForm.value.division_id,
       time_limit_min: createForm.value.time_limit_min ?? undefined,
+      target_type: createForm.value.target_type,
+      student_ids: createForm.value.target_type === 'INDIVIDUAL'
+        ? createForm.value.selected_student_ids
+        : undefined,
     })
     showCreateModal.value = false
-    createForm.value = { assessment_id: 0, division_id: 0, time_limit_min: null }
+    createForm.value = {
+      assessment_id: 0, division_id: 0, time_limit_min: null,
+      target_type: 'ALL', selected_student_ids: [],
+    }
+    divisionStudents.value = []
+    studentSearch.value = ''
     selectedId.value = row.id
   } catch (e) {
     createError.value = e instanceof Error ? e.message : '세션 생성 실패'
@@ -827,4 +936,120 @@ async function doCreateSession() {
   color: var(--color-text);
   box-sizing: border-box;
 }
+
+.form-hint {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-top: var(--space-1);
+}
+
+/* 대상 선택 */
+.target-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.target-option {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color 0.1s, background 0.1s;
+}
+
+.target-option--active {
+  border-color: var(--color-primary);
+  background: var(--color-background-info);
+}
+
+.target-option input[type="radio"] { flex-shrink: 0; margin-top: 2px; }
+
+.target-option-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.target-option-desc {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.target-option--active .target-option-title { color: var(--color-primary); }
+.target-option--active .target-option-desc { color: var(--color-primary); opacity: 0.75; }
+
+/* 학생 체크리스트 */
+.student-checklist {
+  margin-top: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-2);
+}
+
+.checklist-search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-2);
+  color: var(--color-text-muted);
+}
+
+.checklist-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 0.8rem;
+  background: transparent;
+  color: var(--color-text);
+}
+
+.checklist-count {
+  font-size: 0.75rem;
+  color: var(--color-primary);
+  font-weight: 500;
+  margin-bottom: var(--space-1);
+}
+
+.checklist-empty {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: var(--space-3) 0;
+}
+
+.checklist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.checklist-item:hover { background: var(--color-background-hover); }
+
+.checklist-num {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  min-width: 60px;
+}
+
+.checklist-name { color: var(--color-text); }
 </style>
