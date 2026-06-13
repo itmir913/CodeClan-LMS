@@ -19,7 +19,7 @@
 - **Pinia store = 단일 진실의 원천(Single Source of Truth)**
 - 서버에서 받은 데이터는 반드시 store에 저장 후 컴포넌트에서 참조한다.
 - `stores/auth.ts`: 교사 세션 상태, 역할(admin/teacher), 학교 이름, 로그인 여부
-- 향후 추가: `stores/student.ts`, `stores/lesson.ts`, `stores/assessment.ts`, `stores/problem.ts`
+- 향후 추가: `stores/subject.ts` (과목 목록 + 현재 선택 과목), `stores/lesson.ts`, `stores/assessment.ts`, `stores/problem.ts`, `stores/student.ts`
 
 ---
 
@@ -38,10 +38,10 @@
 - **Tailwind CSS v4** 사용. `@tailwindcss/vite` 플러그인 기반. 유틸리티 클래스 우선, `<style scoped>`는 Tailwind로 표현 불가한 경우에만 보조 사용.
 - **최소 폰트 크기: `text-base` (16px)**. `text-sm`, `text-xs` 등 더 작은 클래스 사용 금지. 모든 텍스트는 `text-base` 이상이어야 한다.
 - **아이콘: `@tabler/icons-vue` 패키지** 사용. 패키지가 없는 경우 SVG inline 대체.
-- 모든 교사 화면은 **사이드바 + 메인 콘텐츠** 레이아웃.
+- 모든 교사 화면은 **과목 사이드바(좌) + 메인 콘텐츠(우)** 레이아웃. 사이드바에는 내 과목 목록만 표시. 상단 분반 탭으로 현재 분반 컨텍스트를 항상 명시.
 - 로딩 상태와 에러 상태를 반드시 UI에 표시한다 (스피너, 에러 배너).
 - 교사 화면: 최소 1024px 기준 / 학생 화면: 768px 이상 기준.
-- 구현 시 **`docs/mockups/*.html`** 을 참고한다. 레이아웃·색상 구조를 그대로 따른다.
+- 구현 시 **`docs/mockups/*.html`** 을 참고한다. 레이아웃·색상 구조를 그대로 따른다. (목업이 구현보다 항상 선행한다 — 목업 없이 화면 구현 금지)
 
 ---
 
@@ -136,6 +136,23 @@ frontend/
 - `type_config TEXT NOT NULL DEFAULT '{}'`: 문항 유형별 설정 JSON
 - `auth_tokens`: 교사 세션 토큰 (expires_at 12시간)
 - `sessions`: 수행평가 세션 전용 — `auth_tokens`와 별개, 이름 혼동 주의
+
+### 마이그레이션 규칙 (릴리즈 전)
+- **스키마 변경은 `001_initial.sql` 직접 수정**. 새 마이그레이션 파일(`002_*.sql` 등) 추가 금지.
+- 변경 후 테스트 DB 파일을 삭제하면 앱 재기동 시 최신 스키마로 재생성된다.
+- 릴리즈(배포) 이후에는 번호가 붙은 증분 마이그레이션 파일 방식으로 전환한다.
+
+### 도메인 모델 (핵심 계층)
+```
+subjects (과목)
+  └─ subject_divisions: subject_id + division_id + teacher_id
+       └─ divisions (분반) → students (학생)
+  └─ lessons (차시, subject_id FK)
+  └─ assessments (수행평가, subject_id FK)
+       └─ sessions: assessment_id + division_id (세션)
+            └─ submissions (제출)
+problems (문항) — 전역 공유, 과목 구분 없음
+```
 
 ---
 
