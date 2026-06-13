@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "identifier": "com.luminousky.codeclan.lms",
   "build": {
-    "beforeDevCommand": "npm run dev --prefix ./frontend",
+    "beforeDevCommand": "npm run dev:vite",
     "beforeBuildCommand": "npm run build --prefix ./frontend",
     "devUrl": "http://localhost:5173",
     "frontendDist": "../frontend/dist"
