@@ -1,4 +1,5 @@
 pub mod assessments;
+pub mod audit;
 pub mod attendance;
 pub mod auth;
 pub mod dashboard;

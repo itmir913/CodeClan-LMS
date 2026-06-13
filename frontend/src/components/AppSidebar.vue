@@ -44,6 +44,10 @@
         <IconUserCog :size="16" stroke-width="1.5" />
         교사 계정
       </RouterLink>
+      <RouterLink :to="{ name: 'audit-logs' }" class="nav-item" active-class="nav-item--active">
+        <IconClipboardList :size="16" stroke-width="1.5" />
+        감사 로그
+      </RouterLink>
     </nav>
 
     <div class="sidebar-footer">
@@ -62,7 +66,7 @@ import { useAuthStore } from '@/stores/auth'
 import {
   IconSchool, IconLayoutDashboard, IconPlayerPlay,
   IconDatabase, IconList, IconFileText,
-  IconUsers, IconUserCog,
+  IconUsers, IconUserCog, IconClipboardList,
 } from '@tabler/icons-vue'
 
 const router = useRouter()

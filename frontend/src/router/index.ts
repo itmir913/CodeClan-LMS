@@ -93,6 +93,12 @@ const router = createRouter({
       meta: { requiresStudentAuth: true },
     },
     {
+      path: '/audit-logs',
+      name: 'audit-logs',
+      component: () => import('@/views/AuditLogView.vue'),
+      meta: { requiresTeacherAuth: true },
+    },
+    {
       path: '/:pathMatch(.*)*',
       redirect: '/login',
     },

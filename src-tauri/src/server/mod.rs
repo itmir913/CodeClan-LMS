@@ -78,7 +78,9 @@ pub fn build_router(state: AppState) -> Router {
         .route("/submissions/:id/grade", post(routes::submissions::grade_submission))
         // 출결 현황
         .route("/sessions/:id/attendance", get(routes::attendance::get_session_attendance))
-        .route("/lessons/:id/attendance", get(routes::attendance::get_lesson_attendance));
+        .route("/lessons/:id/attendance", get(routes::attendance::get_lesson_attendance))
+        // 감사 로그
+        .route("/audit-logs", get(routes::audit::list_audit_logs));
 
     Router::new()
         .nest("/api", api)

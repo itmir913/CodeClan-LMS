@@ -308,6 +308,19 @@ export interface StudentActiveSession {
   is_result_released: boolean
 }
 
+// ─── 감사 로그 ───────────────────────────────────────────────
+
+export interface AuditLogRow {
+  id: number
+  actor_teacher_id: number | null
+  actor_name: string | null
+  action_type: string
+  target_type: string | null
+  target_id: number | null
+  detail: string | null
+  created_at: string
+}
+
 // ─── 출결 현황 ───────────────────────────────────────────────
 
 export interface AttendanceRow {
@@ -496,6 +509,17 @@ export const api = {
       request<AttendanceRow[]>('GET', `/lessons/${lesson_id}/attendance?division_id=${division_id}`),
     heartbeat: (context_type: 'session' | 'lesson', context_id: number) =>
       request<{ ok: boolean }>('POST', '/student/heartbeat', { context_type, context_id }),
+  },
+
+  audit: {
+    list: (params?: { limit?: number; offset?: number; action_type?: string }) => {
+      const qs = new URLSearchParams()
+      if (params?.limit) qs.set('limit', String(params.limit))
+      if (params?.offset) qs.set('offset', String(params.offset))
+      if (params?.action_type) qs.set('action_type', params.action_type)
+      const query = qs.toString()
+      return request<AuditLogRow[]>('GET', `/audit-logs${query ? `?${query}` : ''}`)
+    },
   },
 
   setup: {
