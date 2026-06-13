@@ -75,9 +75,10 @@
             공개된 수업이 없습니다.
           </div>
           <ul v-else class="lesson-list">
-            <li
+            <RouterLink
               v-for="lesson in store.lessons"
               :key="lesson.id"
+              :to="{ name: 'student-lesson', params: { id: lesson.id } }"
               class="lesson-item"
             >
               <div class="lesson-icon">
@@ -90,7 +91,7 @@
                 <span class="lesson-desc" v-if="lesson.description">{{ lesson.description }}</span>
               </div>
               <span class="lesson-meta">{{ lesson.problem_count }}문항</span>
-            </li>
+            </RouterLink>
           </ul>
         </section>
 
@@ -454,6 +455,13 @@ function sessionBadgeClass(status: SessionStatus): string {
   background: var(--color-background-primary);
   border: 0.5px solid var(--color-border-tertiary);
   border-radius: var(--border-radius-md);
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.lesson-item:hover {
+  background: var(--color-background-secondary);
 }
 
 .lesson-icon {

@@ -1,9 +1,9 @@
 use axum::{
-    extract::State,
+    extract::{Path, State},
     http::HeaderMap,
     Json,
 };
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::{error::ApiError, server::state::AppState};
 use super::auth::parse_student_session;
@@ -172,4 +172,72 @@ pub async fn get_active_session(
             }
         },
     )))
+}
+
+// ─── GET /api/student/lessons/:id ─────────────────────────
+// 내 분반에 공개된 차시 상세 (문항 포함)
+
+#[derive(Serialize)]
+pub struct StudentLessonProblem {
+    pub id: i64,
+    pub problem_id: i64,
+    pub problem_type: i64,
+    pub problem_title: String,
+    pub description: String,
+    pub type_config: String,
+    pub order_no: i64,
+}
+
+#[derive(Serialize)]
+pub struct StudentLessonDetail {
+    pub id: i64,
+    pub title: String,
+    pub description: String,
+    pub order_no: i64,
+    pub problems: Vec<StudentLessonProblem>,
+}
+
+pub async fn get_lesson_detail(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(lesson_id): Path<i64>,
+) -> Result<Json<StudentLessonDetail>, ApiError> {
+    let (_, division_id, _) = parse_student_session(&state.db, &headers).await?;
+
+    // 내 분반에 공개된 차시인지 확인
+    let lesson = sqlx::query_as::<_, (i64, String, String, i64)>(
+        r#"SELECT l.id, l.title, l.description, l.order_no
+           FROM lessons l
+           JOIN lesson_releases lr ON lr.lesson_id = l.id
+           WHERE l.id = ? AND lr.division_id = ? AND lr.is_released = 1"#,
+    )
+    .bind(lesson_id)
+    .bind(division_id)
+    .fetch_optional(&state.db)
+    .await?
+    .ok_or(ApiError::NotFound)?;
+
+    let problems = sqlx::query_as::<_, (i64, i64, i64, String, String, String, i64)>(
+        r#"SELECT lp.id, lp.problem_id, p.type, p.title, p.description, p.type_config, lp.order_no
+           FROM lesson_problems lp
+           JOIN problems p ON p.id = lp.problem_id
+           WHERE lp.lesson_id = ?
+           ORDER BY lp.order_no"#,
+    )
+    .bind(lesson_id)
+    .fetch_all(&state.db)
+    .await?;
+
+    Ok(Json(StudentLessonDetail {
+        id: lesson.0,
+        title: lesson.1,
+        description: lesson.2,
+        order_no: lesson.3,
+        problems: problems
+            .into_iter()
+            .map(|(id, problem_id, problem_type, problem_title, description, type_config, order_no)| {
+                StudentLessonProblem { id, problem_id, problem_type, problem_title, description, type_config, order_no }
+            })
+            .collect(),
+    }))
 }

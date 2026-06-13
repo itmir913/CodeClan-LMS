@@ -279,6 +279,24 @@ export interface StudentAssessmentRow {
   total_max_score: number
 }
 
+export interface StudentLessonProblem {
+  id: number
+  problem_id: number
+  problem_type: number
+  problem_title: string
+  description: string
+  type_config: string
+  order_no: number
+}
+
+export interface StudentLessonDetail {
+  id: number
+  title: string
+  description: string
+  order_no: number
+  problems: StudentLessonProblem[]
+}
+
 export interface StudentActiveSession {
   id: number
   assessment_id: number
@@ -454,6 +472,7 @@ export const api = {
 
   student: {
     lessons: () => request<StudentLessonRow[]>('GET', '/student/lessons'),
+    lessonDetail: (id: number) => request<StudentLessonDetail>('GET', `/student/lessons/${id}`),
     assessments: () => request<StudentAssessmentRow[]>('GET', '/student/assessments'),
     activeSession: () => request<StudentActiveSession | null>('GET', '/student/active-session'),
     sessionProblems: () => request<SessionProblemRow[]>('GET', '/student/session-problems'),
@@ -473,6 +492,8 @@ export const api = {
   attendance: {
     forSession: (session_id: number) =>
       request<AttendanceRow[]>('GET', `/sessions/${session_id}/attendance`),
+    forLesson: (lesson_id: number, division_id: number) =>
+      request<AttendanceRow[]>('GET', `/lessons/${lesson_id}/attendance?division_id=${division_id}`),
     heartbeat: (context_type: 'session' | 'lesson', context_id: number) =>
       request<{ ok: boolean }>('POST', '/student/heartbeat', { context_type, context_id }),
   },

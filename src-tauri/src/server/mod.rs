@@ -66,6 +66,7 @@ pub fn build_router(state: AppState) -> Router {
         .route("/sessions/:id/result-release", post(routes::sessions::toggle_result_release))
         // 학생 전용 라우트
         .route("/student/lessons", get(routes::student::get_lessons))
+        .route("/student/lessons/:id", get(routes::student::get_lesson_detail))
         .route("/student/assessments", get(routes::student::get_assessments))
         .route("/student/active-session", get(routes::student::get_active_session))
         .route("/student/session-problems", get(routes::submissions::get_session_problems))
@@ -76,7 +77,8 @@ pub fn build_router(state: AppState) -> Router {
         .route("/sessions/:id/submissions", get(routes::submissions::get_session_submissions))
         .route("/submissions/:id/grade", post(routes::submissions::grade_submission))
         // 출결 현황
-        .route("/sessions/:id/attendance", get(routes::attendance::get_session_attendance));
+        .route("/sessions/:id/attendance", get(routes::attendance::get_session_attendance))
+        .route("/lessons/:id/attendance", get(routes::attendance::get_lesson_attendance));
 
     Router::new()
         .nest("/api", api)
