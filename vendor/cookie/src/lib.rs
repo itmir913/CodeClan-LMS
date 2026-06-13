@@ -68,8 +68,6 @@
 //! features = ["secure", "percent-encode"]
 //! ```
 
-#![cfg_attr(all(nightly, doc), feature(doc_cfg))]
-
 #![deny(missing_docs)]
 
 pub use time;
