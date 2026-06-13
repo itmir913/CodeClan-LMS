@@ -266,3 +266,175 @@ async fn student_no_active_session_returns_null() {
     assert_eq!(status, StatusCode::OK);
     assert!(body.is_null(), "no active session should return null, got: {body}");
 }
+
+// ─── pause 상태 제출 차단 ──────────────────────────────────
+
+#[tokio::test]
+async fn submit_while_paused_returns_400() {
+    let (app, admin_cookie, s_cookie, sid, p_id) =
+        full_fixture(1, json!({"expected_output": "42"})).await;
+
+    let pause_req = authed_request(
+        Method::POST,
+        &format!("/api/sessions/{sid}/pause"),
+        &admin_cookie,
+        json!({}),
+    );
+    let (status, body) = response_json(&app, pause_req).await;
+    assert_eq!(status, StatusCode::OK, "{body}");
+    assert_eq!(body["is_paused"], json!(true));
+
+    let req = authed_request(
+        Method::POST,
+        "/api/student/submit",
+        &s_cookie,
+        json!({ "problem_id": p_id, "content": "42" }),
+    );
+    let (status, _) = response_json(&app, req).await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+}
+
+// ─── 닫힌 세션 제출 차단 ──────────────────────────────────
+
+#[tokio::test]
+async fn submit_to_closed_session_returns_400() {
+    let (app, admin_cookie, s_cookie, sid, p_id) =
+        full_fixture(1, json!({"expected_output": "42"})).await;
+
+    let close_req = authed_request(
+        Method::POST,
+        &format!("/api/sessions/{sid}/transition"),
+        &admin_cookie,
+        json!({ "action": "close" }),
+    );
+    response_json(&app, close_req).await;
+
+    let req = authed_request(
+        Method::POST,
+        "/api/student/submit",
+        &s_cookie,
+        json!({ "problem_id": p_id, "content": "42" }),
+    );
+    let (status, _) = response_json(&app, req).await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+}
+
+// ─── 점수 경계값 검증 ──────────────────────────────────────
+
+#[tokio::test]
+async fn grade_score_zero_boundary_is_valid() {
+    let (app, admin_cookie, s_cookie, _, p_id) = full_fixture(3, json!({})).await;
+
+    let req = authed_request(
+        Method::POST,
+        "/api/student/submit",
+        &s_cookie,
+        json!({ "problem_id": p_id, "content": "보고서 내용" }),
+    );
+    let (_, sb) = response_json(&app, req).await;
+    let sub_id = sb["submission_id"].as_i64().unwrap();
+
+    let req2 = authed_request(
+        Method::POST,
+        &format!("/api/submissions/{sub_id}/grade"),
+        &admin_cookie,
+        json!({ "score": 0 }),
+    );
+    let (status, body) = response_json(&app, req2).await;
+    assert_eq!(status, StatusCode::OK, "{body}");
+}
+
+#[tokio::test]
+async fn grade_score_negative_returns_400() {
+    let (app, admin_cookie, s_cookie, _, p_id) = full_fixture(3, json!({})).await;
+
+    let req = authed_request(
+        Method::POST,
+        "/api/student/submit",
+        &s_cookie,
+        json!({ "problem_id": p_id, "content": "보고서 내용" }),
+    );
+    let (_, sb) = response_json(&app, req).await;
+    let sub_id = sb["submission_id"].as_i64().unwrap();
+
+    let req2 = authed_request(
+        Method::POST,
+        &format!("/api/submissions/{sub_id}/grade"),
+        &admin_cookie,
+        json!({ "score": -1 }),
+    );
+    let (status, _) = response_json(&app, req2).await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+}
+
+#[tokio::test]
+async fn grade_score_exceeds_max_returns_400() {
+    let (app, admin_cookie, s_cookie, _, p_id) = full_fixture(3, json!({})).await;
+
+    let req = authed_request(
+        Method::POST,
+        "/api/student/submit",
+        &s_cookie,
+        json!({ "problem_id": p_id, "content": "보고서 내용" }),
+    );
+    let (_, sb) = response_json(&app, req).await;
+    let sub_id = sb["submission_id"].as_i64().unwrap();
+
+    // full_fixture score=100, 101은 초과
+    let req2 = authed_request(
+        Method::POST,
+        &format!("/api/submissions/{sub_id}/grade"),
+        &admin_cookie,
+        json!({ "score": 101 }),
+    );
+    let (status, _) = response_json(&app, req2).await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+}
+
+// ─── 결과 공개 후 학생 점수 조회 ─────────────────────────
+
+#[tokio::test]
+async fn student_views_scores_after_result_release() {
+    let (app, admin_cookie, s_cookie, sid, p_id) =
+        full_fixture(1, json!({"expected_output": "42"})).await;
+
+    // 학생 제출 (정답)
+    let req = authed_request(
+        Method::POST,
+        "/api/student/submit",
+        &s_cookie,
+        json!({ "problem_id": p_id, "content": "42" }),
+    );
+    response_json(&app, req).await;
+
+    // 세션 닫기
+    let close_req = authed_request(
+        Method::POST,
+        &format!("/api/sessions/{sid}/transition"),
+        &admin_cookie,
+        json!({ "action": "close" }),
+    );
+    response_json(&app, close_req).await;
+
+    // 결과 공개 전: session-problems → 404
+    let req_before = get_request("/api/student/session-problems", &s_cookie);
+    let (status_before, _) = response_json(&app, req_before).await;
+    assert_eq!(status_before, StatusCode::NOT_FOUND);
+
+    // 결과 공개
+    let release_req = authed_request(
+        Method::POST,
+        &format!("/api/sessions/{sid}/result-release"),
+        &admin_cookie,
+        json!({}),
+    );
+    response_json(&app, release_req).await;
+
+    // 결과 공개 후: session-problems → 200, 점수 표시
+    let req_after = get_request("/api/student/session-problems", &s_cookie);
+    let (status_after, body) = response_json(&app, req_after).await;
+    assert_eq!(status_after, StatusCode::OK, "{body}");
+    let probs = body.as_array().unwrap();
+    assert_eq!(probs[0]["verdict"], json!("AC"));
+    assert_eq!(probs[0]["submitted_score"], json!(100));
+}

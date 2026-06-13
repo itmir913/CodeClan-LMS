@@ -38,7 +38,10 @@ pub async fn get_session_problems(
     let (student_id, division_id, _) = parse_student_session(&state.db, &headers).await?;
 
     let session = sqlx::query_as::<_, (i64, i64)>(
-        "SELECT id, assessment_id FROM sessions WHERE division_id = ? AND status = 'RUNNING' ORDER BY created_at DESC LIMIT 1",
+        r#"SELECT id, assessment_id FROM sessions
+           WHERE division_id = ?
+             AND (status = 'RUNNING' OR (status = 'CLOSED' AND is_result_released = 1))
+           ORDER BY created_at DESC LIMIT 1"#,
     )
     .bind(division_id)
     .fetch_optional(&state.db)
@@ -111,15 +114,19 @@ pub async fn submit_answer(
 ) -> Result<Json<SubmissionResult>, ApiError> {
     let (student_id, division_id, _) = parse_student_session(&state.db, &headers).await?;
 
-    let session_row = sqlx::query_as::<_, (i64, i64)>(
-        "SELECT id, assessment_id FROM sessions WHERE division_id = ? AND status = 'RUNNING' ORDER BY created_at DESC LIMIT 1",
+    let session_row = sqlx::query_as::<_, (i64, i64, i64)>(
+        "SELECT id, assessment_id, is_paused FROM sessions WHERE division_id = ? AND status = 'RUNNING' ORDER BY created_at DESC LIMIT 1",
     )
     .bind(division_id)
     .fetch_optional(&state.db)
     .await?
     .ok_or_else(|| ApiError::BadRequest("진행 중인 시험 세션이 없습니다".into()))?;
 
-    let (session_id, assessment_id) = session_row;
+    let (session_id, assessment_id, is_paused) = session_row;
+
+    if is_paused != 0 {
+        return Err(ApiError::BadRequest("세션이 일시정지 중입니다".into()));
+    }
 
     // 문제가 이 수행평가에 속하는지 확인
     let problem_row = sqlx::query_as::<_, (i64, i64, String)>(
@@ -304,6 +311,24 @@ pub async fn grade_submission(
 
     if accessible == 0 {
         return Err(ApiError::Forbidden);
+    }
+
+    let max_score: i64 = sqlx::query_scalar::<_, i64>(
+        r#"SELECT ap.score
+           FROM assessment_problems ap
+           JOIN sessions s ON s.assessment_id = ap.assessment_id
+           JOIN submissions sub ON sub.problem_id = ap.problem_id AND sub.session_id = s.id
+           WHERE sub.id = ?"#,
+    )
+    .bind(submission_id)
+    .fetch_optional(&state.db)
+    .await?
+    .ok_or(ApiError::NotFound)?;
+
+    if body.score < 0 || body.score > max_score {
+        return Err(ApiError::BadRequest(format!(
+            "점수는 0 이상 {} 이하이어야 합니다", max_score
+        )));
     }
 
     sqlx::query(
