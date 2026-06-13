@@ -29,6 +29,8 @@ pub struct StudentAssessmentRow {
     pub session_id: Option<i64>,
     pub session_status: Option<String>,
     pub is_result_released: bool,
+    pub my_score: Option<i64>,
+    pub total_max_score: i64,
 }
 
 #[derive(Serialize)]
@@ -81,9 +83,9 @@ pub async fn get_assessments(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Json<Vec<StudentAssessmentRow>>, ApiError> {
-    let (_, division_id, _) = parse_student_session(&state.db, &headers).await?;
+    let (student_id, division_id, _) = parse_student_session(&state.db, &headers).await?;
 
-    let rows = sqlx::query_as::<_, (i64, String, String, i64, Option<i64>, Option<String>, i64)>(
+    let rows = sqlx::query_as::<_, (i64, String, String, i64, Option<i64>, Option<String>, i64, Option<i64>, i64)>(
         r#"SELECT a.id, a.title, a.description,
                   (SELECT COUNT(*) FROM assessment_problems ap WHERE ap.assessment_id = a.id) AS problem_count,
                   (SELECT s.id   FROM sessions s WHERE s.assessment_id = a.id AND s.division_id = ? ORDER BY s.created_at DESC LIMIT 1) AS session_id,
@@ -91,7 +93,16 @@ pub async fn get_assessments(
                   COALESCE(
                     (SELECT s.is_result_released FROM sessions s WHERE s.assessment_id = a.id AND s.division_id = ? ORDER BY s.created_at DESC LIMIT 1),
                     0
-                  ) AS is_result_released
+                  ) AS is_result_released,
+                  (SELECT SUM(sub.score)
+                   FROM sessions s2
+                   JOIN submissions sub ON sub.session_id = s2.id AND sub.student_id = ? AND sub.is_latest = 1
+                   WHERE s2.assessment_id = a.id AND s2.division_id = ? AND s2.status = 'CLOSED' AND s2.is_result_released = 1
+                   ORDER BY s2.created_at DESC LIMIT 1) AS my_score,
+                  COALESCE(
+                    (SELECT SUM(ap2.score) FROM assessment_problems ap2 WHERE ap2.assessment_id = a.id),
+                    0
+                  ) AS total_max_score
            FROM assessments a
            JOIN assessment_divisions ad ON ad.assessment_id = a.id
            WHERE ad.division_id = ?
@@ -100,13 +111,15 @@ pub async fn get_assessments(
     .bind(division_id)
     .bind(division_id)
     .bind(division_id)
+    .bind(student_id)
+    .bind(division_id)
     .bind(division_id)
     .fetch_all(&state.db)
     .await?;
 
     Ok(Json(
         rows.into_iter()
-            .map(|(id, title, description, problem_count, session_id, session_status, is_result_released)| {
+            .map(|(id, title, description, problem_count, session_id, session_status, is_result_released, my_score, total_max_score)| {
                 StudentAssessmentRow {
                     id,
                     title,
@@ -115,6 +128,8 @@ pub async fn get_assessments(
                     session_id,
                     session_status,
                     is_result_released: is_result_released != 0,
+                    my_score,
+                    total_max_score,
                 }
             })
             .collect(),

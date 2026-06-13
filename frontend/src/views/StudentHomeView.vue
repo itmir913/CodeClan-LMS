@@ -99,33 +99,77 @@
           <div v-if="store.assessments.length === 0" class="empty-state">
             연결된 수행평가가 없습니다.
           </div>
-          <ul v-else class="assessment-list">
-            <li
-              v-for="assessment in store.assessments"
-              :key="assessment.id"
-              class="assessment-item"
-            >
-              <div class="assessment-info">
-                <span class="assessment-title">{{ assessment.title }}</span>
-                <span class="assessment-sub" v-if="assessment.description">{{ assessment.description }}</span>
-                <span class="assessment-meta">{{ assessment.problem_count }}문항</span>
-              </div>
-              <div class="assessment-badges">
-                <span
-                  v-if="assessment.session_status"
-                  class="badge"
-                  :class="sessionBadgeClass(assessment.session_status)"
+
+          <template v-else>
+            <!-- 예정된 수행평가 -->
+            <div v-if="upcomingAssessments.length > 0" class="assess-section">
+              <div class="assess-section-title">예정된 수행평가</div>
+              <ul class="assessment-list">
+                <li
+                  v-for="a in upcomingAssessments"
+                  :key="a.id"
+                  class="assessment-item"
                 >
-                  {{ sessionStatusLabel(assessment.session_status) }}
-                </span>
-                <span v-else class="badge badge--neutral">미예정</span>
-                <span
-                  v-if="assessment.is_result_released"
-                  class="badge badge--info"
-                >결과 공개</span>
-              </div>
-            </li>
-          </ul>
+                  <div class="assessment-icon assessment-icon--upcoming">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  </div>
+                  <div class="assessment-info">
+                    <span class="assessment-title">{{ a.title }}</span>
+                    <span class="assessment-sub" v-if="a.description">{{ a.description }}</span>
+                    <span class="assessment-meta">{{ a.problem_count }}문항</span>
+                  </div>
+                  <span
+                    v-if="a.session_status"
+                    class="badge"
+                    :class="sessionBadgeClass(a.session_status)"
+                  >{{ sessionStatusLabel(a.session_status) }}</span>
+                  <span v-else class="badge badge--neutral">안내</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- 지난 수행평가 결과 -->
+            <div v-if="pastAssessments.length > 0" class="assess-section">
+              <div class="assess-section-title">지난 수행평가 결과</div>
+              <ul class="assessment-list">
+                <li
+                  v-for="a in pastAssessments"
+                  :key="a.id"
+                  class="assessment-item"
+                >
+                  <div class="assessment-icon" :class="a.is_result_released ? 'assessment-icon--released' : 'assessment-icon--closed'">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                  </div>
+                  <div class="assessment-info">
+                    <span class="assessment-title">{{ a.title }}</span>
+                    <span class="assessment-sub" v-if="a.description">{{ a.description }}</span>
+                    <span class="assessment-meta">{{ a.problem_count }}문항</span>
+                  </div>
+
+                  <!-- 결과 미공개 -->
+                  <span v-if="!a.is_result_released" class="badge badge--neutral">
+                    결과 미공개
+                  </span>
+
+                  <!-- 결과 공개: 점수 + 상세 링크 -->
+                  <div v-else class="result-area">
+                    <div class="result-score">
+                      <span class="result-score-mine">{{ a.my_score ?? 0 }}</span>
+                      <span class="result-score-sep"> / </span>
+                      <span class="result-score-max">{{ a.total_max_score }}점</span>
+                    </div>
+                    <RouterLink
+                      v-if="a.session_id"
+                      :to="{ name: 'student-result', params: { sessionId: a.session_id } }"
+                      class="result-detail-link"
+                    >
+                      상세 결과 보기 →
+                    </RouterLink>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </template>
         </section>
       </div>
     </template>
@@ -133,8 +177,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useStudentStore } from '@/stores/student'
 import { api } from '@/api/client'
@@ -149,6 +194,13 @@ const initialLoading = ref(false)
 const initError = ref<string | null>(null)
 let pollTimer: ReturnType<typeof setInterval> | null = null
 let heartbeatTimer: ReturnType<typeof setInterval> | null = null
+
+const upcomingAssessments = computed(() =>
+  store.assessments.filter(a => a.session_status !== 'CLOSED')
+)
+const pastAssessments = computed(() =>
+  store.assessments.filter(a => a.session_status === 'CLOSED')
+)
 
 async function init() {
   initialLoading.value = true
@@ -443,6 +495,15 @@ function sessionBadgeClass(status: SessionStatus): string {
 
 /* ── 수행평가 목록 ─────────────────────────────────── */
 
+.assess-section { margin-bottom: 1.5rem; }
+
+.assess-section-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+}
+
 .assessment-list {
   list-style: none;
   padding: 0;
@@ -461,6 +522,45 @@ function sessionBadgeClass(status: SessionStatus): string {
   border: 0.5px solid var(--color-border-tertiary);
   border-radius: var(--border-radius-md);
 }
+
+.assessment-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.assessment-icon--upcoming { color: var(--color-text-info); }
+.assessment-icon--released { color: var(--color-text-success); }
+.assessment-icon--closed   { color: var(--color-text-tertiary); }
+
+.result-area {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.result-score {
+  display: flex;
+  align-items: baseline;
+}
+
+.result-score-mine {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-info);
+}
+
+.result-score-sep { font-size: 12px; color: var(--color-text-tertiary); margin: 0 2px; }
+.result-score-max { font-size: 12px; color: var(--color-text-secondary); }
+
+.result-detail-link {
+  font-size: 12px;
+  color: var(--color-text-info);
+  text-decoration: none;
+}
+.result-detail-link:hover { text-decoration: underline; }
 
 .assessment-info {
   flex: 1;

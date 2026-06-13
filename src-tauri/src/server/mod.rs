@@ -68,6 +68,7 @@ pub fn build_router(state: AppState) -> Router {
         .route("/student/assessments", get(routes::student::get_assessments))
         .route("/student/active-session", get(routes::student::get_active_session))
         .route("/student/session-problems", get(routes::submissions::get_session_problems))
+        .route("/student/sessions/:id/problems", get(routes::submissions::get_session_result_problems))
         .route("/student/submit", post(routes::submissions::submit_answer))
         .route("/student/heartbeat", post(routes::attendance::student_heartbeat))
         // 제출/채점 (교사)

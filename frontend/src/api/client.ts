@@ -268,6 +268,8 @@ export interface StudentAssessmentRow {
   session_id: number | null
   session_status: 'CREATED' | 'LOBBY' | 'RUNNING' | 'CLOSED' | null
   is_result_released: boolean
+  my_score: number | null
+  total_max_score: number
 }
 
 export interface StudentActiveSession {
@@ -446,6 +448,8 @@ export const api = {
     assessments: () => request<StudentAssessmentRow[]>('GET', '/student/assessments'),
     activeSession: () => request<StudentActiveSession | null>('GET', '/student/active-session'),
     sessionProblems: () => request<SessionProblemRow[]>('GET', '/student/session-problems'),
+    sessionResultProblems: (session_id: number) =>
+      request<SessionProblemRow[]>('GET', `/student/sessions/${session_id}/problems`),
     submit: (data: { problem_id: number; content: string; language?: string }) =>
       request<SubmissionResult>('POST', '/student/submit', data),
   },

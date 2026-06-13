@@ -91,6 +91,60 @@ pub async fn get_session_problems(
     ))
 }
 
+/// GET /api/student/sessions/:id/problems
+/// 특정 CLOSED+released 세션의 문제 목록 + 내 답안 + 점수 (결과 조회용)
+pub async fn get_session_result_problems(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(session_id): Path<i64>,
+) -> Result<Json<Vec<SessionProblemRow>>, ApiError> {
+    let (student_id, division_id, _) = parse_student_session(&state.db, &headers).await?;
+
+    let assessment_id = sqlx::query_scalar::<_, i64>(
+        r#"SELECT assessment_id FROM sessions
+           WHERE id = ? AND division_id = ? AND status = 'CLOSED' AND is_result_released = 1"#,
+    )
+    .bind(session_id)
+    .bind(division_id)
+    .fetch_optional(&state.db)
+    .await?
+    .ok_or(ApiError::NotFound)?;
+
+    let rows = sqlx::query_as::<_, (i64, i64, i64, i64, i64, String, String, String, i64, Option<i64>, Option<String>, Option<String>, Option<String>, Option<i64>)>(
+        r#"SELECT ap.id, ap.order_no, ap.score,
+                  p.id, p.type, p.title, p.description, p.type_config, p.is_structure_check,
+                  sub.id, sub.content, sub.language, sub.verdict, sub.score
+           FROM assessment_problems ap
+           JOIN problems p ON p.id = ap.problem_id
+           LEFT JOIN submissions sub ON sub.problem_id = p.id
+               AND sub.student_id = ? AND sub.session_id = ? AND sub.is_latest = 1
+           WHERE ap.assessment_id = ?
+           ORDER BY ap.order_no"#,
+    )
+    .bind(student_id)
+    .bind(session_id)
+    .bind(assessment_id)
+    .fetch_all(&state.db)
+    .await?;
+
+    Ok(Json(
+        rows.into_iter()
+            .map(|(ap_id, order_no, max_score, problem_id, problem_type, title, description, type_config, is_sc, sub_id, sub_content, sub_lang, verdict, sub_score)| {
+                SessionProblemRow {
+                    ap_id, order_no, max_score, problem_id, problem_type,
+                    title, description, type_config,
+                    is_structure_check: is_sc != 0,
+                    submission_id: sub_id,
+                    submitted_content: sub_content,
+                    submitted_language: sub_lang,
+                    verdict,
+                    submitted_score: sub_score,
+                }
+            })
+            .collect(),
+    ))
+}
+
 #[derive(Deserialize)]
 pub struct SubmitRequest {
     pub problem_id: i64,

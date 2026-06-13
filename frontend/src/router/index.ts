@@ -75,6 +75,12 @@ const router = createRouter({
       meta: { requiresStudentAuth: true },
     },
     {
+      path: '/student/result/:sessionId',
+      name: 'student-result',
+      component: () => import('@/views/StudentResultView.vue'),
+      meta: { requiresStudentAuth: true },
+    },
+    {
       path: '/:pathMatch(.*)*',
       redirect: '/login',
     },
