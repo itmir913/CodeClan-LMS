@@ -78,6 +78,7 @@
 - **하드코딩된 URL**: 모든 API 호출은 `api/client.ts`의 `api` 객체를 통한다.
 - **`any` 타입**: TypeScript에서 `any` 사용 금지.
 - **`sqlx::query!` 매크로**: 컴파일 타임 DB 접근 요구하므로 사용 금지.
+- **Polling 방식**: setInterval 기반 반복 fetch 사용 금지. 실시간 데이터는 WebSocket(학생) 또는 SSE(교사)로 처리.
 - **JWT**: 인증에 JWT 사용 금지. 쿠키 세션 방식만 사용.
 - **미구현 stub 방치**: placeholder는 최소한 로딩/에러 상태 UI를 갖춰야 한다.
 - **CSS 하드코딩 색상**: 반드시 CSS 변수 사용. `#2563eb` 직접 사용 금지.
