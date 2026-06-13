@@ -1,3 +1,10 @@
 [workspace]
 members = ["src-tauri"]
 resolver = "2"
+
+# Rust 1.95 coherence 강화로 tauri-utils 2.9.2의 blanket From impl이 거부됨.
+# 로컬 패치로 구체적인 impl로 교체.
+[patch.crates-io]
+tauri-utils = { path = "vendor/tauri-utils" }
+cookie = { path = "vendor/cookie" }
+tauri = { path = "vendor/tauri" }
