@@ -6,4 +6,5 @@ pub mod lessons;
 pub mod problems;
 pub mod sessions;
 pub mod setup;
+pub mod student;
 pub mod teachers;

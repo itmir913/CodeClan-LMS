@@ -62,7 +62,11 @@ pub async fn start(state: AppState) -> anyhow::Result<()> {
         .route("/sessions", get(routes::sessions::list_sessions).post(routes::sessions::create_session))
         .route("/sessions/:id/transition", post(routes::sessions::transition_session))
         .route("/sessions/:id/pause", post(routes::sessions::pause_session))
-        .route("/sessions/:id/result-release", post(routes::sessions::toggle_result_release));
+        .route("/sessions/:id/result-release", post(routes::sessions::toggle_result_release))
+        // 학생 전용 라우트
+        .route("/student/lessons", get(routes::student::get_lessons))
+        .route("/student/assessments", get(routes::student::get_assessments))
+        .route("/student/active-session", get(routes::student::get_active_session));
 
     let app = Router::new()
         .nest("/api", api)

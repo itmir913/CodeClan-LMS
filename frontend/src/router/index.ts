@@ -93,7 +93,10 @@ router.beforeEach(async (to) => {
     }
 
     if (to.meta.requiresStudentAuth) {
-      await api.auth.studentMe()
+      const studentUser = await api.auth.studentMe()
+      if (studentUser.password_reset_required && to.name !== 'student-change-password') {
+        return { name: 'student-change-password' }
+      }
     }
   } catch {
     if (to.meta.requiresTeacherAuth || to.meta.requiresStudentAuth) {

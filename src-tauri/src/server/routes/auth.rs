@@ -58,6 +58,27 @@ fn parse_student_token(headers: &HeaderMap) -> Option<String> {
     parse_cookie(headers, STUDENT_SESSION_COOKIE)
 }
 
+/// 학생 세션 검증 공통 헬퍼 — student 라우트에서 재사용
+/// 반환: (student_id, division_id, name)
+pub async fn parse_student_session(
+    db: &sqlx::SqlitePool,
+    headers: &HeaderMap,
+) -> Result<(i64, i64, String), ApiError> {
+    let token = parse_student_token(headers).ok_or(ApiError::Unauthorized)?;
+
+    let row = sqlx::query_as::<_, (i64, i64, String)>(
+        r#"SELECT s.id, s.division_id, s.name
+           FROM student_sessions ss
+           JOIN students s ON s.id = ss.student_id
+           WHERE ss.token = ? AND ss.expires_at > datetime('now')"#,
+    )
+    .bind(&token)
+    .fetch_optional(db)
+    .await?;
+
+    row.ok_or(ApiError::Unauthorized)
+}
+
 fn set_student_cookie(token: &str) -> HeaderValue {
     HeaderValue::from_str(&format!(
         "{STUDENT_SESSION_COOKIE}={token}; HttpOnly; Path=/; SameSite=Lax; Max-Age={SESSION_MAX_AGE_SECS}"
@@ -213,6 +234,7 @@ pub struct StudentMeResponse {
     pub student_number: String,
     pub name: String,
     pub division_id: i64,
+    pub division_name: String,
     pub password_reset_required: bool,
 }
 
@@ -221,15 +243,17 @@ pub async fn student_login(
     State(state): State<AppState>,
     Json(body): Json<StudentLoginRequest>,
 ) -> Result<impl IntoResponse, ApiError> {
-    let row = sqlx::query_as::<_, (i64, String, String, i64, i64)>(
-        "SELECT id, password_hash, name, division_id, password_reset_required
-         FROM students WHERE student_number = ?",
+    let row = sqlx::query_as::<_, (i64, String, String, i64, String, i64)>(
+        r#"SELECT s.id, s.password_hash, s.name, s.division_id, d.name, s.password_reset_required
+           FROM students s
+           JOIN divisions d ON d.id = s.division_id
+           WHERE s.student_number = ?"#,
     )
     .bind(&body.student_number)
     .fetch_optional(&state.db)
     .await?;
 
-    let (student_id, password_hash, name, division_id, reset_required) =
+    let (student_id, password_hash, name, division_id, division_name, reset_required) =
         row.ok_or(ApiError::Unauthorized)?;
 
     if password_hash.is_empty() {
@@ -271,6 +295,7 @@ pub async fn student_login(
                 "student_number": body.student_number,
                 "name": name,
                 "division_id": division_id,
+                "division_name": division_name,
                 "password_reset_required": reset_required != 0,
             }
         })),
@@ -302,17 +327,18 @@ pub async fn student_me(
 ) -> Result<Json<StudentMeResponse>, ApiError> {
     let token = parse_student_token(&headers).ok_or(ApiError::Unauthorized)?;
 
-    let row = sqlx::query_as::<_, (i64, String, String, i64, i64)>(
-        r#"SELECT s.id, s.student_number, s.name, s.division_id, s.password_reset_required
+    let row = sqlx::query_as::<_, (i64, String, String, i64, String, i64)>(
+        r#"SELECT s.id, s.student_number, s.name, s.division_id, d.name, s.password_reset_required
            FROM student_sessions ss
            JOIN students s ON s.id = ss.student_id
+           JOIN divisions d ON d.id = s.division_id
            WHERE ss.token = ? AND ss.expires_at > datetime('now')"#,
     )
     .bind(&token)
     .fetch_optional(&state.db)
     .await?;
 
-    let (id, student_number, name, division_id, reset_required) =
+    let (id, student_number, name, division_id, division_name, reset_required) =
         row.ok_or(ApiError::Unauthorized)?;
 
     Ok(Json(StudentMeResponse {
@@ -320,6 +346,7 @@ pub async fn student_me(
         student_number,
         name,
         division_id,
+        division_name,
         password_reset_required: reset_required != 0,
     }))
 }

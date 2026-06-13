@@ -32,7 +32,40 @@ export interface StudentUser {
   student_number: string
   name: string
   division_id: number
+  division_name: string
   password_reset_required: boolean
+}
+
+// ─── 학생 전용 ───────────────────────────────────────────────
+
+export interface StudentLessonRow {
+  id: number
+  title: string
+  description: string
+  order_no: number
+  problem_count: number
+  released_at: string | null
+}
+
+export interface StudentAssessmentRow {
+  id: number
+  title: string
+  description: string
+  problem_count: number
+  session_id: number | null
+  session_status: 'CREATED' | 'LOBBY' | 'RUNNING' | 'CLOSED' | null
+  is_result_released: boolean
+}
+
+export interface StudentActiveSession {
+  id: number
+  assessment_id: number
+  assessment_title: string
+  status: 'LOBBY' | 'RUNNING'
+  time_limit_min: number | null
+  start_at: string | null
+  is_paused: boolean
+  is_result_released: boolean
 }
 
 export interface DashboardResponse {
@@ -339,6 +372,12 @@ export const api = {
     pause: (id: number) => request<{ ok: boolean; is_paused: boolean }>('POST', `/sessions/${id}/pause`),
     toggleResultRelease: (id: number) =>
       request<{ ok: boolean; is_result_released: boolean }>('POST', `/sessions/${id}/result-release`),
+  },
+
+  student: {
+    lessons: () => request<StudentLessonRow[]>('GET', '/student/lessons'),
+    assessments: () => request<StudentAssessmentRow[]>('GET', '/student/assessments'),
+    activeSession: () => request<StudentActiveSession | null>('GET', '/student/active-session'),
   },
 
   setup: {
