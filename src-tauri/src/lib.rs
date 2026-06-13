@@ -18,8 +18,12 @@ pub fn run() {
 
     tauri::Builder::default()
         .setup(|app| {
-            let app_data_dir = app.path().app_data_dir()?;
-            let db_path = app_data_dir.join("codeclan.db");
+            let exe_dir = std::env::current_exe()
+                .expect("current_exe 경로 조회 실패")
+                .parent()
+                .expect("exe 부모 디렉토리 없음")
+                .to_path_buf();
+            let db_path = exe_dir.join("data").join("codeclan.db");
 
             // Axum 서버를 별도 tokio 태스크로 실행
             tauri::async_runtime::spawn(async move {

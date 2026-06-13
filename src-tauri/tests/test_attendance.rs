@@ -4,6 +4,46 @@ use common::*;
 use hyper::{Method, StatusCode};
 use serde_json::json;
 
+/// 차시 + 분반 + 학생까지 포함한 lesson 출결 fixture
+async fn lesson_attendance_fixture() -> (
+    axum::Router,
+    String, // admin_cookie
+    String, // student_cookie
+    i64,    // lesson_id
+    i64,    // division_id
+) {
+    let pool = setup_test_db().await;
+    let app = build_test_app(pool);
+    setup_admin(&app).await;
+    let admin = teacher_login_cookie(&app, "admin", "password123").await;
+
+    let div_id = create_division(&app, &admin, "1반").await;
+    add_student(&app, &admin, div_id, "20240001", "학생A", "pw1234").await;
+    add_student(&app, &admin, div_id, "20240002", "학생B", "pw1234").await;
+
+    // 차시 생성
+    let req = authed_request(
+        Method::POST,
+        "/api/lessons",
+        &admin,
+        json!({ "title": "1차시" }),
+    );
+    let (_, lb) = response_json(&app, req).await;
+    let lesson_id = lb["id"].as_i64().unwrap();
+
+    // 차시 공개
+    let rel_req = authed_request(
+        Method::PUT,
+        &format!("/api/lessons/{lesson_id}/release"),
+        &admin,
+        json!({ "division_id": div_id, "is_released": true }),
+    );
+    response_json(&app, rel_req).await;
+
+    let s_cookie = student_login_cookie(&app, "20240001", "pw1234").await;
+    (app, admin, s_cookie, lesson_id, div_id)
+}
+
 /// RUNNING 세션 + 학생까지 완전한 fixture
 async fn attendance_fixture() -> (
     axum::Router,
@@ -208,3 +248,65 @@ async fn attendance_running_join_is_late() {
     let s = list.iter().find(|s| s["is_online"] == json!(true)).unwrap();
     assert_eq!(s["is_late"], json!(true));
 }
+
+// ─── 차시 출결 현황 ────────────────────────────────────────
+
+#[tokio::test]
+async fn lesson_attendance_requires_division_id() {
+    let (app, admin, _, lesson_id, _) = lesson_attendance_fixture().await;
+
+    // division_id 없이 호출 → 400
+    let req = get_request(&format!("/api/lessons/{lesson_id}/attendance"), &admin);
+    let (status, _) = response_json(&app, req).await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+}
+
+#[tokio::test]
+async fn lesson_attendance_shows_all_students_in_division() {
+    let (app, admin, _, lesson_id, div_id) = lesson_attendance_fixture().await;
+
+    let req = get_request(
+        &format!("/api/lessons/{lesson_id}/attendance?division_id={div_id}"),
+        &admin,
+    );
+    let (status, body) = response_json(&app, req).await;
+    assert_eq!(status, StatusCode::OK, "{body}");
+    assert_eq!(body.as_array().unwrap().len(), 2, "학생 2명 반환");
+}
+
+#[tokio::test]
+async fn lesson_attendance_student_online_after_lesson_heartbeat() {
+    let (app, admin, s_cookie, lesson_id, div_id) = lesson_attendance_fixture().await;
+
+    let hb = authed_request(
+        Method::POST,
+        "/api/student/heartbeat",
+        &s_cookie,
+        json!({ "context_type": "lesson", "context_id": lesson_id }),
+    );
+    response_json(&app, hb).await;
+
+    let req = get_request(
+        &format!("/api/lessons/{lesson_id}/attendance?division_id={div_id}"),
+        &admin,
+    );
+    let (status, body) = response_json(&app, req).await;
+    assert_eq!(status, StatusCode::OK, "{body}");
+
+    let list = body.as_array().unwrap();
+    let online_count = list.iter().filter(|s| s["is_online"] == json!(true)).count();
+    assert_eq!(online_count, 1, "하트비트 보낸 학생 1명만 온라인");
+}
+
+#[tokio::test]
+async fn lesson_attendance_requires_teacher_auth() {
+    let (app, _, _, lesson_id, div_id) = lesson_attendance_fixture().await;
+
+    let req = get_request(
+        &format!("/api/lessons/{lesson_id}/attendance?division_id={div_id}"),
+        "cc_session=invalid",
+    );
+    let (status, _) = response_json(&app, req).await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+}
+

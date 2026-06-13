@@ -253,3 +253,103 @@ async fn student_assessments_my_score_reflects_graded_submission() {
     assert_eq!(body[0]["my_score"], json!(80));
     assert_eq!(body[0]["total_max_score"], json!(100));
 }
+
+// ─── 학생 차시 상세 조회 ────────────────────────────────────
+
+/// 차시 공개까지 완료된 lesson fixture
+async fn lesson_fixture() -> (
+    axum::Router,
+    String, // admin_cookie
+    String, // student_cookie
+    i64,    // lesson_id
+) {
+    let pool = setup_test_db().await;
+    let app = build_test_app(pool);
+    setup_admin(&app).await;
+    let admin = teacher_login_cookie(&app, "admin", "password123").await;
+
+    let div_id = create_division(&app, &admin, "1반").await;
+    add_student(&app, &admin, div_id, "20240001", "학생A", "pw1234").await;
+
+    // 문제 생성 후 차시 배정
+    let p_id = create_problem(&app, &admin, 1, "문제1", json!({"expected_output": "42"})).await;
+
+    let req = authed_request(
+        Method::POST,
+        "/api/lessons",
+        &admin,
+        json!({ "title": "1차시", "description": "차시 설명" }),
+    );
+    let (_, lb) = response_json(&app, req).await;
+    let lesson_id = lb["id"].as_i64().unwrap();
+
+    let req2 = authed_request(
+        Method::PUT,
+        &format!("/api/lessons/{lesson_id}/problems"),
+        &admin,
+        json!({ "problem_ids": [p_id] }),
+    );
+    response_json(&app, req2).await;
+
+    // 차시 공개
+    let rel_req = authed_request(
+        Method::PUT,
+        &format!("/api/lessons/{lesson_id}/release"),
+        &admin,
+        json!({ "division_id": div_id, "is_released": true }),
+    );
+    response_json(&app, rel_req).await;
+
+    let s_cookie = student_login_cookie(&app, "20240001", "pw1234").await;
+    (app, admin, s_cookie, lesson_id)
+}
+
+#[tokio::test]
+async fn student_lesson_detail_returns_title_and_problems() {
+    let (app, _, s_cookie, lesson_id) = lesson_fixture().await;
+
+    let req = get_request(&format!("/api/student/lessons/{lesson_id}"), &s_cookie);
+    let (status, body) = response_json(&app, req).await;
+    assert_eq!(status, StatusCode::OK, "{body}");
+
+    assert_eq!(body["title"], json!("1차시"));
+    assert_eq!(body["description"], json!("차시 설명"));
+    let problems = body["problems"].as_array().unwrap();
+    assert_eq!(problems.len(), 1);
+    assert_eq!(problems[0]["problem_title"], json!("문제1"));
+}
+
+#[tokio::test]
+async fn student_lesson_detail_unreleased_returns_404() {
+    let pool = setup_test_db().await;
+    let app = build_test_app(pool);
+    setup_admin(&app).await;
+    let admin = teacher_login_cookie(&app, "admin", "password123").await;
+
+    let div_id = create_division(&app, &admin, "1반").await;
+    add_student(&app, &admin, div_id, "20240001", "학생A", "pw1234").await;
+
+    let req = authed_request(
+        Method::POST,
+        "/api/lessons",
+        &admin,
+        json!({ "title": "비공개차시" }),
+    );
+    let (_, lb) = response_json(&app, req).await;
+    let lesson_id = lb["id"].as_i64().unwrap();
+
+    // 공개 토글 없이 접근
+    let s_cookie = student_login_cookie(&app, "20240001", "pw1234").await;
+    let req = get_request(&format!("/api/student/lessons/{lesson_id}"), &s_cookie);
+    let (status, _) = response_json(&app, req).await;
+    assert_eq!(status, StatusCode::NOT_FOUND);
+}
+
+#[tokio::test]
+async fn student_lesson_detail_requires_student_auth() {
+    let (app, _, _, lesson_id) = lesson_fixture().await;
+
+    let req = get_request(&format!("/api/student/lessons/{lesson_id}"), "cc_student=invalid");
+    let (status, _) = response_json(&app, req).await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+}
