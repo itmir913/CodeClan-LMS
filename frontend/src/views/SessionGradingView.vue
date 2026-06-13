@@ -1,6 +1,10 @@
 <template>
   <div class="page-layout">
-    <!-- 사이드바: 학생 목록 -->
+    <AppSidebar />
+
+    <!-- 채점 패널 (좌: 학생 목록, 우: 제출물) -->
+    <div class="grading-split">
+    <!-- 좌: 학생 목록 -->
     <aside class="sidebar">
       <div class="sidebar-header">
         <RouterLink :to="{ name: 'session-management' }" class="back-link">← 세션 관리</RouterLink>
@@ -133,6 +137,7 @@
         </div>
       </div>
     </main>
+    </div><!-- grading-split -->
   </div>
 </template>
 
@@ -141,6 +146,7 @@ import { ref, computed, reactive, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useGradingStore } from '@/stores/grading'
 import type { SubmissionRow } from '@/api/client'
+import AppSidebar from '@/components/AppSidebar.vue'
 
 const route = useRoute()
 const store = useGradingStore()
@@ -222,17 +228,26 @@ async function doGrade(sub: SubmissionRow) {
 <style scoped>
 .page-layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.grading-split {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
 }
 
 /* ── 사이드바 ──────────────────────────────────────── */
 .sidebar {
-  width: 240px;
+  width: 220px;
   flex-shrink: 0;
   background: var(--color-background-primary);
   border-right: 0.5px solid var(--color-border-secondary);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .sidebar-header {

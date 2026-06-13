@@ -1,210 +1,189 @@
 <template>
-  <div class="page-layout">
-    <!-- 사이드바 -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <RouterLink to="/dashboard" class="back-link">
-          <IconArrowLeft :size="16" /> 대시보드
-        </RouterLink>
-        <h2 class="sidebar-title">세션 관리</h2>
-      </div>
+  <div class="layout">
+    <AppSidebar />
 
-      <!-- 필터 -->
-      <div class="filter-group">
-        <label class="filter-label">분반 필터</label>
-        <select v-model="filterDivisionId" class="filter-select" @change="loadSessions">
-          <option :value="null">전체 분반</option>
-          <option v-for="d in divisions" :key="d.id" :value="d.id">{{ d.name }}</option>
-        </select>
-        <label class="filter-label" style="margin-top: var(--space-2)">상태 필터</label>
-        <select v-model="filterStatus" class="filter-select" @change="loadSessions">
-          <option value="">전체</option>
-          <option value="CREATED">CREATED</option>
-          <option value="LOBBY">LOBBY</option>
-          <option value="RUNNING">RUNNING</option>
-          <option value="CLOSED">CLOSED</option>
-        </select>
-      </div>
-
-      <!-- 세션 목록 -->
-      <div class="session-list">
-        <div v-if="sessionStore.loading" class="list-loading">로딩 중...</div>
-        <div v-else-if="sessionStore.sessions.length === 0" class="list-empty">
-          세션이 없습니다
-        </div>
-        <div
-          v-for="s in sessionStore.sessions"
-          :key="s.id"
-          class="session-item"
-          :class="{ selected: selectedId === s.id, [`status-${s.status.toLowerCase()}`]: true }"
-          @click="selectSession(s)"
-        >
-          <div class="session-item-top">
-            <span class="status-badge" :class="`badge-${s.status.toLowerCase()}`">{{ s.status }}</span>
-            <span v-if="s.is_paused" class="pause-badge">일시정지</span>
-          </div>
-          <div class="session-item-title">{{ s.assessment_title }}</div>
-          <div class="session-item-sub">{{ s.division_name }}</div>
-        </div>
-      </div>
-
-      <!-- 새 세션 생성 버튼 -->
-      <div class="sidebar-footer">
-        <button class="btn btn-primary" style="width:100%" @click="showCreateModal = true">
-          <IconPlus :size="16" /> 새 세션 생성
-        </button>
-      </div>
-    </aside>
-
-    <!-- 메인 콘텐츠 -->
-    <main class="main-content">
-      <div v-if="!selected" class="empty-state">
-        <IconCalendarEvent :size="48" />
-        <p>왼쪽에서 세션을 선택하거나 새 세션을 생성하세요</p>
-      </div>
-
-      <div v-else class="session-detail">
-        <!-- 상태 헤더 -->
-        <div class="detail-header">
-          <div>
-            <h2 class="detail-title">{{ selected.assessment_title }}</h2>
-            <p class="detail-sub">{{ selected.division_name }} · {{ selected.target_type === 'ALL' ? '전체 학생' : '개별 지정' }}</p>
-          </div>
-          <div class="status-header-badges">
-            <span class="status-badge-lg" :class="`badge-${selected.status.toLowerCase()}`">
-              {{ STATUS_LABELS[selected.status] }}
-            </span>
-            <span v-if="selected.is_paused" class="pause-badge-lg">⏸ 일시정지</span>
-          </div>
+    <div class="main-split">
+      <!-- 좌: 세션 목록 -->
+      <div class="list-panel">
+        <div class="panel-header">
+          <span class="panel-title">시험 세션</span>
+          <button class="btn-icon" title="새 세션 생성" @click="showCreateModal = true">
+            <IconPlus :size="15" />
+          </button>
         </div>
 
-        <!-- 에러 배너 -->
-        <div v-if="actionError" class="error-banner">{{ actionError }}</div>
-
-        <!-- 통계 카드 -->
-        <div class="stat-cards">
-          <div class="stat-card">
-            <span class="stat-value">{{ selected.student_count }}</span>
-            <span class="stat-label">대상 학생</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-value">{{ selected.submission_count }}</span>
-            <span class="stat-label">제출 수</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-value">{{ selected.time_limit_min ?? '무제한' }}</span>
-            <span class="stat-label">제한 시간(분)</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-value">{{ selected.start_at ? formatTime(selected.start_at) : '-' }}</span>
-            <span class="stat-label">시작 시각</span>
-          </div>
+        <div class="filter-group">
+          <select v-model="filterDivisionId" class="filter-select" @change="loadSessions">
+            <option :value="null">전체 분반</option>
+            <option v-for="d in divisions" :key="d.id" :value="d.id">{{ d.name }}</option>
+          </select>
+          <select v-model="filterStatus" class="filter-select" @change="loadSessions">
+            <option value="">전체 상태</option>
+            <option value="CREATED">CREATED</option>
+            <option value="LOBBY">LOBBY</option>
+            <option value="RUNNING">RUNNING</option>
+            <option value="CLOSED">CLOSED</option>
+          </select>
         </div>
 
-        <!-- 액션 버튼 영역 -->
-        <div class="action-section">
-          <h3 class="section-title">세션 제어</h3>
-          <div class="action-buttons">
-            <!-- CREATED → LOBBY -->
-            <button
-              v-if="selected.status === 'CREATED'"
-              class="btn btn-primary"
-              :disabled="transitioning"
-              @click="doTransition('to_lobby')"
-            >
-              <IconDoor :size="16" /> 대기실 열기 (LOBBY)
-            </button>
-
-            <!-- LOBBY → CREATED (취소) -->
-            <button
-              v-if="selected.status === 'LOBBY'"
-              class="btn btn-secondary"
-              :disabled="transitioning"
-              @click="doTransition('to_created')"
-            >
-              <IconArrowBack :size="16" /> 대기실 취소
-            </button>
-
-            <!-- LOBBY → RUNNING -->
-            <button
-              v-if="selected.status === 'LOBBY'"
-              class="btn btn-danger"
-              :disabled="transitioning"
-              @click="confirmStart"
-            >
-              <IconPlayerPlay :size="16" /> 시험 시작 (RUNNING)
-            </button>
-
-            <!-- RUNNING → 일시정지/재개 -->
-            <button
-              v-if="selected.status === 'RUNNING'"
-              class="btn btn-warning"
-              :disabled="transitioning"
-              @click="doPause"
-            >
-              <IconPlayerPause v-if="!selected.is_paused" :size="16" />
-              <IconPlayerPlay v-else :size="16" />
-              {{ selected.is_paused ? '재개' : '일시정지' }}
-            </button>
-
-            <!-- RUNNING → CLOSED -->
-            <button
-              v-if="selected.status === 'RUNNING'"
-              class="btn btn-danger"
-              :disabled="transitioning"
-              @click="confirmClose"
-            >
-              <IconPlayerStop :size="16" /> 시험 종료 (CLOSED)
-            </button>
-
-            <!-- CLOSED → 결과 공개 토글 -->
-            <button
-              v-if="selected.status === 'CLOSED'"
-              class="btn"
-              :class="selected.is_result_released ? 'btn-warning' : 'btn-primary'"
-              :disabled="transitioning"
-              @click="doToggleRelease"
-            >
-              <IconEye v-if="!selected.is_result_released" :size="16" />
-              <IconEyeOff v-else :size="16" />
-              {{ selected.is_result_released ? '결과 비공개' : '결과 공개' }}
-            </button>
-
-            <!-- RUNNING/CLOSED → 채점 -->
-            <RouterLink
-              v-if="selected.status === 'RUNNING' || selected.status === 'CLOSED'"
-              :to="{ name: 'session-grading', params: { id: selected.id } }"
-              class="btn btn-secondary"
-            >
-              채점하기
-            </RouterLink>
-          </div>
+        <div v-if="sessionStore.loading && sessionStore.sessions.length === 0" class="panel-loading">
+          <div class="spinner" />
         </div>
-
-        <!-- 출결 위젯 (LOBBY / RUNNING) -->
-        <AttendanceWidget
-          v-if="selected.status === 'LOBBY' || selected.status === 'RUNNING'"
-          :session-id="selected.id"
-          class="attendance-section"
-        />
-
-        <!-- 세션 정보 -->
-        <div class="info-section">
-          <h3 class="section-title">세션 정보</h3>
-          <table class="info-table">
-            <tbody>
-              <tr><td>세션 ID</td><td>#{{ selected.id }}</td></tr>
-              <tr><td>수행평가</td><td>{{ selected.assessment_title }}</td></tr>
-              <tr><td>분반</td><td>{{ selected.division_name }}</td></tr>
-              <tr><td>대상</td><td>{{ selected.target_type === 'ALL' ? '전체 학생' : '개별 지정' }}</td></tr>
-              <tr><td>생성일</td><td>{{ selected.created_at }}</td></tr>
-              <tr v-if="selected.start_at"><td>시작</td><td>{{ selected.start_at }}</td></tr>
-              <tr v-if="selected.end_at"><td>종료</td><td>{{ selected.end_at }}</td></tr>
-            </tbody>
-          </table>
+        <div v-else-if="sessionStore.sessions.length === 0" class="panel-empty">세션이 없습니다</div>
+        <div v-else class="session-list">
+          <div
+            v-for="s in sessionStore.sessions"
+            :key="s.id"
+            class="session-item"
+            :class="{ 'session-item--active': selectedId === s.id }"
+            @click="selectSession(s)"
+          >
+            <div class="session-item-top">
+              <span class="status-badge" :class="`badge-${s.status.toLowerCase()}`">{{ s.status }}</span>
+              <span v-if="s.is_paused" class="pause-badge">일시정지</span>
+            </div>
+            <div class="session-item-title">{{ s.assessment_title }}</div>
+            <div class="session-item-sub">{{ s.division_name }}</div>
+          </div>
         </div>
       </div>
-    </main>
+
+      <!-- 우: 세션 상세 -->
+      <div class="detail-panel">
+        <div v-if="!selected" class="empty-state">
+          <IconCalendarEvent :size="40" />
+          <p>왼쪽에서 세션을 선택하거나 새 세션을 생성하세요</p>
+        </div>
+
+        <div v-else class="session-detail">
+          <!-- 상태 헤더 -->
+          <div class="detail-header">
+            <div>
+              <h2 class="detail-title">{{ selected.assessment_title }}</h2>
+              <p class="detail-sub">{{ selected.division_name }} · {{ selected.target_type === 'ALL' ? '전체 학생' : '개별 지정' }}</p>
+            </div>
+            <div class="status-header-badges">
+              <span class="status-badge-lg" :class="`badge-${selected.status.toLowerCase()}`">
+                {{ STATUS_LABELS[selected.status] }}
+              </span>
+              <span v-if="selected.is_paused" class="pause-badge-lg">⏸ 일시정지</span>
+            </div>
+          </div>
+
+          <div v-if="actionError" class="error-banner">{{ actionError }}</div>
+
+          <!-- 통계 카드 -->
+          <div class="stat-cards">
+            <div class="stat-card">
+              <span class="stat-value">{{ selected.student_count }}</span>
+              <span class="stat-label">대상 학생</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value">{{ selected.submission_count }}</span>
+              <span class="stat-label">제출 수</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value">{{ selected.time_limit_min ?? '무제한' }}</span>
+              <span class="stat-label">제한 시간(분)</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value">{{ selected.start_at ? formatTime(selected.start_at) : '-' }}</span>
+              <span class="stat-label">시작 시각</span>
+            </div>
+          </div>
+
+          <!-- 액션 버튼 -->
+          <div class="section-card">
+            <h3 class="section-title">세션 제어</h3>
+            <div class="action-buttons">
+              <button
+                v-if="selected.status === 'CREATED'"
+                class="btn-action btn-action--info"
+                :disabled="transitioning"
+                @click="doTransition('to_lobby')"
+              >
+                <IconDoor :size="15" /> 대기실 열기 (LOBBY)
+              </button>
+              <button
+                v-if="selected.status === 'LOBBY'"
+                class="btn-action btn-action--secondary"
+                :disabled="transitioning"
+                @click="doTransition('to_created')"
+              >
+                <IconArrowBack :size="15" /> 대기실 취소
+              </button>
+              <button
+                v-if="selected.status === 'LOBBY'"
+                class="btn-action btn-action--danger"
+                :disabled="transitioning"
+                @click="confirmStart"
+              >
+                <IconPlayerPlay :size="15" /> 시험 시작 (RUNNING)
+              </button>
+              <button
+                v-if="selected.status === 'RUNNING'"
+                class="btn-action btn-action--warning"
+                :disabled="transitioning"
+                @click="doPause"
+              >
+                <IconPlayerPause v-if="!selected.is_paused" :size="15" />
+                <IconPlayerPlay v-else :size="15" />
+                {{ selected.is_paused ? '재개' : '일시정지' }}
+              </button>
+              <button
+                v-if="selected.status === 'RUNNING'"
+                class="btn-action btn-action--danger"
+                :disabled="transitioning"
+                @click="confirmClose"
+              >
+                <IconPlayerStop :size="15" /> 시험 종료 (CLOSED)
+              </button>
+              <button
+                v-if="selected.status === 'CLOSED'"
+                class="btn-action"
+                :class="selected.is_result_released ? 'btn-action--warning' : 'btn-action--info'"
+                :disabled="transitioning"
+                @click="doToggleRelease"
+              >
+                <IconEye v-if="!selected.is_result_released" :size="15" />
+                <IconEyeOff v-else :size="15" />
+                {{ selected.is_result_released ? '결과 비공개' : '결과 공개' }}
+              </button>
+              <RouterLink
+                v-if="selected.status === 'RUNNING' || selected.status === 'CLOSED'"
+                :to="{ name: 'session-grading', params: { id: selected.id } }"
+                class="btn-action btn-action--secondary"
+              >
+                채점하기
+              </RouterLink>
+            </div>
+          </div>
+
+          <!-- 출결 위젯 -->
+          <AttendanceWidget
+            v-if="selected.status === 'LOBBY' || selected.status === 'RUNNING'"
+            :session-id="selected.id"
+            class="attendance-section"
+          />
+
+          <!-- 세션 정보 -->
+          <div class="section-card">
+            <h3 class="section-title">세션 정보</h3>
+            <table class="info-table">
+              <tbody>
+                <tr><td>세션 ID</td><td>#{{ selected.id }}</td></tr>
+                <tr><td>수행평가</td><td>{{ selected.assessment_title }}</td></tr>
+                <tr><td>분반</td><td>{{ selected.division_name }}</td></tr>
+                <tr><td>대상</td><td>{{ selected.target_type === 'ALL' ? '전체 학생' : '개별 지정' }}</td></tr>
+                <tr><td>생성일</td><td>{{ selected.created_at }}</td></tr>
+                <tr v-if="selected.start_at"><td>시작</td><td>{{ selected.start_at }}</td></tr>
+                <tr v-if="selected.end_at"><td>종료</td><td>{{ selected.end_at }}</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- 세션 생성 모달 -->
@@ -230,8 +209,6 @@
             <option v-for="d in divisions" :key="d.id" :value="d.id">{{ d.name }}</option>
           </select>
         </div>
-
-        <!-- 대상 선택 -->
         <div class="form-group">
           <label class="form-label">대상 *</label>
           <div class="target-options">
@@ -251,7 +228,6 @@
             </label>
           </div>
 
-          <!-- 개별 학생 체크리스트 -->
           <div v-if="createForm.target_type === 'INDIVIDUAL'" class="student-checklist">
             <div v-if="!createForm.division_id" class="checklist-empty">분반을 먼저 선택하세요</div>
             <template v-else>
@@ -263,21 +239,11 @@
                   placeholder="이름 또는 학번 검색"
                 />
               </div>
-              <div class="checklist-count">
-                {{ createForm.selected_student_ids.length }}명 선택됨
-              </div>
+              <div class="checklist-count">{{ createForm.selected_student_ids.length }}명 선택됨</div>
               <div v-if="filteredStudents.length === 0" class="checklist-empty">학생이 없습니다</div>
               <div v-else class="checklist-list">
-                <label
-                  v-for="s in filteredStudents"
-                  :key="s.id"
-                  class="checklist-item"
-                >
-                  <input
-                    type="checkbox"
-                    :value="s.id"
-                    v-model="createForm.selected_student_ids"
-                  />
+                <label v-for="s in filteredStudents" :key="s.id" class="checklist-item">
+                  <input type="checkbox" :value="s.id" v-model="createForm.selected_student_ids" />
                   <span class="checklist-num">{{ s.student_number }}</span>
                   <span class="checklist-name">{{ s.name }}</span>
                 </label>
@@ -299,15 +265,15 @@
         <p class="form-hint">세션은 <strong>CREATED</strong> 상태로 생성됩니다. 이후 LOBBY로 전환해 학생을 대기시킨 뒤 시작할 수 있습니다.</p>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" @click="showCreateModal = false">취소</button>
-        <button class="btn btn-primary" :disabled="creating" @click="doCreateSession">
+        <button @click="showCreateModal = false">취소</button>
+        <button class="btn-primary-action" :disabled="creating" @click="doCreateSession">
           {{ creating ? '생성 중...' : '생성' }}
         </button>
       </div>
     </div>
   </div>
 
-  <!-- 확인 모달 (시작/종료 등 비가역 전환) -->
+  <!-- 확인 모달 -->
   <div v-if="confirmModal.show" class="modal-backdrop" @click.self="confirmModal.show = false">
     <div class="modal modal-sm">
       <div class="modal-header">
@@ -317,8 +283,8 @@
         <p>{{ confirmModal.message }}</p>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" @click="confirmModal.show = false">취소</button>
-        <button class="btn btn-danger" @click="confirmModal.onConfirm">확인</button>
+        <button @click="confirmModal.show = false">취소</button>
+        <button class="btn-danger-action" @click="confirmModal.onConfirm">확인</button>
       </div>
     </div>
   </div>
@@ -327,7 +293,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import {
-  IconArrowLeft, IconPlus, IconCalendarEvent,
+  IconPlus, IconCalendarEvent,
   IconDoor, IconArrowBack, IconPlayerPlay, IconPlayerPause,
   IconPlayerStop, IconEye, IconEyeOff, IconSearch,
 } from '@tabler/icons-vue'
@@ -335,6 +301,7 @@ import { useSessionStore } from '@/stores/session'
 import { useDivisionStore } from '@/stores/division'
 import { useAssessmentStore } from '@/stores/assessment'
 import AttendanceWidget from '@/components/AttendanceWidget.vue'
+import AppSidebar from '@/components/AppSidebar.vue'
 import { api } from '@/api/client'
 import type { SessionRow, StudentRow } from '@/api/client'
 
@@ -529,12 +496,6 @@ async function doCreateSession() {
         : undefined,
     })
     showCreateModal.value = false
-    createForm.value = {
-      assessment_id: 0, division_id: 0, time_limit_min: null,
-      target_type: 'ALL', selected_student_ids: [],
-    }
-    divisionStudents.value = []
-    studentSearch.value = ''
     selectedId.value = row.id
   } catch (e) {
     createError.value = e instanceof Error ? e.message : '세션 생성 실패'
@@ -545,147 +506,154 @@ async function doCreateSession() {
 </script>
 
 <style scoped>
-.page-layout {
+/* ── 레이아웃 ── */
+.layout {
   display: flex;
   height: 100vh;
   overflow: hidden;
-  background: var(--color-background);
+  background: var(--color-background-secondary);
 }
 
-.sidebar {
-  width: 280px;
+.main-split {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* ── 목록 패널 ── */
+.list-panel {
+  width: 260px;
   flex-shrink: 0;
-  border-right: 1px solid var(--color-border);
+  border-right: 0.5px solid var(--color-border-secondary);
+  background: var(--color-background-primary);
   display: flex;
   flex-direction: column;
-  background: var(--color-surface);
+  overflow: hidden;
 }
 
-.sidebar-header {
-  padding: var(--space-4);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.back-link {
+.panel-header {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
-  color: var(--color-text-muted);
-  text-decoration: none;
-  font-size: 0.875rem;
-  margin-bottom: var(--space-2);
+  justify-content: space-between;
+  padding: 14px 14px 10px;
+  border-bottom: 0.5px solid var(--color-border-secondary);
 }
 
-.back-link:hover { color: var(--color-text); }
-
-.sidebar-title {
-  font-size: 1rem;
+.panel-title {
   font-weight: 600;
-  color: var(--color-text);
-  margin: 0;
 }
+
+.btn-icon {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-md);
+  border: 0.5px solid var(--color-border-secondary);
+  background: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.btn-icon:hover { background: var(--color-background-secondary); }
 
 .filter-group {
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--color-border);
+  padding: 8px 10px;
+  border-bottom: 0.5px solid var(--color-border-secondary);
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
-}
-
-.filter-label {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
+  gap: 5px;
 }
 
 .filter-select {
   width: 100%;
-  padding: var(--space-1) var(--space-2);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: 0.875rem;
-  background: var(--color-background);
-  color: var(--color-text);
+  padding: 5px 8px;
+  border: 0.5px solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+}
+
+.panel-loading {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.panel-empty {
+  padding: 1rem;
+  text-align: center;
+  color: var(--color-text-tertiary);
 }
 
 .session-list {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-2);
-}
-
-.list-loading,
-.list-empty {
-  padding: var(--space-4);
-  text-align: center;
-  color: var(--color-text-muted);
-  font-size: 0.875rem;
+  padding: 6px;
 }
 
 .session-item {
-  padding: var(--space-3);
-  border-radius: var(--radius);
+  padding: 10px;
+  border-radius: var(--border-radius-md);
   cursor: pointer;
-  border: 1px solid transparent;
-  margin-bottom: var(--space-1);
-  transition: background 0.15s;
+  border: 0.5px solid transparent;
+  margin-bottom: 3px;
+  transition: background 0.1s;
 }
 
-.session-item:hover { background: var(--color-background-hover); }
-.session-item.selected {
-  border-color: var(--color-primary);
+.session-item:hover { background: var(--color-background-secondary); }
+
+.session-item--active {
+  border-color: var(--color-border-info);
   background: var(--color-background-info);
 }
 
 .session-item-top {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
-  margin-bottom: var(--space-1);
+  gap: 5px;
+  margin-bottom: 4px;
 }
 
 .session-item-title {
-  font-size: 0.875rem;
   font-weight: 500;
-  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .session-item-sub {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 .status-badge {
   display: inline-block;
   padding: 1px 6px;
-  border-radius: var(--radius-sm);
-  font-size: 0.7rem;
+  border-radius: var(--border-radius-sm);
   font-weight: 600;
-  text-transform: uppercase;
 }
 
-.badge-created { background: var(--color-background-hover); color: var(--color-text-muted); }
-.badge-lobby { background: var(--color-background-info); color: var(--color-primary); }
+.badge-created { background: var(--color-background-secondary); color: var(--color-text-secondary); }
+.badge-lobby   { background: var(--color-background-info); color: var(--color-text-info); }
 .badge-running { background: var(--color-background-success); color: var(--color-text-success); }
-.badge-closed { background: var(--color-background-hover); color: var(--color-text-muted); }
+.badge-closed  { background: var(--color-background-secondary); color: var(--color-text-tertiary); }
 
 .pause-badge {
-  font-size: 0.7rem;
   background: var(--color-background-warning);
   color: var(--color-text-warning);
   padding: 1px 6px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--border-radius-sm);
 }
 
-.sidebar-footer {
-  padding: var(--space-3) var(--space-4);
-  border-top: 1px solid var(--color-border);
-}
-
-.main-content {
+/* ── 상세 패널 ── */
+.detail-panel {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-6);
+  padding: 1.5rem;
+  min-width: 0;
 }
 
 .empty-state {
@@ -693,9 +661,9 @@ async function doCreateSession() {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  gap: var(--space-3);
-  color: var(--color-text-muted);
+  height: 300px;
+  gap: 12px;
+  color: var(--color-text-tertiary);
 }
 
 .session-detail { max-width: 720px; }
@@ -704,19 +672,17 @@ async function doCreateSession() {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: var(--space-6);
+  margin-bottom: 1.25rem;
 }
 
 .detail-title {
-  font-size: 1.5rem;
+  font-size: 18px;
   font-weight: 700;
-  color: var(--color-text);
-  margin: 0 0 var(--space-1);
+  margin: 0 0 4px;
 }
 
 .detail-sub {
-  color: var(--color-text-muted);
-  font-size: 0.875rem;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
@@ -724,147 +690,126 @@ async function doCreateSession() {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: var(--space-1);
+  gap: 4px;
 }
 
 .status-badge-lg {
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius);
-  font-size: 0.875rem;
+  padding: 4px 12px;
+  border-radius: var(--border-radius-md);
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 .pause-badge-lg {
-  font-size: 0.8rem;
   background: var(--color-background-warning);
   color: var(--color-text-warning);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  border-radius: var(--border-radius-sm);
 }
 
 .error-banner {
-  background: var(--color-background-danger, #fef2f2);
-  color: var(--color-danger, #dc2626);
-  border: 1px solid var(--color-border-danger);
-  border-radius: var(--radius);
-  padding: var(--space-3);
-  margin-bottom: var(--space-4);
-  font-size: 0.875rem;
+  background: var(--color-background-danger);
+  color: var(--color-text-danger);
+  border: 0.5px solid var(--color-border-danger);
+  border-radius: var(--border-radius-md);
+  padding: 10px 14px;
+  margin-bottom: 1rem;
 }
 
 .stat-cards {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-3);
-  margin-bottom: var(--space-6);
+  gap: 10px;
+  margin-bottom: 1rem;
 }
 
 .stat-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  padding: var(--space-4);
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  padding: 14px;
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 3px;
 }
 
 .stat-value {
-  font-size: 1.5rem;
+  font-size: 20px;
   font-weight: 700;
-  color: var(--color-text);
 }
 
 .stat-label {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
 }
 
-.action-section,
-.info-section {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  padding: var(--space-4);
-  margin-bottom: var(--space-4);
-}
-
-.attendance-section {
-  margin-bottom: var(--space-4);
+.section-card {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
 }
 
 .section-title {
-  font-size: 0.875rem;
   font-weight: 600;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin: 0 0 var(--space-3);
+  margin: 0 0 10px;
+  color: var(--color-text-secondary);
 }
+
+.attendance-section { margin-bottom: 1rem; }
 
 .action-buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  gap: 8px;
 }
+
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  border-radius: var(--border-radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  border: 0.5px solid transparent;
+  text-decoration: none;
+  transition: opacity 0.1s;
+}
+
+.btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-action--info     { background: var(--color-background-info); color: var(--color-text-info); border-color: var(--color-border-info); }
+.btn-action--danger   { background: var(--color-background-danger); color: var(--color-text-danger); border-color: var(--color-border-danger); }
+.btn-action--warning  { background: var(--color-background-warning); color: var(--color-text-warning); }
+.btn-action--secondary { background: var(--color-background-primary); color: var(--color-text-secondary); border-color: var(--color-border-secondary); }
 
 .info-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.875rem;
 }
 
 .info-table td {
-  padding: var(--space-2) var(--space-3);
-  border-bottom: 1px solid var(--color-border);
+  padding: 7px 12px;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
 }
 
 .info-table td:first-child {
-  color: var(--color-text-muted);
-  width: 120px;
+  color: var(--color-text-secondary);
+  width: 100px;
 }
 
-/* 버튼 */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid transparent;
-  border-radius: var(--radius);
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: opacity 0.15s;
+/* ── 스피너 ── */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-border-secondary);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
 }
 
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-.btn-primary {
-  background: var(--color-primary);
-  color: white;
-}
-
-.btn-secondary {
-  background: var(--color-surface);
-  border-color: var(--color-border);
-  color: var(--color-text);
-}
-
-.btn-danger {
-  background: var(--color-danger, #dc2626);
-  color: white;
-}
-
-.btn-warning {
-  background: var(--color-background-warning);
-  color: var(--color-text-warning);
-  border-color: var(--color-border-warning, #fde68a);
-}
-
-/* 모달 */
+/* ── 모달 ── */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -876,8 +821,8 @@ async function doCreateSession() {
 }
 
 .modal {
-  background: var(--color-surface);
-  border-radius: var(--radius-lg, var(--radius));
+  background: var(--color-background-primary);
+  border-radius: var(--border-radius-lg);
   width: 480px;
   max-width: 95vw;
   box-shadow: 0 8px 32px rgba(0,0,0,0.15);
@@ -889,140 +834,142 @@ async function doCreateSession() {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-4);
-  border-bottom: 1px solid var(--color-border);
+  padding: 14px 16px;
+  border-bottom: 0.5px solid var(--color-border-secondary);
 }
 
-.modal-header h3 { margin: 0; font-size: 1rem; }
+.modal-header h3 { margin: 0; font-size: 15px; }
 
 .modal-close {
   background: none;
   border: none;
-  font-size: 1.25rem;
+  font-size: 20px;
   cursor: pointer;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   line-height: 1;
+  padding: 0;
 }
 
-.modal-body { padding: var(--space-4); }
+.modal-body { padding: 16px; }
 
 .modal-footer {
   display: flex;
   justify-content: flex-end;
-  gap: var(--space-2);
-  padding: var(--space-4);
-  border-top: 1px solid var(--color-border);
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 0.5px solid var(--color-border-secondary);
 }
 
-.form-group {
-  margin-bottom: var(--space-3);
-}
+.form-group { margin-bottom: 12px; }
 
 .form-label {
   display: block;
-  font-size: 0.875rem;
   font-weight: 500;
-  margin-bottom: var(--space-1);
-  color: var(--color-text);
+  margin-bottom: 5px;
+  color: var(--color-text-primary);
 }
 
 .form-input {
   width: 100%;
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  font-size: 0.875rem;
-  background: var(--color-background);
-  color: var(--color-text);
+  padding: 7px 10px;
+  border: 0.5px solid var(--color-border-primary);
+  border-radius: var(--border-radius-md);
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
   box-sizing: border-box;
 }
 
 .form-hint {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
-  margin-top: var(--space-1);
+  color: var(--color-text-secondary);
+  margin-top: 4px;
 }
 
-/* 대상 선택 */
+.btn-primary-action {
+  background: var(--color-background-info);
+  color: var(--color-text-info);
+  border-color: var(--color-border-info);
+  font-weight: 500;
+  padding: 7px 16px;
+}
+
+.btn-danger-action {
+  background: var(--color-background-danger);
+  color: var(--color-text-danger);
+  border-color: var(--color-border-danger);
+  font-weight: 500;
+  padding: 7px 16px;
+}
+
+/* ── 대상 선택 ── */
 .target-options {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: 8px;
 }
 
 .target-option {
   display: flex;
   align-items: flex-start;
-  gap: var(--space-2);
-  padding: var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  gap: 8px;
+  padding: 10px;
+  border: 0.5px solid var(--color-border-primary);
+  border-radius: var(--border-radius-md);
   cursor: pointer;
   transition: border-color 0.1s, background 0.1s;
 }
 
 .target-option--active {
-  border-color: var(--color-primary);
+  border-color: var(--color-border-info);
   background: var(--color-background-info);
 }
 
 .target-option input[type="radio"] { flex-shrink: 0; margin-top: 2px; }
 
 .target-option-title {
-  font-size: 0.875rem;
   font-weight: 500;
-  color: var(--color-text);
 }
 
 .target-option-desc {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   margin-top: 2px;
 }
 
-.target-option--active .target-option-title { color: var(--color-primary); }
-.target-option--active .target-option-desc { color: var(--color-primary); opacity: 0.75; }
-
-/* 학생 체크리스트 */
 .student-checklist {
-  margin-top: var(--space-2);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  padding: var(--space-2);
+  margin-top: 8px;
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  padding: 8px;
 }
 
 .checklist-search {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-1) var(--space-2);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  margin-bottom: var(--space-2);
-  color: var(--color-text-muted);
+  gap: 5px;
+  padding: 5px 8px;
+  border: 0.5px solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  margin-bottom: 8px;
+  color: var(--color-text-secondary);
 }
 
 .checklist-search-input {
   flex: 1;
   border: none;
   outline: none;
-  font-size: 0.8rem;
   background: transparent;
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 .checklist-count {
-  font-size: 0.75rem;
-  color: var(--color-primary);
+  color: var(--color-text-info);
   font-weight: 500;
-  margin-bottom: var(--space-1);
+  margin-bottom: 4px;
 }
 
 .checklist-empty {
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
+  color: var(--color-text-tertiary);
   text-align: center;
-  padding: var(--space-3) 0;
+  padding: 10px 0;
 }
 
 .checklist-list {
@@ -1036,20 +983,14 @@ async function doCreateSession() {
 .checklist-item {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: var(--border-radius-sm);
   cursor: pointer;
-  font-size: 0.875rem;
 }
 
-.checklist-item:hover { background: var(--color-background-hover); }
+.checklist-item:hover { background: var(--color-background-secondary); }
 
-.checklist-num {
-  color: var(--color-text-muted);
-  font-size: 0.75rem;
-  min-width: 60px;
-}
-
-.checklist-name { color: var(--color-text); }
+.checklist-num { color: var(--color-text-secondary); min-width: 60px; }
+.checklist-name { color: var(--color-text-primary); }
 </style>
