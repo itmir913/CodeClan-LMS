@@ -118,6 +118,12 @@
                   >
                     {{ rel.is_released ? '공개 중 (클릭해 비공개)' : '비공개 (클릭해 공개)' }}
                   </button>
+                  <RouterLink
+                    :to="{ name: 'lesson-live', params: { lessonId: store.currentLesson.id, divisionId: rel.division_id } }"
+                    class="live-btn"
+                  >
+                    차시 운영 시작
+                  </RouterLink>
                 </div>
               </div>
             </section>
@@ -541,6 +547,19 @@ onMounted(async () => {
   color: var(--color-text-success);
   border-color: var(--color-border-success);
 }
+
+.live-btn {
+  font-size: 12px;
+  padding: 4px 10px;
+  border: 0.5px solid var(--color-border-info);
+  border-radius: var(--border-radius-md);
+  background: var(--color-background-info);
+  color: var(--color-text-info);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity 0.1s;
+}
+.live-btn:hover { opacity: 0.8; }
 
 /* ── 모달 ── */
 .modal-backdrop {

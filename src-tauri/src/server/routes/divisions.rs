@@ -602,3 +602,41 @@ pub async fn reset_student_password(
 
     Ok(Json(serde_json::json!({ "ok": true })))
 }
+
+// ─── 분반 연결 수행평가 목록 ───────────────────────────────
+
+#[derive(Serialize)]
+pub struct DivisionAssessmentRow {
+    pub id: i64,
+    pub title: String,
+    pub description: String,
+    pub problem_count: i64,
+}
+
+pub async fn get_division_assessments(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(division_id): Path<i64>,
+) -> Result<Json<Vec<DivisionAssessmentRow>>, ApiError> {
+    parse_teacher_session(&state.db, &headers).await?;
+
+    let rows = sqlx::query_as::<_, (i64, String, String, i64)>(
+        r#"SELECT a.id, a.title, a.description,
+                  (SELECT COUNT(*) FROM assessment_problems ap WHERE ap.assessment_id = a.id) AS problem_count
+           FROM assessments a
+           JOIN assessment_divisions ad ON ad.assessment_id = a.id
+           WHERE ad.division_id = ?
+           ORDER BY a.created_at DESC"#,
+    )
+    .bind(division_id)
+    .fetch_all(&state.db)
+    .await?;
+
+    Ok(Json(
+        rows.into_iter()
+            .map(|(id, title, description, problem_count)| DivisionAssessmentRow {
+                id, title, description, problem_count,
+            })
+            .collect(),
+    ))
+}

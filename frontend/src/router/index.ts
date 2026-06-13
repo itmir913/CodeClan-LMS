@@ -63,6 +63,12 @@ const router = createRouter({
       meta: { requiresTeacherAuth: true },
     },
     {
+      path: '/lessons/:lessonId/live/:divisionId',
+      name: 'lesson-live',
+      component: () => import('@/views/LessonLiveView.vue'),
+      meta: { requiresTeacherAuth: true },
+    },
+    {
       path: '/student',
       name: 'student-home',
       component: () => import('@/views/StudentHomeView.vue'),

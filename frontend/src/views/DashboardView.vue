@@ -72,19 +72,29 @@
               </div>
 
               <div class="card-actions">
-                <button v-if="div.active_session" class="btn-primary">
+                <RouterLink
+                  v-if="div.active_session"
+                  :to="{ name: 'session-management' }"
+                  class="btn-primary"
+                >
                   <IconArrowRight :size="13" />
                   세션 운영 화면
-                </button>
+                </RouterLink>
                 <template v-else>
-                  <button class="btn-secondary">
+                  <RouterLink
+                    :to="{ name: 'lesson-management' }"
+                    class="btn-secondary"
+                  >
                     <IconPresentation :size="13" />
                     차시 운영
-                  </button>
-                  <button class="btn-secondary">
+                  </RouterLink>
+                  <RouterLink
+                    :to="{ name: 'session-management' }"
+                    class="btn-secondary"
+                  >
                     <IconPlayerPlay :size="13" />
                     수행평가 세션
-                  </button>
+                  </RouterLink>
                 </template>
               </div>
             </div>

@@ -39,6 +39,7 @@ pub fn build_router(state: AppState) -> Router {
         // 학생 관리
         .route("/divisions/:id/students", get(routes::divisions::get_students).post(routes::divisions::add_student))
         .route("/divisions/:id/students/bulk", post(routes::divisions::bulk_import_students))
+        .route("/divisions/:id/assessments", get(routes::divisions::get_division_assessments))
         .route("/students/:id", axum::routing::delete(routes::divisions::delete_student))
         .route("/students/:id/reset-password", post(routes::divisions::reset_student_password))
         // 교사 계정 관리 (admin only)

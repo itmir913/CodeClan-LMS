@@ -114,6 +114,13 @@ export interface BulkImportResult {
   errors: string[]
 }
 
+export interface DivisionAssessmentRow {
+  id: number
+  title: string
+  description: string
+  problem_count: number
+}
+
 // ─── 수행평가 관리 ──────────────────────────────────────────
 
 export interface AssessmentRow {
@@ -359,6 +366,8 @@ export const api = {
       request<StudentRow>('POST', `/divisions/${id}/students`, data),
     bulkImport: (id: number, items: BulkStudentItem[]) =>
       request<BulkImportResult>('POST', `/divisions/${id}/students/bulk`, items),
+    assessments: (id: number) =>
+      request<DivisionAssessmentRow[]>('GET', `/divisions/${id}/assessments`),
   },
 
   students: {
