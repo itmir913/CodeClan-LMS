@@ -1,8 +1,9 @@
 use axum::{extract::State, Json};
 use argon2::{
-    password_hash::{rand_core::OsRng, PasswordHasher, SaltString},
+    password_hash::{PasswordHasher, SaltString},
     Argon2,
 };
+use rand_core::OsRng;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 

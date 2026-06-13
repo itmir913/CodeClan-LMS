@@ -1,2 +1,9 @@
+pub mod assessments;
 pub mod auth;
+pub mod dashboard;
+pub mod divisions;
+pub mod lessons;
+pub mod problems;
+pub mod sessions;
 pub mod setup;
+pub mod teachers;

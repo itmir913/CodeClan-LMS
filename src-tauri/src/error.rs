@@ -10,8 +10,10 @@ pub enum ApiError {
     Database(sqlx::Error),
     NotFound,
     Unauthorized,
+    Forbidden,
     BadRequest(String),
     Internal(String),
+    InternalError(String),
 }
 
 impl IntoResponse for ApiError {
@@ -23,8 +25,9 @@ impl IntoResponse for ApiError {
             }
             ApiError::NotFound => (StatusCode::NOT_FOUND, "찾을 수 없습니다".to_string()),
             ApiError::Unauthorized => (StatusCode::UNAUTHORIZED, "인증이 필요합니다".to_string()),
+            ApiError::Forbidden => (StatusCode::FORBIDDEN, "권한이 없습니다".to_string()),
             ApiError::BadRequest(msg) => (StatusCode::BAD_REQUEST, msg),
-            ApiError::Internal(msg) => {
+            ApiError::Internal(msg) | ApiError::InternalError(msg) => {
                 tracing::error!("Internal error: {msg}");
                 (StatusCode::INTERNAL_SERVER_ERROR, "서버 오류".to_string())
             }

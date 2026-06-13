@@ -38,14 +38,24 @@ CREATE TABLE IF NOT EXISTS teacher_divisions (
     PRIMARY KEY (teacher_id, division_id)
 );
 
--- 학생 (학번 + 생년월일 로그인)
+-- 학생 (학번 + 비밀번호 로그인)
 CREATE TABLE IF NOT EXISTS students (
     id INTEGER PRIMARY KEY,
     division_id INTEGER NOT NULL REFERENCES divisions(id),
     student_number TEXT NOT NULL UNIQUE,
     name TEXT NOT NULL,
-    birth_date TEXT NOT NULL,
+    password_hash TEXT NOT NULL DEFAULT '',
+    password_reset_required INTEGER NOT NULL DEFAULT 1,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- 학생 세션 (쿠키 기반, cc_student)
+CREATE TABLE IF NOT EXISTS student_sessions (
+    id INTEGER PRIMARY KEY,
+    student_id INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    token TEXT NOT NULL UNIQUE,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    expires_at TEXT NOT NULL
 );
 
 -- 문제 은행 (전역 단일 마스터)
@@ -179,6 +189,8 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 -- 인덱스
 CREATE INDEX IF NOT EXISTS idx_auth_tokens_token ON auth_tokens(token);
 CREATE INDEX IF NOT EXISTS idx_auth_tokens_teacher ON auth_tokens(teacher_id);
+CREATE INDEX IF NOT EXISTS idx_student_sessions_token ON student_sessions(token);
+CREATE INDEX IF NOT EXISTS idx_student_sessions_student ON student_sessions(student_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_student_session ON submissions(student_id, session_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_is_latest ON submissions(problem_id, student_id, is_latest);
 CREATE INDEX IF NOT EXISTS idx_attendance_context ON attendance_heartbeats(context_type, context_id);
