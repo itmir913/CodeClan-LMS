@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS assessments (
     title       TEXT NOT NULL,
     description TEXT NOT NULL DEFAULT '',
     is_draft       INTEGER NOT NULL DEFAULT 1 CHECK (is_draft IN (0, 1)),
-    time_limit_min INTEGER,
+    time_limit_min INTEGER CHECK (time_limit_min IS NULL OR time_limit_min > 0),
     created_at     TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

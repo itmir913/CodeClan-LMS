@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS exam_sessions (
                              CHECK (status IN ('WAITING', 'RUNNING', 'PAUSED', 'CLOSED')),
     target_type          TEXT NOT NULL DEFAULT 'ALL'
                              CHECK (target_type IN ('ALL', 'INDIVIDUAL')),
-    time_limit_min       INTEGER,                          -- NULL이면 무제한
+    time_limit_min       INTEGER CHECK (time_limit_min IS NULL OR time_limit_min > 0),  -- NULL이면 무제한
     started_at           TEXT,                             -- RUNNING 전환 시각 (마지막)
     elapsed_ms           INTEGER NOT NULL DEFAULT 0,       -- 현재 RUNNING 이전 누적 경과 ms
     paused_at            TEXT,                             -- 현재 PAUSED 전환 시각
