@@ -16,14 +16,19 @@ CREATE TABLE IF NOT EXISTS assessments (
 
 -- ── 수업-수행평가 배정 (M:N) ──────────────────────────────────────────────────
 -- class_lessons와 동일한 패턴.
--- is_released: 학생에게 수행평가 존재를 공개할지 여부.
+-- order_no: 수업 내 수행평가 순서.
+-- is_announced: 학생에게 수행평가 존재를 사전 공지할지 여부 (시험 전).
+-- is_result_released: 학생에게 결과를 공개할지 여부 (시험 후, 수행평가 단위).
+--   여러 세션이 있어도 결과 공개는 수행평가 단위로 일괄 처리.
 -- 실제 시험 실행은 exam_sessions(006)에서 관리.
 
 CREATE TABLE IF NOT EXISTS class_assessments (
-    id            INTEGER PRIMARY KEY,
-    class_id      INTEGER NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
-    assessment_id INTEGER NOT NULL REFERENCES assessments(id) ON DELETE CASCADE,
-    is_released   INTEGER NOT NULL DEFAULT 0,
+    id                 INTEGER PRIMARY KEY,
+    class_id           INTEGER NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+    assessment_id      INTEGER NOT NULL REFERENCES assessments(id) ON DELETE CASCADE,
+    order_no           INTEGER NOT NULL DEFAULT 0,
+    is_announced       INTEGER NOT NULL DEFAULT 0,
+    is_result_released INTEGER NOT NULL DEFAULT 0,
     UNIQUE (class_id, assessment_id)
 );
 
@@ -45,5 +50,5 @@ CREATE TABLE IF NOT EXISTS assessment_problems (
 CREATE INDEX IF NOT EXISTS idx_assessments_subject      ON assessments(subject_id);
 CREATE INDEX IF NOT EXISTS idx_assessments_created_by   ON assessments(created_by);
 CREATE INDEX IF NOT EXISTS idx_assessments_draft        ON assessments(is_draft);
-CREATE INDEX IF NOT EXISTS idx_class_assessments_class  ON class_assessments(class_id);
+CREATE INDEX IF NOT EXISTS idx_class_assessments_class  ON class_assessments(class_id, order_no);
 CREATE INDEX IF NOT EXISTS idx_assessment_problems      ON assessment_problems(assessment_id, order_no);
