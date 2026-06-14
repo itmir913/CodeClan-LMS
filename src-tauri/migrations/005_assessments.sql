@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS assessment_problems (
     assessment_id INTEGER NOT NULL REFERENCES assessments(id) ON DELETE CASCADE,
     problem_id    INTEGER NOT NULL REFERENCES problems(id) ON DELETE RESTRICT,
     order_no      INTEGER NOT NULL DEFAULT 0,
-    score         INTEGER NOT NULL DEFAULT 0,
+    score         INTEGER NOT NULL DEFAULT 0 CHECK (score >= 0),
     UNIQUE (assessment_id, problem_id)
 );
 
