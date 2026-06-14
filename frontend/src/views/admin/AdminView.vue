@@ -225,7 +225,7 @@
 
         <!-- 교사 관리 탭 -->
         <template v-else-if="activeSection === 'teachers'">
-          <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center justify-between mb-6">
             <h2 class="font-semibold tracking-widest uppercase"
                 style="color: var(--color-text-muted)">{{ $t('admin.teachers') }}</h2>
             <button
@@ -345,7 +345,7 @@
 
         <!-- 과목 관리 탭 -->
         <template v-else-if="activeSection === 'subjects'">
-          <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center justify-between mb-6">
             <h2 class="font-semibold tracking-widest uppercase"
                 style="color: var(--color-text-muted)">{{ $t('admin.subjects') }}</h2>
             <button
