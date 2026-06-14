@@ -3,6 +3,7 @@
 -- 같은 교과 교사끼리 수행평가를 공유할 수 있다.
 -- subject_id: NOT NULL. 관리자 초기 세팅에서 교과 생성 후 사용.
 -- is_draft: 1=임시저장, 0=공개 (수업 배정 및 세션 생성 가능)
+-- time_limit_min: 기본 시험 시간(분). NULL이면 무제한. 세션 생성 시 기본값으로 사용.
 
 CREATE TABLE IF NOT EXISTS assessments (
     id          INTEGER PRIMARY KEY,
@@ -10,8 +11,9 @@ CREATE TABLE IF NOT EXISTS assessments (
     subject_id  INTEGER NOT NULL REFERENCES subjects(id),
     title       TEXT NOT NULL,
     description TEXT NOT NULL DEFAULT '',
-    is_draft    INTEGER NOT NULL DEFAULT 1 CHECK (is_draft IN (0, 1)),
-    created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+    is_draft       INTEGER NOT NULL DEFAULT 1 CHECK (is_draft IN (0, 1)),
+    time_limit_min INTEGER,
+    created_at     TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 -- ── 수업-수행평가 배정 (M:N) ──────────────────────────────────────────────────
