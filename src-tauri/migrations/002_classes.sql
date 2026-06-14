@@ -5,7 +5,7 @@
 CREATE TABLE IF NOT EXISTS classes (
     id         INTEGER PRIMARY KEY,
     teacher_id INTEGER NOT NULL REFERENCES teachers(id),
-    subject_id INTEGER REFERENCES subjects(id),
+    subject_id INTEGER NOT NULL REFERENCES subjects(id),
     name       TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );

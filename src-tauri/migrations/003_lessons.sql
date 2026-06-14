@@ -5,7 +5,7 @@
 CREATE TABLE IF NOT EXISTS lessons (
     id          INTEGER PRIMARY KEY,
     created_by  INTEGER REFERENCES teachers(id) ON DELETE SET NULL,
-    subject_id  INTEGER REFERENCES subjects(id),
+    subject_id  INTEGER NOT NULL REFERENCES subjects(id),
     title       TEXT NOT NULL,
     description TEXT NOT NULL DEFAULT '',
     created_at  TEXT NOT NULL DEFAULT (datetime('now'))
