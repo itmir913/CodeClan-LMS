@@ -95,59 +95,63 @@ body {
 }
 
 /* ── Form Elements ───────────────────────────────────────────────────────── */
-input[type="text"],
-input[type="password"],
-input[type="email"],
-select,
-textarea {
-  display: block;
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-sm);
-  font-size: 1rem;
-  font-family: inherit;
-  color: var(--color-text-primary);
-  background: var(--color-bg-secondary);
-  outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
+/* @layer base: Tailwind 유틸리티(utilities)가 이 스타일보다 항상 우선순위를 가짐.
+   컴포넌트에서 Tailwind 클래스 또는 inline style로 자유롭게 override 가능. */
+@layer base {
+  input[type="text"],
+  input[type="password"],
+  input[type="email"],
+  select,
+  textarea {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-family: inherit;
+    color: var(--color-text-primary);
+    background: var(--color-bg-secondary);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
 
-input:focus,
-select:focus,
-textarea:focus {
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-}
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  }
 
-input:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
+  input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 
-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 20px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: 1rem;
-  font-family: inherit;
-  font-weight: 500;
-  cursor: pointer;
-  background: var(--color-bg-secondary);
-  color: var(--color-text-primary);
-  transition: background 0.15s, border-color 0.15s;
-}
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    transition: background 0.15s, border-color 0.15s;
+  }
 
-button:hover:not(:disabled) {
-  background: var(--color-bg-tertiary);
-}
+  button:hover:not(:disabled) {
+    background: var(--color-bg-tertiary);
+  }
 
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 }
 
 /* ── Spinner ─────────────────────────────────────────────────────────────── */

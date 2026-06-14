@@ -11,10 +11,12 @@ function buildMessages(modules: LocaleModules): Record<string, Record<string, st
   return result
 }
 
+// @ts-ignore
 const koModules = import.meta.glob<{ default: Record<string, string> }>(
   './locales/ko/*.json',
   { eager: true },
 )
+// @ts-ignore
 const enModules = import.meta.glob<{ default: Record<string, string> }>(
   './locales/en/*.json',
   { eager: true },

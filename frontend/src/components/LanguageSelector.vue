@@ -2,8 +2,8 @@
   <div class="relative" ref="containerRef">
     <button
       type="button"
-      class="flex items-center gap-1.5 px-3 py-2 rounded-md"
-      style="background: transparent; border: 1px solid var(--color-border); color: var(--color-text-muted);"
+      class="flex items-center gap-1.5 rounded-md"
+      style="height: 36px; padding: 0 11px; background: transparent; border: 1px solid var(--color-border); color: var(--color-text-muted);"
       @click="open = !open"
     >
       <IconLanguage :size="16" />

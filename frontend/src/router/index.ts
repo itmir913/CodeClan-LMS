@@ -16,6 +16,24 @@ const router = createRouter({
       component: () => import('@/views/LoginView.vue'),
     },
     {
+      path: '/dashboard',
+      name: 'dashboard',
+      component: () => import('@/views/DashboardView.vue'),
+      meta: { requiresTeacherAuth: true },
+    },
+    {
+      path: '/student',
+      name: 'student-home',
+      component: () => import('@/views/StudentHomeView.vue'),
+      meta: { requiresStudentAuth: true },
+    },
+    {
+      path: '/student/change-password',
+      name: 'student-change-password',
+      component: () => import('@/views/StudentChangePasswordView.vue'),
+      meta: { requiresStudentAuth: true },
+    },
+    {
       path: '/:pathMatch(.*)*',
       redirect: '/login',
     },
@@ -23,10 +41,10 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
+  // setup 체크는 항상 먼저
   try {
     const status = await api.setup.status()
 
-    // 서버에 저장된 locale이 있으면 앱 전체 기본 언어로 적용
     if (status.locale) {
       i18n.global.locale.value = status.locale as 'ko' | 'en'
     }
@@ -39,8 +57,24 @@ router.beforeEach(async (to) => {
       return { name: 'login' }
     }
   } catch {
-    if (to.name !== 'setup') {
-      return { name: 'setup' }
+    if (to.name !== 'setup') return { name: 'setup' }
+  }
+
+  // 교사 인증 필요 라우트
+  if (to.meta.requiresTeacherAuth) {
+    try {
+      await api.auth.meTeacher()
+    } catch {
+      return { name: 'login' }
+    }
+  }
+
+  // 학생 인증 필요 라우트
+  if (to.meta.requiresStudentAuth) {
+    try {
+      await api.auth.meStudent()
+    } catch {
+      return { name: 'login' }
     }
   }
 })

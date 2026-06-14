@@ -11,5 +11,6 @@
   "ERR_PASSWORD_TOO_SHORT": "Password must be at least 8 characters",
   "ERR_USERNAME_TAKEN": "This username is already taken",
   "ERR_INVALID_CREDENTIALS": "Invalid username or password",
+  "ERR_CURRENT_PASSWORD_REQUIRED": "Please enter your current password",
   "ERR_UNKNOWN": "An unknown error occurred"
 }

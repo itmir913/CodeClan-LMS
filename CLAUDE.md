@@ -36,6 +36,12 @@
 
 - **CSS 변수(design token) 기반**: 색상, 간격, 반지름은 `frontend/src/assets/main.css`의 `:root` 변수를 참조한다. 인라인 하드코딩 금지.
 - **Tailwind CSS v4** 사용. `@tailwindcss/vite` 플러그인 기반. 유틸리티 클래스 우선, `<style scoped>`는 Tailwind로 표현 불가한 경우에만 보조 사용.
+- **CSS Cascade Layer 규칙**: `main.css`의 전역 `button`, `input` 등 폼 요소 기본 스타일은 반드시 `@layer base { }` 안에 선언한다. unlayered CSS는 `@layer utilities`(Tailwind)보다 cascade 우선순위가 높아 Tailwind 클래스가 무력화된다.
+- **컴포넌트 스타일 3원칙**:
+  1. 레이아웃·크기·간격 → Tailwind 클래스 (`h-12`, `px-4`, `rounded-lg`, `p-0`, `border-0` 등)
+  2. 색상·그림자 등 CSS 변수 값 → `style="color: var(--color-accent)"` (CSS 변수만 허용)
+  3. hover 등 상태에 CSS 변수 필요 시 → `<style scoped>` 사용
+- **`style=""` 속성에 CSS 변수 외 값 금지**: `style="padding: 0"`, `style="border-radius: 8px"` 등 Tailwind로 표현 가능한 값을 inline으로 작성하지 않는다. 반드시 Tailwind 클래스로만 처리한다.
 - **폰트**: 본문은 `Pretendard` (가변 폰트, npm 패키지 `pretendard` 사용), 코드·에디터 영역은 `Pretendard Mono` 또는 동급 고정폭 폰트. 외부 CDN 금지 — npm으로 번들에 포함.
 - **다크모드 대응**: CSS 변수를 `:root`(라이트)와 `.dark` 또는 `[data-theme="dark"]` 두 벌로 정의한다. 색상은 반드시 시맨틱 변수(`--color-bg-primary`, `--color-text-primary` 등)로만 참조하여 테마 전환 시 자동 반영되도록 한다. 하드코딩 색상값 사용 금지.
 - **최소 폰트 크기: `text-base` (16px)**. `text-sm`, `text-xs` 등 더 작은 클래스 사용 금지. 모든 텍스트는 `text-base` 이상이어야 한다.
@@ -132,6 +138,8 @@ async function onSubmit() {
 - **파일 임포트 시 열 인덱스 사용**: CSV/XLSX 파싱 시 열 인덱스(0, 1, 2...) 접근 금지. 반드시 열 이름으로 매핑하며, 매핑 사전을 통해 동의어 처리.
 - **모달 외부 클릭 닫기**: `@click.self`로 모달 바깥 클릭 시 닫히도록 구현 금지. 모달은 ESC 키로만 닫힌다.
 - **버튼 가드 누락**: 비동기 액션 핸들러 첫 줄에 `if (isSubmitting.value) return` 없이 구현 금지. `:disabled` 바인딩만으로는 중복 실행을 완전히 막을 수 없다.
+- **`style=""` 속성에 CSS 변수 외 값 작성**: `style="padding: 0"`, `style="border-radius: 8px"`, `style="display: flex"` 등 Tailwind 클래스로 표현 가능한 값을 inline으로 작성 금지. CSS 변수(`var(--xxx)`)를 값으로 쓰는 경우만 `style=""` 허용.
+- **전역 폼 스타일을 `@layer base` 밖에 선언**: `main.css`에 `button {}`, `input {}` 등을 unlayered로 작성하면 Tailwind 유틸리티 클래스 전체가 무력화된다. 반드시 `@layer base { }` 안에 선언할 것.
 
 ---
 
