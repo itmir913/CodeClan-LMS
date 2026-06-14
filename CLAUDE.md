@@ -69,7 +69,10 @@
 ### API
 - 모든 API 경로: `/api/` 접두어.
 - 인증: `cc_session` 쿠키. fetch 시 `credentials: 'include'` 필수.
-- 서버에서 쿠키 검증: `auth_tokens` 테이블에서 토큰 조회 + `expires_at > datetime('now')` 확인.
+- 서버에서 쿠키 검증: `auth_sessions` 테이블에서 토큰 조회 + `expires_at > datetime('now')` 확인.
+- **오류 응답 형식**: `{ "error": "ERR_CODE" }`. 오류 코드는 `SCREAMING_SNAKE_CASE`.
+- **백엔드 오류 메시지 하드코딩 금지**: 백엔드는 오류 코드만 반환. 프론트엔드가 `$t('errors.ERR_CODE')` 형태로 번역. `ApiError::BadRequest("한국어 문자열")` 사용 금지.
+- **지원 언어 목록은 프론트엔드가 관리**: 백엔드는 특정 언어 코드 목록을 하드코딩하지 않는다. 형식 검증만 수행하고, 알 수 없는 값은 기본값(`en`)으로 대체한다.
 
 ---
 
@@ -88,6 +91,7 @@
 - **`text-sm` 이하 폰트 클래스**: `text-sm`, `text-xs` 등 `text-base`(16px)보다 작은 Tailwind 폰트 클래스 사용 금지.
 - **외부 CDN 폰트·아이콘**: `fonts.googleapis.com` 등 외부 CDN 링크 사용 금지. 모든 폰트·아이콘은 npm 패키지로 번들에 포함.
 - **UI 텍스트 한국어 하드코딩**: 모든 UI 텍스트는 `$t('key')` 형태로만 출력. 컴포넌트 템플릿에 한국어 문자열 직접 삽입 금지.
+- **백엔드 오류 메시지 한국어 하드코딩**: `ApiError::BadRequest("한국어...")` 금지. 반드시 `ApiError::BadRequest("ERR_CODE")` 형태로 오류 코드를 반환하고, 프론트엔드 `locales/{lang}/errors.json`에서 번역.
 - **색만으로 상태 전달**: 상태 표시 시 색 + 텍스트를 항상 함께 사용. 색각 이상 사용자를 고려.
 - **파일 임포트 시 열 인덱스 사용**: CSV/XLSX 파싱 시 열 인덱스(0, 1, 2...) 접근 금지. 반드시 열 이름으로 매핑하며, 매핑 사전을 통해 동의어 처리.
 - **모달 외부 클릭 닫기**: `@click.self`로 모달 바깥 클릭 시 닫히도록 구현 금지. 모달은 ESC 키로만 닫힌다.

@@ -1,0 +1,15 @@
+{
+  "ERR_DB": "A database error occurred",
+  "ERR_NOT_FOUND": "The requested item was not found",
+  "ERR_UNAUTHORIZED": "Please log in to continue",
+  "ERR_FORBIDDEN": "You do not have permission to perform this action",
+  "ERR_INTERNAL": "An internal server error occurred",
+  "ERR_SETUP_ALREADY_COMPLETE": "Initial setup has already been completed",
+  "ERR_SCHOOL_NAME_REQUIRED": "School name is required",
+  "ERR_ADMIN_NAME_REQUIRED": "Admin name is required",
+  "ERR_USERNAME_REQUIRED": "Username is required",
+  "ERR_PASSWORD_TOO_SHORT": "Password must be at least 8 characters",
+  "ERR_USERNAME_TAKEN": "This username is already taken",
+  "ERR_INVALID_CREDENTIALS": "Invalid username or password",
+  "ERR_UNKNOWN": "An unknown error occurred"
+}

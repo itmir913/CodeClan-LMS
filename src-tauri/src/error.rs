@@ -17,21 +17,21 @@ pub enum ApiError {
 
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
-        let (status, message) = match self {
+        let (status, code) = match self {
             ApiError::Database(e) => {
                 tracing::error!("DB error: {e}");
-                (StatusCode::INTERNAL_SERVER_ERROR, "데이터베이스 오류".to_string())
+                (StatusCode::INTERNAL_SERVER_ERROR, "ERR_DB".to_string())
             }
-            ApiError::NotFound => (StatusCode::NOT_FOUND, "찾을 수 없습니다".to_string()),
-            ApiError::Unauthorized => (StatusCode::UNAUTHORIZED, "인증이 필요합니다".to_string()),
-            ApiError::Forbidden => (StatusCode::FORBIDDEN, "권한이 없습니다".to_string()),
-            ApiError::BadRequest(msg) => (StatusCode::BAD_REQUEST, msg),
+            ApiError::NotFound => (StatusCode::NOT_FOUND, "ERR_NOT_FOUND".to_string()),
+            ApiError::Unauthorized => (StatusCode::UNAUTHORIZED, "ERR_UNAUTHORIZED".to_string()),
+            ApiError::Forbidden => (StatusCode::FORBIDDEN, "ERR_FORBIDDEN".to_string()),
+            ApiError::BadRequest(code) => (StatusCode::BAD_REQUEST, code),
             ApiError::Internal(msg) => {
                 tracing::error!("Internal error: {msg}");
-                (StatusCode::INTERNAL_SERVER_ERROR, "서버 오류".to_string())
+                (StatusCode::INTERNAL_SERVER_ERROR, "ERR_INTERNAL".to_string())
             }
         };
-        (status, Json(json!({ "error": message }))).into_response()
+        (status, Json(json!({ "error": code }))).into_response()
     }
 }
 

@@ -6,7 +6,7 @@
   "schoolNameHint": "Displayed on the login screen as your school name",
   "adminSection": "Create Admin Account",
   "adminName": "Name",
-  "adminNamePlaceholder": "e.g. Mr. Kim",
+  "adminNamePlaceholder": "e.g. Mr. Admin",
   "adminUsername": "Username",
   "adminUsernamePlaceholder": "e.g. admin",
   "adminPassword": "Password",

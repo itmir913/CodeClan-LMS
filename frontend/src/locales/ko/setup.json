@@ -6,7 +6,7 @@
   "schoolNameHint": "로그인 화면에 학교 이름으로 표시됩니다",
   "adminSection": "관리자 계정 생성",
   "adminName": "이름",
-  "adminNamePlaceholder": "예: 김교사",
+  "adminNamePlaceholder": "예: 관리자",
   "adminUsername": "아이디",
   "adminUsernamePlaceholder": "예: admin",
   "adminPassword": "비밀번호",

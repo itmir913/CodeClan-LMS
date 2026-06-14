@@ -181,7 +181,8 @@ async function onSubmit() {
     })
     router.push('/login')
   } catch (e) {
-    errorMsg.value = e instanceof Error ? e.message : t('common.error')
+    const code = e instanceof Error ? e.message : 'ERR_UNKNOWN'
+    errorMsg.value = t(`errors.${code}`, t('errors.ERR_UNKNOWN'))
   } finally {
     submitting.value = false
   }

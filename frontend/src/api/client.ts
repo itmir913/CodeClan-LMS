@@ -13,8 +13,8 @@ async function request<T>(
   })
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: res.statusText }))
-    throw new Error(err.error ?? '알 수 없는 오류')
+    const err = await res.json().catch(() => ({ error: 'ERR_UNKNOWN' }))
+    throw new Error(err.error ?? 'ERR_UNKNOWN')
   }
 
   return res.json()
