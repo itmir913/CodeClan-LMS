@@ -36,6 +36,8 @@
 
 - **CSS 변수(design token) 기반**: 색상, 간격, 반지름은 `frontend/src/assets/main.css`의 `:root` 변수를 참조한다. 인라인 하드코딩 금지.
 - **Tailwind CSS v4** 사용. `@tailwindcss/vite` 플러그인 기반. 유틸리티 클래스 우선, `<style scoped>`는 Tailwind로 표현 불가한 경우에만 보조 사용.
+- **폰트**: 본문은 `Pretendard` (가변 폰트, npm 패키지 `pretendard` 사용), 코드·에디터 영역은 `Pretendard Mono` 또는 동급 고정폭 폰트. 외부 CDN 금지 — npm으로 번들에 포함.
+- **다크모드 대응**: CSS 변수를 `:root`(라이트)와 `.dark` 또는 `[data-theme="dark"]` 두 벌로 정의한다. 색상은 반드시 시맨틱 변수(`--color-bg-primary`, `--color-text-primary` 등)로만 참조하여 테마 전환 시 자동 반영되도록 한다. 하드코딩 색상값 사용 금지.
 - **최소 폰트 크기: `text-base` (16px)**. `text-sm`, `text-xs` 등 더 작은 클래스 사용 금지. 모든 텍스트는 `text-base` 이상이어야 한다.
 - **아이콘: `@tabler/icons-vue` 패키지** 사용. 패키지가 없는 경우 SVG inline 대체.
 - **홈 화면(교사·학생 공통)**: 사이드바 없음. 수업 카드 그리드만 표시.
