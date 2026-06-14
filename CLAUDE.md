@@ -19,7 +19,9 @@
 - **Pinia store = 단일 진실의 원천(Single Source of Truth)**
 - 서버에서 받은 데이터는 반드시 store에 저장 후 컴포넌트에서 참조한다.
 - `stores/auth.ts`: 교사 세션 상태, 역할(admin/teacher), 학교 이름, 로그인 여부
-- 향후 추가: `stores/class.ts` (수업 목록 + 현재 선택 수업), `stores/lesson.ts`, `stores/assessment.ts`, `stores/problem.ts`, `stores/student.ts`
+- `stores/class.ts`: 수업 목록, 과목 목록, 수업 CRUD
+- `stores/admin.ts`: 교사 계정 목록, 과목 관리 (admin 전용)
+- 향후 추가: `stores/lesson.ts`, `stores/assessment.ts`, `stores/problem.ts`, `stores/student.ts`
 
 ---
 
@@ -34,9 +36,9 @@
 
 ## UI / DESIGN RULES
 
-- **CSS 변수(design token) 기반**: 색상, 간격, 반지름은 `frontend/src/assets/main.css`의 `:root` 변수를 참조한다. 인라인 하드코딩 금지.
+- **CSS 변수(design token) 기반**: 색상, 간격, 반지름은 `frontend/src/assets/tokens.css`의 `:root` 변수를 참조한다. 인라인 하드코딩 금지.
 - **Tailwind CSS v4** 사용. `@tailwindcss/vite` 플러그인 기반. 유틸리티 클래스 우선, `<style scoped>`는 Tailwind로 표현 불가한 경우에만 보조 사용.
-- **CSS Cascade Layer 규칙**: `main.css`의 전역 `button`, `input` 등 폼 요소 기본 스타일은 반드시 `@layer base { }` 안에 선언한다. unlayered CSS는 `@layer utilities`(Tailwind)보다 cascade 우선순위가 높아 Tailwind 클래스가 무력화된다.
+- **CSS Cascade Layer 규칙**: `base.css`의 전역 `button`, `input` 등 폼 요소 기본 스타일은 반드시 `@layer base { }` 안에 선언한다. unlayered CSS는 `@layer utilities`(Tailwind)보다 cascade 우선순위가 높아 Tailwind 클래스가 무력화된다.
 - **컴포넌트 스타일 3원칙**:
   1. 레이아웃·크기·간격 → Tailwind 클래스 (`h-12`, `px-4`, `rounded-lg`, `p-0`, `border-0` 등)
   2. 색상·그림자 등 CSS 변수 값 → `style="color: var(--color-accent)"` (CSS 변수만 허용)
@@ -51,7 +53,7 @@
 - **시험 응시 화면(학생)**: 사이드바·네비게이션 완전 숨김. 타이머·문제·에디터·제출 버튼만.
 - 로딩 상태와 에러 상태를 반드시 UI에 표시한다 (스피너, 에러 배너).
 - 교사 화면: 최소 1024px 기준 / 학생 화면: 768px 이상 기준.
-- 구현 시 **`docs/mockups/*.html`** 을 참고한다. 레이아웃·색상 구조를 그대로 따른다. (목업이 구현보다 항상 선행한다 — 목업 없이 화면 구현 금지)
+- `docs/mockups/*.html`이 있으면 레이아웃·색상 구조를 참고한다. 목업이 없어도 구현 가능.
 - **모달 동작 규칙**: 모달 외부 클릭으로 닫히지 않는다. ESC 키로만 닫힌다. `@click.self` 기반 외부 클릭 닫기 구현 금지.
 
 ---
@@ -139,7 +141,7 @@ async function onSubmit() {
 - **모달 외부 클릭 닫기**: `@click.self`로 모달 바깥 클릭 시 닫히도록 구현 금지. 모달은 ESC 키로만 닫힌다.
 - **버튼 가드 누락**: 비동기 액션 핸들러 첫 줄에 `if (isSubmitting.value) return` 없이 구현 금지. `:disabled` 바인딩만으로는 중복 실행을 완전히 막을 수 없다.
 - **`style=""` 속성에 CSS 변수 외 값 작성**: `style="padding: 0"`, `style="border-radius: 8px"`, `style="display: flex"` 등 Tailwind 클래스로 표현 가능한 값을 inline으로 작성 금지. CSS 변수(`var(--xxx)`)를 값으로 쓰는 경우만 `style=""` 허용.
-- **전역 폼 스타일을 `@layer base` 밖에 선언**: `main.css`에 `button {}`, `input {}` 등을 unlayered로 작성하면 Tailwind 유틸리티 클래스 전체가 무력화된다. 반드시 `@layer base { }` 안에 선언할 것.
+- **전역 폼 스타일을 `@layer base` 밖에 선언**: `base.css`에 `button {}`, `input {}` 등을 unlayered로 작성하면 Tailwind 유틸리티 클래스 전체가 무력화된다. 반드시 `@layer base { }` 안에 선언할 것.
 
 ---
 
@@ -148,13 +150,20 @@ async function onSubmit() {
 ```
 docs/
   design-decisions.md     — 설계 결정 사항 (0~12장), 구현 시 항상 참고
-  mockups/                — HTML 목업 파일 (구현 참고용, 21개)
+  mockups/                — HTML 목업 파일 (구현 참고용)
 
 src-tauri/
   Cargo.toml
   tauri.conf.json
   migrations/
-    001_initial.sql       — 전체 SQLite 스키마 (마이그레이션)
+    001_core.sql          — app_configs, subjects, teachers, students, auth_sessions
+    002_classes.sql       — classes, class_students, languages, class_allowed_languages
+    003_lessons.sql       — lessons, class_lessons
+    004_problems.sql      — problem_types, problems, problem_*, test_cases
+    005_assessments.sql   — assessments, class_assessments, assessment_problems
+    006_sessions.sql      — assessment_sessions, assessment_session_targets
+    007_submissions.sql   — (논의 예정)
+    008_attendance.sql    — (논의 예정)
   src/
     main.rs               — 진입점 (run() 호출)
     lib.rs                — Tauri 빌더, 트레이, Axum 서버 spawn
@@ -166,7 +175,9 @@ src-tauri/
       routes/
         mod.rs
         setup.rs          — GET /api/setup/status, POST /api/setup/complete
-        auth.rs           — POST /login/teacher, /logout, GET /me, /school-name
+        auth.rs           — POST /api/auth/login/teacher|student, /logout, GET /me
+        classes.rs        — GET/POST /api/classes, PUT/DELETE /api/classes/:id
+        admin.rs          — /api/admin/teachers, /api/admin/subjects (admin 전용)
 
 frontend/
   package.json
@@ -174,16 +185,36 @@ frontend/
   src/
     main.ts
     App.vue
-    assets/main.css       — CSS 변수(디자인 토큰) 정의
+    assets/
+      main.css            — @import 진입점 (4줄: tailwindcss, pretendard, tokens, base)
+      tokens.css          — CSS 디자인 토큰 (색상, 간격, 반지름 변수 — 라이트/다크)
+      base.css            — 리셋, body, @layer base 폼 스타일, .spin 애니메이션
     api/client.ts         — fetch 기반 API 헬퍼 (모든 엔드포인트 집중 관리)
-    router/index.ts       — 라우트 + 네비게이션 가드 (needs_setup 체크)
-    stores/               — Pinia 스토어 (auth.ts, 향후 추가)
+    router/index.ts       — 라우트 + role 기반 네비게이션 가드
+    stores/
+      auth.ts             — 교사/학생 세션, role, 학교 이름
+      class.ts            — 수업 목록, 과목 목록, 수업 CRUD
+      admin.ts            — 교사 계정 관리, 과목 관리 (admin 전용)
     views/
       SetupView.vue       — 초기 설정 (0장)
-      LoginView.vue       — 교사/학생 탭 로그인
-      DashboardView.vue   — 교사 대시보드
-    components/           — 공용 컴포넌트 (향후)
+      LoginView.vue       — 교사/학생 탭 로그인 (role→라우팅)
+      TeacherHomeView.vue — 교사 홈 (수업 카드 그리드, 수업 CRUD 모달)
+      AdminView.vue       — 관리자 홈 (교사 계정·과목 관리)
+      StudentHomeView.vue — 학생 홈 (진행 중 세션 진입 또는 대기 화면)
+    components/           — 공용 컴포넌트 (LanguageSelector.vue 등)
+    locales/
+      ko/ en/             — setup, auth, common, errors, classes, admin, student
 ```
+
+### 라우트 구조
+| 경로 | 뷰 | 가드 |
+|------|-----|------|
+| `/setup` | SetupView | needs_setup |
+| `/login` | LoginView | 비로그인 |
+| `/teacher` | TeacherHomeView | requiresAuth: 'teacher' (또는 admin) |
+| `/admin` | AdminView | requiresAuth: 'admin' |
+| `/student` | StudentHomeView | requiresAuth: 'student' |
+| `/student/change-password` | (인라인/모달) | requiresAuth: 'student' |
 
 ---
 
