@@ -55,11 +55,9 @@ CREATE TABLE IF NOT EXISTS problem_choices (
 
 -- ── 코드 제출형 설정 ──────────────────────────────────────────────────────────
 -- input_format / output_format / constraints: 마크다운
--- compare_mode: 출력 비교 방식. 문항별 교사 설정.
---   'exact' — 바이트 단위 완전 일치
---   'trim'  — 앞뒤 공백·개행 제거 후 비교 (기본값)
---   'token' — 공백 기준 토큰 분리 후 순서대로 비교
 -- show_io_on_fail: 실패 시 입력·기댓값·실제출력을 학생에게 공개할지 여부
+-- 출력 비교 방식(compare_mode)은 채점 엔진에 trim 하드코딩.
+-- 추후 관리자 UX 설계 시 app_configs로 전역 설정 추가 예정.
 
 CREATE TABLE IF NOT EXISTS problem_code_submits (
     problem_id      INTEGER PRIMARY KEY REFERENCES problems(id) ON DELETE CASCADE,
@@ -68,8 +66,6 @@ CREATE TABLE IF NOT EXISTS problem_code_submits (
     constraints     TEXT NOT NULL DEFAULT '',
     time_limit_ms   INTEGER NOT NULL DEFAULT 1000,
     memory_limit_mb INTEGER NOT NULL DEFAULT 128,
-    compare_mode    TEXT NOT NULL DEFAULT 'trim'
-                        CHECK (compare_mode IN ('exact', 'trim', 'token')),
     show_io_on_fail INTEGER NOT NULL DEFAULT 1
 );
 
