@@ -157,9 +157,18 @@ frontend/
 | `sessions.division_id` | `sessions.class_id` | |
 
 ### 마이그레이션 규칙 (릴리즈 전)
-- **스키마 변경은 `001_initial.sql` 직접 수정**. 새 마이그레이션 파일(`002_*.sql` 등) 추가 금지.
+- 스키마는 도메인별로 분리된 파일로 관리한다:
+  - `001_core.sql` — app_configs, subjects, teachers, students, auth_sessions
+  - `002_classes.sql` — classes, class_students, languages, class_allowed_languages
+  - `003_lessons.sql` — lessons, class_lessons
+  - `004_problems.sql` — problem_types, problems, problem_*, test_cases
+  - `005_assessments.sql` — (논의 예정)
+  - `006_sessions.sql` — (논의 예정)
+  - `007_submissions.sql` — (논의 예정)
+  - `008_attendance.sql` — (논의 예정)
+- **릴리즈 전**: 해당 도메인 파일 직접 수정. 새 번호 파일 추가 금지.
+- **릴리즈 후**: `009_xxx.sql` 형태로 증분 마이그레이션 추가.
 - 변경 후 테스트 DB 파일을 삭제하면 앱 재기동 시 최신 스키마로 재생성된다.
-- 릴리즈(배포) 이후에는 번호가 붙은 증분 마이그레이션 파일 방식으로 전환한다.
 
 ### 도메인 모델 (핵심 계층)
 ```
