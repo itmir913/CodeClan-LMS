@@ -59,6 +59,24 @@ CREATE TABLE IF NOT EXISTS auth_sessions (
     )
 );
 
+-- ── 사용자별 설정 ─────────────────────────────────────────────────────────────
+-- 교사/학생 각자의 환경설정. 복합 PK로 (user, key) UNIQUE 보장.
+-- 알려진 키: locale, dark_mode, editor_font_size
+
+CREATE TABLE IF NOT EXISTS teacher_settings (
+    teacher_id INTEGER NOT NULL REFERENCES teachers(id) ON DELETE CASCADE,
+    key        TEXT NOT NULL,
+    value      TEXT NOT NULL,
+    PRIMARY KEY (teacher_id, key)
+);
+
+CREATE TABLE IF NOT EXISTS student_settings (
+    student_id INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    key        TEXT NOT NULL,
+    value      TEXT NOT NULL,
+    PRIMARY KEY (student_id, key)
+);
+
 -- ── 인덱스 ────────────────────────────────────────────────────────────────────
 
 CREATE INDEX IF NOT EXISTS idx_auth_sessions_token   ON auth_sessions(token);

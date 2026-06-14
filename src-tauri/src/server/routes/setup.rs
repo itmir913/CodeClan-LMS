@@ -12,6 +12,7 @@ use crate::{error::ApiError, server::state::AppState};
 #[derive(Serialize)]
 pub struct SetupStatus {
     pub needs_setup: bool,
+    pub locale: Option<String>,
 }
 
 /// GET /api/setup/status
@@ -22,8 +23,15 @@ pub async fn get_status(State(state): State<AppState>) -> Result<Json<SetupStatu
     .fetch_one(&state.db)
     .await?;
 
+    let locale = sqlx::query_scalar::<_, String>(
+        "SELECT value FROM app_configs WHERE key = 'locale'",
+    )
+    .fetch_optional(&state.db)
+    .await?;
+
     Ok(Json(SetupStatus {
         needs_setup: count == 0,
+        locale,
     }))
 }
 
@@ -33,6 +41,7 @@ pub struct SetupRequest {
     pub admin_name: String,
     pub admin_username: String,
     pub admin_password: String,
+    pub locale: String,
 }
 
 /// POST /api/setup/complete
@@ -52,6 +61,7 @@ pub async fn complete(
     let school_name = body.school_name.trim().to_string();
     let admin_name = body.admin_name.trim().to_string();
     let admin_username = body.admin_username.trim().to_string();
+    let locale = body.locale.trim().to_string();
 
     if school_name.is_empty() {
         return Err(ApiError::BadRequest("학교 이름을 입력해주세요".into()));
@@ -64,6 +74,9 @@ pub async fn complete(
     }
     if body.admin_password.len() < 8 {
         return Err(ApiError::BadRequest("비밀번호는 8자 이상이어야 합니다".into()));
+    }
+    if !["ko", "en"].contains(&locale.as_str()) {
+        return Err(ApiError::BadRequest("지원하지 않는 언어입니다".into()));
     }
 
     let salt = SaltString::generate(&mut OsRng);
@@ -79,6 +92,14 @@ pub async fn complete(
          ON CONFLICT(key) DO UPDATE SET value = excluded.value",
     )
     .bind(&school_name)
+    .execute(&mut *tx)
+    .await?;
+
+    sqlx::query(
+        "INSERT INTO app_configs (key, value) VALUES ('locale', ?)
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+    )
+    .bind(&locale)
     .execute(&mut *tx)
     .await?;
 

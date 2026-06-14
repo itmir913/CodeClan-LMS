@@ -147,7 +147,7 @@ import { IconSchool, IconUser, IconAlertCircle, IconLoader2 } from '@tabler/icon
 import { useAuthStore } from '@/stores/auth'
 import LanguageSelector from '@/components/LanguageSelector.vue'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const router = useRouter()
 const auth = useAuthStore()
 
@@ -177,6 +177,7 @@ async function onSubmit() {
       admin_name: form.value.adminName,
       admin_username: form.value.adminUsername,
       admin_password: form.value.adminPassword,
+      locale: locale.value,
     })
     router.push('/login')
   } catch (e) {

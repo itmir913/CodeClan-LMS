@@ -24,6 +24,7 @@ async function request<T>(
 
 export interface SetupStatus {
   needs_setup: boolean
+  locale: string | null
 }
 
 export interface SetupRequest {
@@ -31,6 +32,7 @@ export interface SetupRequest {
   admin_name: string
   admin_username: string
   admin_password: string
+  locale: string
 }
 
 // ── API object ────────────────────────────────────────────────
