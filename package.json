@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "tauri dev",
-    "dev:vite": "wait-on tcp:8080 && npm run dev --prefix frontend",
+    "dev:vite": "npm run dev --prefix frontend",
     "dev:frontend": "npm run dev --prefix frontend",
     "dev:backend": "concurrently --names \"VITE,AXUM\" --prefix-colors \"cyan,green\" \"npm run dev --prefix frontend\" \"cargo run --manifest-path src-tauri/Cargo.toml\"",
     "build": "npm run build --prefix frontend && tauri build",
