@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CodeClan LMS — 로그인 목업</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── Design Tokens ── */
+  :root {
+    --color-bg:           #f8fafc;
+    --color-surface:      #ffffff;
+    --color-text-primary: #111827;
+    --color-text-muted:   #6b7280;
+    --color-border:       #e5e7eb;
+    --color-accent:       #2563eb;
+    --color-hover-bg:     #f8fafc;
+    --color-danger:       #dc2626;
+    --color-danger-border:rgba(220,38,38,.4);
+    --color-danger-bg:    #fef2f2;
+    --shadow-card:        0 4px 6px -1px rgba(15,23,42,.1), 0 2px 4px -2px rgba(15,23,42,.08);
+    --shadow-dropdown:    0 12px 32px -10px rgba(15,23,42,.28);
+  }
+
+  [data-theme="dark"] {
+    --color-bg:           #0f172a;
+    --color-surface:      #1e293b;
+    --color-text-primary: #f1f5f9;
+    --color-text-muted:   #94a3b8;
+    --color-border:       #334155;
+    --color-accent:       #3b82f6;
+    --color-hover-bg:     #0f172a;
+    --color-danger:       #f87171;
+    --color-danger-border:rgba(248,113,113,.4);
+    --color-danger-bg:    #450a0a;
+    --shadow-card:        0 18px 40px -12px rgba(2,6,23,.6);
+    --shadow-dropdown:    0 12px 32px -10px rgba(2,6,23,.6);
+  }
+
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 16px;
+    background: var(--color-bg);
+    color: var(--color-text-primary);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: background .15s, color .15s;
+  }
+
+  /* ── Spinner ── */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spin { animation: spin .8s linear infinite; }
+  @media (prefers-reduced-motion: reduce) { .spin { animation-duration: 2s; } }
+
+  /* ── Top Nav ── */
+  .top-nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    height: 64px;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    transition: background .15s, border-color .15s;
+  }
+  .nav-inner {
+    max-width: 72rem;
+    margin: 0 auto;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+  }
+  .logo-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: var(--color-accent);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: background .15s;
+  }
+  .logo-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+  .nav-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Icon button with border */
+  .icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: color .1s, background .1s, border-color .1s;
+  }
+  .icon-btn:hover { color: var(--color-text-primary); background: var(--color-hover-bg); }
+
+  /* Language dropdown */
+  .lang-wrapper { position: relative; }
+  .lang-trigger {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 11px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .1s;
+  }
+  .lang-trigger:hover { background: var(--color-hover-bg); }
+  .lang-trigger .chevron {
+    color: var(--color-text-muted);
+    transition: transform .15s ease;
+  }
+  .lang-trigger.open .chevron { transform: rotate(180deg); }
+  .lang-menu {
+    position: absolute;
+    top: 44px; right: 0;
+    z-index: 50;
+    min-width: 160px;
+    overflow: hidden;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    box-shadow: var(--shadow-dropdown);
+    padding: 4px 0;
+    display: none;
+  }
+  .lang-menu.open { display: block; }
+  .lang-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    text-align: left;
+    transition: background .1s;
+  }
+  .lang-item:hover { background: var(--color-hover-bg); }
+  .lang-item.active { color: var(--color-accent); font-weight: 600; }
+  .lang-item .lang-left { display: flex; align-items: center; gap: 8px; }
+  .lang-item .lang-short { width: 28px; color: var(--color-text-muted); }
+  .lang-item .check { display: none; flex-shrink: 0; color: var(--color-accent); }
+  .lang-item.active .check { display: block; }
+
+  /* ── Main ── */
+  .main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 16px;
+  }
+
+  /* ── Login Card ── */
+  .login-card {
+    width: 100%;
+    max-width: 448px;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    padding: 32px;
+    box-shadow: var(--shadow-card);
+    transition: background .15s, border-color .15s, box-shadow .15s;
+  }
+  .school-name {
+    text-align: center;
+    font-size: 16px;
+    color: var(--color-text-muted);
+  }
+
+  /* Tabs */
+  .tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid var(--color-border);
+    margin-top: 24px;
+  }
+  .tab-btn {
+    margin-bottom: -1px;
+    padding-bottom: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: color .15s, border-color .15s;
+  }
+  .tab-btn:hover { color: var(--color-text-primary); }
+  .tab-btn.active {
+    border-bottom-color: var(--color-accent);
+    color: var(--color-accent);
+    font-weight: 700;
+  }
+
+  /* Form */
+  .form { margin-top: 24px; display: flex; flex-direction: column; gap: 20px; }
+  .field { display: flex; flex-direction: column; gap: 8px; }
+  .field-label { font-size: 16px; font-weight: 500; color: var(--color-text-primary); }
+
+  .input {
+    height: 48px;
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    padding: 0 16px;
+    font-size: 16px;
+    color: var(--color-text-primary);
+    outline: none;
+    transition: border-color .15s;
+    font-family: inherit;
+  }
+  .input::placeholder { color: var(--color-text-muted); }
+  .input:focus { border-color: var(--color-accent); }
+
+  .pw-wrapper { position: relative; }
+  .pw-wrapper .input { padding-right: 48px; }
+  .pw-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    border: none;
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 2px;
+    transition: color .1s;
+  }
+  .pw-toggle:hover { color: var(--color-text-primary); }
+
+  .submit-btn {
+    display: flex;
+    height: 48px;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    border-radius: 8px;
+    background: var(--color-accent);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .15s;
+    font-family: inherit;
+  }
+  .submit-btn:hover:not(:disabled) { opacity: .9; }
+  .submit-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+  .error-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 8px;
+    border: 1px solid var(--color-danger-border);
+    background: var(--color-danger-bg);
+    padding: 12px 16px;
+    font-size: 16px;
+    color: var(--color-danger);
+    transition: background .15s, border-color .15s, color .15s;
+  }
+  .error-banner svg { flex-shrink: 0; }
+  .error-banner.hidden { display: none; }
+</style>
+</head>
+<body>
+
+<!-- ── Top Nav ── -->
+<header class="top-nav">
+  <div class="nav-inner">
+    <div class="logo-group">
+      <span class="logo-badge">C</span>
+      <span class="logo-text">CodeClan LMS</span>
+    </div>
+    <div class="nav-controls">
+      <!-- Dark mode toggle -->
+      <button class="icon-btn" id="theme-toggle" aria-label="다크 모드로 전환">
+        <svg id="icon-moon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+        </svg>
+        <svg id="icon-sun" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+        </svg>
+      </button>
+
+      <!-- Language dropdown -->
+      <div class="lang-wrapper" id="lang-wrapper">
+        <button class="lang-trigger" id="lang-trigger" aria-haspopup="listbox" aria-expanded="false" aria-label="언어 선택">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-text-muted);">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
+            <path d="M2 12h20"/>
+          </svg>
+          <span id="lang-short">KO</span>
+          <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </button>
+        <ul class="lang-menu" id="lang-menu" role="listbox">
+          <li>
+            <button class="lang-item active" id="lang-ko" role="option" aria-selected="true">
+              <span class="lang-left">
+                <span class="lang-short">KO</span>
+                <span>한국어</span>
+              </span>
+              <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6 9 17l-5-5"/>
+              </svg>
+            </button>
+          </li>
+          <li>
+            <button class="lang-item" id="lang-en" role="option" aria-selected="false">
+              <span class="lang-left">
+                <span class="lang-short">EN</span>
+                <span>English</span>
+              </span>
+              <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6 9 17l-5-5"/>
+              </svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ── Main ── -->
+<main class="main">
+  <div class="login-card">
+
+    <!-- School name -->
+    <p class="school-name" id="school-name" data-ko="○○고등학교" data-en="○○ High School">○○고등학교</p>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn" id="tab-teacher" data-ko="교사" data-en="Teacher">교사</button>
+      <button class="tab-btn active" id="tab-student" data-ko="학생" data-en="Student">학생</button>
+    </div>
+
+    <!-- Form -->
+    <form class="form" id="login-form" novalidate>
+      <div class="field">
+        <label class="field-label" id="id-label" for="identifier" data-ko="학번" data-en="Student ID">학번</label>
+        <input class="input" id="identifier" type="text" autocomplete="username"
+               placeholder="" data-ko="학번" data-en="Student ID">
+      </div>
+
+      <div class="field">
+        <label class="field-label" id="pw-label" for="password" data-ko="비밀번호" data-en="Password">비밀번호</label>
+        <div class="pw-wrapper">
+          <input class="input" id="password" type="password" autocomplete="current-password"
+                 placeholder="" data-ko="비밀번호" data-en="Password">
+          <button type="button" class="pw-toggle" id="pw-toggle" aria-label="비밀번호 표시 전환">
+            <!-- Eye (show password) -->
+            <svg id="icon-eye" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <!-- EyeOff (hide password) -->
+            <svg id="icon-eyeoff" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+              <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+              <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+              <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+              <line x1="2" x2="22" y1="2" y2="22"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submit-btn">
+        <svg id="spinner" class="spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+          <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+        </svg>
+        <span id="login-label" data-ko="로그인" data-en="Sign In">로그인</span>
+      </button>
+
+      <div class="error-banner" id="error-banner" role="alert">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 8v4"/>
+          <path d="M12 16h.01"/>
+        </svg>
+        <span id="error-msg" data-ko="아이디 또는 비밀번호가 올바르지 않습니다" data-en="Incorrect username or password">아이디 또는 비밀번호가 올바르지 않습니다</span>
+      </div>
+    </form>
+
+  </div>
+</main>
+
+<script>
+  // ── State ──
+  let lang  = 'ko';
+  let dark  = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  let activeTab = 'student';
+  let showPw    = false;
+  let isLoading = false;
+  let timer     = null;
+
+  // ── Theme ──
+  function applyTheme() {
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    document.getElementById('icon-moon').style.display = dark ? 'none'  : 'block';
+    document.getElementById('icon-sun').style.display  = dark ? 'block' : 'none';
+    document.getElementById('theme-toggle').setAttribute('aria-label',
+      dark ? '라이트 모드로 전환' : '다크 모드로 전환');
+  }
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    dark = !dark; applyTheme();
+  });
+
+  // ── i18n ──
+  const i18n = {
+    ko: { teacher: '교사', student: '학생', username: '아이디', studentId: '학번',
+          password: '비밀번호', login: '로그인',
+          error: '아이디 또는 비밀번호가 올바르지 않습니다', school: '○○고등학교' },
+    en: { teacher: 'Teacher', student: 'Student', username: 'Username', studentId: 'Student ID',
+          password: 'Password', login: 'Sign In',
+          error: 'Incorrect username or password', school: '○○ High School' },
+  };
+
+  function applyLang() {
+    const t = i18n[lang];
+    // Static elements
+    document.getElementById('school-name').textContent = t.school;
+    document.getElementById('login-label').textContent  = t.login;
+    document.getElementById('error-msg').textContent    = t.error;
+    // Tab labels
+    document.getElementById('tab-teacher').textContent = t.teacher;
+    document.getElementById('tab-student').textContent = t.student;
+    // Identifier field (depends on active tab)
+    applyTab();
+    // Password
+    document.getElementById('pw-label').textContent    = t.password;
+    document.getElementById('password').placeholder    = t.password;
+    // Lang dropdown
+    document.getElementById('lang-short').textContent  = lang === 'ko' ? 'KO' : 'EN';
+    document.getElementById('lang-ko').classList.toggle('active', lang === 'ko');
+    document.getElementById('lang-ko').setAttribute('aria-selected', lang === 'ko');
+    document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+    document.getElementById('lang-en').setAttribute('aria-selected', lang === 'en');
+  }
+
+  function applyTab() {
+    const t = i18n[lang];
+    const idLabel = activeTab === 'teacher' ? t.username : t.studentId;
+    document.getElementById('id-label').textContent       = idLabel;
+    document.getElementById('identifier').placeholder     = idLabel;
+    document.getElementById('tab-teacher').classList.toggle('active', activeTab === 'teacher');
+    document.getElementById('tab-student').classList.toggle('active', activeTab === 'student');
+  }
+
+  // ── Language dropdown ──
+  const langTrigger = document.getElementById('lang-trigger');
+  const langMenu    = document.getElementById('lang-menu');
+
+  function closeLangMenu() {
+    langMenu.classList.remove('open');
+    langTrigger.classList.remove('open');
+    langTrigger.setAttribute('aria-expanded', 'false');
+  }
+  langTrigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = langMenu.classList.toggle('open');
+    langTrigger.classList.toggle('open', open);
+    langTrigger.setAttribute('aria-expanded', open);
+  });
+  document.getElementById('lang-ko').addEventListener('click', () => { lang = 'ko'; applyLang(); closeLangMenu(); });
+  document.getElementById('lang-en').addEventListener('click', () => { lang = 'en'; applyLang(); closeLangMenu(); });
+  document.addEventListener('mousedown', (e) => {
+    if (!document.getElementById('lang-wrapper').contains(e.target)) closeLangMenu();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLangMenu(); });
+
+  // ── Tabs ──
+  document.getElementById('tab-teacher').addEventListener('click', () => { activeTab = 'teacher'; applyTab(); });
+  document.getElementById('tab-student').addEventListener('click', () => { activeTab = 'student'; applyTab(); });
+
+  // ── Password toggle ──
+  document.getElementById('pw-toggle').addEventListener('click', () => {
+    showPw = !showPw;
+    document.getElementById('password').type = showPw ? 'text' : 'password';
+    document.getElementById('icon-eye').style.display    = showPw ? 'none'  : 'block';
+    document.getElementById('icon-eyeoff').style.display = showPw ? 'block' : 'none';
+  });
+
+  // ── Form submit (demo) ──
+  document.getElementById('login-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (isLoading) return;
+    if (timer) clearTimeout(timer);
+    isLoading = true;
+    document.getElementById('error-banner').classList.add('hidden');
+    document.getElementById('submit-btn').disabled = true;
+    document.getElementById('spinner').style.display = 'block';
+    timer = setTimeout(() => {
+      isLoading = false;
+      document.getElementById('submit-btn').disabled = false;
+      document.getElementById('spinner').style.display = 'none';
+      document.getElementById('error-banner').classList.remove('hidden');
+    }, 1500);
+  });
+
+  // ── Init ──
+  applyTheme();
+  applyLang();
+</script>
+</body>
+</html>

@@ -195,3 +195,5 @@ CREATE INDEX IF NOT EXISTS idx_submissions_student_session ON submissions(studen
 CREATE INDEX IF NOT EXISTS idx_submissions_is_latest ON submissions(problem_id, student_id, is_latest);
 CREATE INDEX IF NOT EXISTS idx_attendance_context ON attendance_heartbeats(context_type, context_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_division ON sessions(division_id, status);
+CREATE INDEX IF NOT EXISTS idx_lessons_order ON lessons(order_no);
+CREATE INDEX IF NOT EXISTS idx_lesson_problems_order ON lesson_problems(lesson_id, order_no);

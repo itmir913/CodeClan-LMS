@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CodeClan LMS — 교사 홈 목업</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── Design Tokens ── */
+  :root {
+    --color-bg:           #f8fafc;
+    --color-surface:      #ffffff;
+    --color-text-primary: #111827;
+    --color-text-muted:   #6b7280;
+    --color-border:       #e5e7eb;
+    --color-border-faint: #f1f5f9;
+    --color-accent:       #2563eb;
+    --color-accent-hover: #1d4ed8;
+    --color-hover-bg:     #f1f5f9;
+    --color-danger:       #ef4444;
+    --color-danger-hover: #dc2626;
+    --color-danger-border:rgba(239,68,68,.32);
+    --color-danger-bg:    rgba(239,68,68,.08);
+    --color-live-dot:     #ef4444;
+    --color-status-text:  #b91c1c;
+    --shadow-card:        0 1px 2px rgba(15,23,42,.05);
+    --shadow-card-hover:  0 14px 28px -16px rgba(15,23,42,.4);
+    --shadow-dropdown:    0 12px 32px -10px rgba(15,23,42,.28);
+    --border-color-card-hover: #94a3b8;
+  }
+
+  [data-theme="dark"] {
+    --color-bg:           #0f172a;
+    --color-surface:      #1e293b;
+    --color-text-primary: #f1f5f9;
+    --color-text-muted:   #94a3b8;
+    --color-border:       #334155;
+    --color-border-faint: #334155;
+    --color-accent:       #3b82f6;
+    --color-accent-hover: #60a5fa;
+    --color-hover-bg:     #334155;
+    --color-danger:       #ef4444;
+    --color-danger-hover: #dc2626;
+    --color-danger-border:rgba(248,113,113,.4);
+    --color-danger-bg:    rgba(239,68,68,.14);
+    --color-live-dot:     #f87171;
+    --color-status-text:  #fca5a5;
+    --shadow-card:        0 1px 2px rgba(2,6,23,.4);
+    --shadow-card-hover:  0 14px 28px -16px rgba(2,6,23,.7);
+    --shadow-dropdown:    0 12px 32px -10px rgba(2,6,23,.6);
+    --border-color-card-hover: #64748b;
+  }
+
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 16px;
+    background: var(--color-bg);
+    color: var(--color-text-primary);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    transition: background .15s, color .15s;
+  }
+
+  /* ── Animations ── */
+  @keyframes liveDot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: .45; transform: scale(.8); }
+  }
+  @keyframes liveRing {
+    0%   { opacity: .5; transform: scale(1); }
+    100% { opacity: 0;  transform: scale(2.4); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .live-dot  { animation: none !important; }
+    .live-ring { display: none !important; }
+  }
+
+  /* ── Top Nav ── */
+  .top-nav {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    height: 64px;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    transition: background .15s, border-color .15s;
+  }
+  @media (min-width: 640px)  { .top-nav { padding: 0 24px; } }
+  @media (min-width: 1024px) { .top-nav { padding: 0 32px; } }
+
+  .nav-inner {
+    width: 100%;
+    max-width: 80rem;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo-group {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+  .logo-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    background: var(--color-accent);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: background .15s;
+  }
+  .logo-text {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+    color: var(--color-text-primary);
+  }
+
+  .nav-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .teacher-name {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    margin-right: 6px;
+    display: none;
+  }
+  @media (min-width: 640px) { .teacher-name { display: inline; } }
+
+  .icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: background .1s, color .1s;
+  }
+  .icon-btn:hover {
+    background: var(--color-hover-bg);
+    color: var(--color-text-primary);
+  }
+  .icon-btn svg { display: block; }
+
+  /* Language dropdown */
+  .lang-wrapper { position: relative; }
+  .lang-trigger {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    height: 38px;
+    padding: 0 10px 0 11px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .1s, border-color .1s;
+  }
+  .lang-trigger:hover {
+    background: var(--color-hover-bg);
+    border-color: var(--color-text-muted);
+  }
+  .lang-trigger svg { flex-shrink: 0; }
+  .lang-trigger .chevron { opacity: .6; }
+  .lang-menu {
+    position: absolute;
+    top: 46px; right: 0;
+    z-index: 50;
+    min-width: 168px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    box-shadow: var(--shadow-dropdown);
+    padding: 5px;
+    display: none;
+  }
+  .lang-menu.open { display: block; }
+  .lang-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    border: none;
+    background: transparent;
+    border-radius: 7px;
+    font-size: 16px;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    text-align: left;
+    transition: background .1s;
+  }
+  .lang-item:hover { background: var(--color-hover-bg); }
+  .lang-item .check { display: none; color: var(--color-accent); }
+  .lang-item.active .check { display: block; }
+
+  /* ── Main content ── */
+  .main {
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 24px 16px 64px;
+  }
+  @media (min-width: 640px)  { .main { padding: 24px 24px 64px; } }
+  @media (min-width: 1024px) { .main { padding: 24px 32px 64px; } }
+
+  /* ── Alert Banner ── */
+  .alert-banner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 18px;
+    border: 1px solid var(--color-danger-border);
+    background: var(--color-danger-bg);
+    border-radius: 12px;
+    flex-wrap: wrap;
+    transition: border-color .15s, background .15s;
+  }
+  .live-indicator {
+    position: relative;
+    display: inline-flex;
+    width: 11px; height: 11px;
+    flex-shrink: 0;
+  }
+  .live-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: var(--color-live-dot);
+    animation: liveRing 1.6s ease-out infinite;
+  }
+  .live-dot {
+    position: relative;
+    width: 11px; height: 11px;
+    border-radius: 999px;
+    background: var(--color-live-dot);
+    animation: liveDot 1.6s ease-in-out infinite;
+  }
+  .banner-text {
+    flex: 1;
+    min-width: 240px;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--color-text-primary);
+  }
+  .banner-class { font-weight: 700; }
+  .banner-status { font-weight: 600; color: var(--color-status-text); }
+  .banner-btn {
+    flex-shrink: 0;
+    height: 38px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 10px;
+    background: var(--color-danger);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .1s;
+  }
+  .banner-btn:hover { background: var(--color-danger-hover); }
+
+  /* ── Section label ── */
+  .section-label {
+    margin: 28px 0 14px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  /* ── Class card grid ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  @media (min-width: 640px)  { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1024px) { .card-grid { grid-template-columns: repeat(3, 1fr); } }
+
+  .class-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+    cursor: pointer;
+    text-align: left;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .class-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card-hover);
+    border-color: var(--border-color-card-hover);
+  }
+  .accent-bar { height: 4px; width: 100%; display: block; }
+  .card-body { display: flex; flex-direction: column; padding: 20px; }
+  .card-name {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -.01em;
+    color: var(--color-text-primary);
+  }
+  .card-subtitle {
+    margin-top: 6px;
+    font-size: 16px;
+    color: var(--color-text-muted);
+  }
+  .card-footer {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--color-border-faint);
+    display: flex;
+    align-items: center;
+  }
+  .card-student-count {
+    font-size: 16px;
+    color: var(--color-text-muted);
+  }
+  .session-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(239,68,68,.12);
+    border: 1px solid rgba(239,68,68,.3);
+    font-size: 16px;
+    font-weight: 600;
+    color: #dc2626;
+  }
+  [data-theme="dark"] .session-badge {
+    background: rgba(248,113,113,.15);
+    border-color: rgba(248,113,113,.35);
+    color: #f87171;
+  }
+  .session-badge-dot {
+    width: 7px; height: 7px;
+    border-radius: 999px;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Top Navigation ── -->
+<header class="top-nav">
+  <div class="nav-inner">
+    <div class="logo-group">
+      <span class="logo-badge">C</span>
+      <span class="logo-text">CodeClan LMS</span>
+    </div>
+
+    <div class="nav-controls">
+      <span class="teacher-name" id="teacher-name">김정보 선생님</span>
+
+      <!-- Dark mode toggle -->
+      <button class="icon-btn" id="theme-toggle" aria-label="다크 모드로 전환">
+        <!-- Moon (shown in light mode) -->
+        <svg id="icon-moon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+        </svg>
+        <!-- Sun (shown in dark mode) -->
+        <svg id="icon-sun" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+        </svg>
+      </button>
+
+      <!-- Language dropdown -->
+      <div class="lang-wrapper" id="lang-wrapper">
+        <button class="lang-trigger" id="lang-trigger" aria-haspopup="listbox" aria-expanded="false">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
+            <path d="M2 12h20"/>
+          </svg>
+          <span id="lang-label">한국어</span>
+          <svg class="chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </button>
+
+        <ul class="lang-menu" id="lang-menu" role="listbox">
+          <li>
+            <button class="lang-item active" id="lang-ko" role="option" aria-selected="true">
+              <span>한국어</span>
+              <svg class="check" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6 9 17l-5-5"/>
+              </svg>
+            </button>
+          </li>
+          <li>
+            <button class="lang-item" id="lang-en" role="option" aria-selected="false">
+              <span>English</span>
+              <svg class="check" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6 9 17l-5-5"/>
+              </svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Settings -->
+      <button class="icon-btn" aria-label="계정 설정">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2Z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ── Main ── -->
+<main class="main">
+
+  <!-- Alert Banner -->
+  <div class="alert-banner">
+    <span class="live-indicator" aria-hidden="true">
+      <span class="live-ring"></span>
+      <span class="live-dot"></span>
+    </span>
+    <p class="banner-text">
+      <strong class="banner-class" data-ko="정보과학 1반" data-en="Computer Science 1">정보과학 1반</strong>
+      <span> — </span>
+      <span class="banner-status" data-ko="1차 수행평가 진행 중" data-en="Assessment 1 in progress">1차 수행평가 진행 중</span>
+      <span> · </span>
+      <span data-ko="18/24 제출 · 잔여 24분" data-en="18/24 submitted · 24 min left">18/24 제출 · 잔여 24분</span>
+    </p>
+    <button class="banner-btn" data-ko="운영 화면으로 →" data-en="Go to live view →">운영 화면으로 →</button>
+  </div>
+
+  <!-- Section label -->
+  <h2 class="section-label" id="section-label" data-ko="내 수업 (6)" data-en="My Classes (6)">내 수업 (6)</h2>
+
+  <!-- Card grid -->
+  <div class="card-grid">
+
+    <!-- 정보과학 1반: 세션 진행 중 -->
+    <button class="class-card">
+      <span class="accent-bar" style="background:#2563eb;"></span>
+      <div class="card-body">
+        <h3 class="card-name" data-ko="정보과학 1반" data-en="Computer Science 1">정보과학 1반</h3>
+        <p class="card-subtitle" data-ko="3학년 1반 · 정보과" data-en="Grade 3, Class 1 · CS Dept.">3학년 1반 · 정보과</p>
+        <div class="card-footer">
+          <span class="session-badge">
+            <span class="session-badge-dot" aria-hidden="true"></span>
+            <span data-ko="세션 진행 중" data-en="Session live">세션 진행 중</span>
+          </span>
+        </div>
+      </div>
+    </button>
+
+    <button class="class-card">
+      <span class="accent-bar" style="background:#2563eb;"></span>
+      <div class="card-body">
+        <h3 class="card-name" data-ko="정보과학 2반" data-en="Computer Science 2">정보과학 2반</h3>
+        <p class="card-subtitle" data-ko="3학년 2반 · 정보과" data-en="Grade 3, Class 2 · CS Dept.">3학년 2반 · 정보과</p>
+        <div class="card-footer">
+          <span class="card-student-count" data-ko="학생 26명" data-en="26 students">학생 26명</span>
+        </div>
+      </div>
+    </button>
+
+    <button class="class-card">
+      <span class="accent-bar" style="background:#7c3aed;"></span>
+      <div class="card-body">
+        <h3 class="card-name" data-ko="알고리즘 기초" data-en="Intro to Algorithms">알고리즘 기초</h3>
+        <p class="card-subtitle" data-ko="2학년 3반 · 정보과" data-en="Grade 2, Class 3 · CS Dept.">2학년 3반 · 정보과</p>
+        <div class="card-footer">
+          <span class="card-student-count" data-ko="학생 22명" data-en="22 students">학생 22명</span>
+        </div>
+      </div>
+    </button>
+
+    <button class="class-card">
+      <span class="accent-bar" style="background:#7c3aed;"></span>
+      <div class="card-body">
+        <h3 class="card-name" data-ko="자료구조" data-en="Data Structures">자료구조</h3>
+        <p class="card-subtitle" data-ko="2학년 4반 · 정보과" data-en="Grade 2, Class 4 · CS Dept.">2학년 4반 · 정보과</p>
+        <div class="card-footer">
+          <span class="card-student-count" data-ko="학생 25명" data-en="25 students">학생 25명</span>
+        </div>
+      </div>
+    </button>
+
+    <button class="class-card">
+      <span class="accent-bar" style="background:#059669;"></span>
+      <div class="card-body">
+        <h3 class="card-name" data-ko="웹 프로그래밍" data-en="Web Programming">웹 프로그래밍</h3>
+        <p class="card-subtitle" data-ko="1학년 2반 · 정보과" data-en="Grade 1, Class 2 · CS Dept.">1학년 2반 · 정보과</p>
+        <div class="card-footer">
+          <span class="card-student-count" data-ko="학생 28명" data-en="28 students">학생 28명</span>
+        </div>
+      </div>
+    </button>
+
+    <button class="class-card">
+      <span class="accent-bar" style="background:#059669;"></span>
+      <div class="card-body">
+        <h3 class="card-name" data-ko="파이썬 입문" data-en="Intro to Python">파이썬 입문</h3>
+        <p class="card-subtitle" data-ko="1학년 5반 · 정보과" data-en="Grade 1, Class 5 · CS Dept.">1학년 5반 · 정보과</p>
+        <div class="card-footer">
+          <span class="card-student-count" data-ko="학생 30명" data-en="30 students">학생 30명</span>
+        </div>
+      </div>
+    </button>
+
+  </div>
+</main>
+
+<script>
+  // ── State ──
+  let lang = 'ko';
+  let dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+  // ── Theme ──
+  function applyTheme() {
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    document.getElementById('icon-moon').style.display = dark ? 'none' : 'block';
+    document.getElementById('icon-sun').style.display  = dark ? 'block' : 'none';
+    document.getElementById('theme-toggle').setAttribute('aria-label',
+      dark ? '라이트 모드로 전환' : '다크 모드로 전환');
+  }
+
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    dark = !dark;
+    applyTheme();
+  });
+
+  // ── i18n ──
+  function applyLang() {
+    document.querySelectorAll('[data-ko]').forEach(el => {
+      el.textContent = el.getAttribute('data-' + lang);
+    });
+    document.getElementById('lang-label').textContent = lang === 'ko' ? '한국어' : 'English';
+    document.getElementById('teacher-name').textContent = lang === 'ko' ? '김정보 선생님' : 'Mr. Kim';
+    document.getElementById('lang-ko').classList.toggle('active', lang === 'ko');
+    document.getElementById('lang-ko').setAttribute('aria-selected', lang === 'ko');
+    document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+    document.getElementById('lang-en').setAttribute('aria-selected', lang === 'en');
+  }
+
+  // ── Language dropdown ──
+  const langTrigger = document.getElementById('lang-trigger');
+  const langMenu    = document.getElementById('lang-menu');
+
+  langTrigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = langMenu.classList.toggle('open');
+    langTrigger.setAttribute('aria-expanded', open);
+  });
+
+  document.getElementById('lang-ko').addEventListener('click', () => {
+    lang = 'ko'; applyLang(); closeMenu();
+  });
+  document.getElementById('lang-en').addEventListener('click', () => {
+    lang = 'en'; applyLang(); closeMenu();
+  });
+
+  function closeMenu() {
+    langMenu.classList.remove('open');
+    langTrigger.setAttribute('aria-expanded', 'false');
+  }
+
+  document.addEventListener('mousedown', (e) => {
+    if (!document.getElementById('lang-wrapper').contains(e.target)) closeMenu();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMenu();
+  });
+
+  // ── Init ──
+  applyTheme();
+  applyLang();
+</script>
+</body>
+</html>

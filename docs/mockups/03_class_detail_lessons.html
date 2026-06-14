@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CodeClan LMS — 수업 내부 차시 탭 [03]</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Pretendard', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-size: 16px;
+    background: #dfe4ec;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    padding: 44px 28px 80px;
+  }
+
+  .page-wrapper { max-width: 1260px; margin: 0 auto; }
+
+  /* ── Card action fade ── */
+  [data-lesson-card] [data-card-actions] { opacity: 0; transition: opacity .12s ease; }
+  [data-lesson-card]:hover [data-card-actions] { opacity: 1; }
+  @media (hover: none) { [data-card-actions] { opacity: 1 !important; } }
+
+  /* ── Sidebar shared (always dark) ── */
+  .nav-item {
+    display: flex; align-items: center; gap: 11px;
+    height: 42px; padding: 0 12px; border-radius: 8px;
+    color: #64748b; font-size: 16px; font-weight: 500;
+    cursor: pointer; text-decoration: none; flex-shrink: 0;
+    border: none; background: transparent; width: 100%; text-align: left;
+    transition: background .1s, color .1s;
+  }
+  .nav-item:hover { background: rgba(255,255,255,.05); color: #e2e8f0; }
+  .nav-item.active {
+    box-shadow: inset 3px 0 0 #93c5fd;
+    background: rgba(147,197,253,.1);
+    color: #f8fafc; font-weight: 600;
+  }
+  .back-btn {
+    display: flex; align-items: center; gap: 7px;
+    height: 34px; padding: 0 8px; margin: 0 -8px;
+    border: none; background: transparent; border-radius: 7px;
+    color: #64748b; font-size: 16px; cursor: pointer; white-space: nowrap;
+    transition: color .1s, background .1s;
+  }
+  .back-btn:hover { color: #93c5fd; background: rgba(255,255,255,.04); }
+  .profile-btn {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; padding: 9px 10px;
+    border: none; background: transparent; border-radius: 9px;
+    cursor: pointer; text-align: left; transition: background .1s;
+  }
+  .profile-btn:hover { background: rgba(255,255,255,.06); }
+
+  /* ── Frame containers ── */
+  .frame { display: flex; align-items: stretch; border-radius: 16px; overflow: hidden; min-height: 640px; margin-bottom: 56px; }
+  .frame-light { box-shadow: 0 24px 52px -18px rgba(15,23,42,.28), 0 0 0 1px rgba(15,23,42,.07); }
+  .frame-dark  { box-shadow: 0 24px 52px -18px rgba(2,6,23,.6),   0 0 0 1px rgba(255,255,255,.05); }
+  .frame-empty { box-shadow: 0 24px 52px -18px rgba(15,23,42,.28), 0 0 0 1px rgba(15,23,42,.07); }
+
+  /* ── Light / Empty frame hovers ── */
+  .frame-light .tb-btn:hover, .frame-empty .tb-btn:hover { background: #f1f5f9; color: #111827; border-color: #cbd5e1; }
+  .frame-light .ip-chip:hover, .frame-empty .ip-chip:hover { background: #f1f5f9; border-color: #cbd5e1; }
+  .frame-light .sort-btn:hover { background: #f8fafc; border-color: #d1d5db; }
+  .frame-light .add-btn:hover, .frame-empty .add-btn:hover, .frame-empty .empty-cta:hover { background: #1d4ed8; }
+  .frame-light .dd-opt:hover, .frame-empty .dd-opt:hover { background: #f8fafc; }
+  .frame-light .lang-btn:hover, .frame-empty .lang-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
+  .frame-light .card-edit:hover { background: #f1f5f9; color: #374151; }
+  .frame-light .card-del:hover  { background: #fef2f2; color: #dc2626; }
+  .frame-light [data-lesson-card]:hover { border-color: #e2e8f0; box-shadow: 0 6px 18px -10px rgba(37,99,235,.18); }
+
+  /* ── Dark frame hovers ── */
+  .frame-dark .tb-btn:hover  { background: #1e293b; color: #f1f5f9; border-color: #475569; }
+  .frame-dark .ip-chip:hover { background: #1e293b; border-color: #475569; }
+  .frame-dark .sort-btn:hover { background: #263347; border-color: #475569; }
+  .frame-dark .add-btn:hover { background: #2563eb; }
+  .frame-dark .dd-opt:hover  { background: #334155; }
+  .frame-dark .lang-btn:hover { background: #334155; border-color: #475569; }
+  .frame-dark .card-edit:hover { background: #334155; color: #e2e8f0; }
+  .frame-dark .card-del:hover  { background: #450a0a; color: #f87171; }
+  .frame-dark [data-lesson-card]:hover { border-color: #334155; box-shadow: 0 6px 18px -10px rgba(2,6,23,.6); }
+
+  /* ── Dropdown panels ── */
+  .dd-panel {
+    position: absolute; z-index: 60;
+    border-radius: 10px; padding: 5px;
+    box-shadow: 0 10px 28px -8px rgba(15,23,42,.18);
+  }
+  .dd-panel.hidden { display: none; }
+  .dd-opt {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; height: 40px; padding: 0 12px;
+    border: none; background: transparent; border-radius: 7px;
+    font-size: 16px; cursor: pointer; text-align: left;
+  }
+  .frame-dark .dd-panel {
+    box-shadow: 0 10px 28px -8px rgba(2,6,23,.5);
+  }
+
+  /* ── Frame label ── */
+  .frame-label {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+  }
+  .frame-label-dot {
+    width: 10px; height: 10px; border-radius: 3px;
+  }
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+<!-- ──────────────── PAGE HEADER ──────────────── -->
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:36px;flex-wrap:wrap;">
+  <div>
+    <div style="font-size:16px;font-weight:600;color:#8b98a9;letter-spacing:.09em;text-transform:uppercase;margin-bottom:6px;">CodeClan LMS</div>
+    <h1 style="font-size:28px;font-weight:700;letter-spacing:-.02em;color:#1e293b;" data-ko="수업 내부 — 차시 탭" data-en="Inside Class — Lessons Tab">수업 내부 — 차시 탭</h1>
+  </div>
+  <button onclick="toggleLangGlobal()" style="display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 18px;border:1px solid #c8cfd8;background:#fff;border-radius:9px;font-size:16px;font-weight:600;color:#374151;cursor:pointer;">언어 전환 / Language</button>
+</div>
+
+<!-- ══════════════════ LIGHT FRAME ══════════════════ -->
+<div class="frame-label">
+  <div class="frame-label-dot" style="background:#fff;border:1px solid #c6cdd6;"></div>
+  <span style="font-size:16px;font-weight:600;color:#64748b;" data-ko="라이트 모드" data-en="Light mode">라이트 모드</span>
+</div>
+
+<div class="frame frame-light" id="frame-light">
+  <!-- SIDEBAR -->
+  <aside style="width:240px;flex-shrink:0;background:#0f172a;display:flex;flex-direction:column;">
+    <div style="padding:20px 16px 0;">
+      <button class="back-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
+        <span data-ko="수업 목록" data-en="Class list">수업 목록</span>
+      </button>
+      <div style="margin-top:16px;padding-bottom:20px;">
+        <div style="font-size:17px;font-weight:700;color:#f1f5f9;line-height:1.3;letter-spacing:-.01em;" data-ko="정보과학 1반" data-en="Comp. Sci. 1">정보과학 1반</div>
+        <div style="font-size:16px;color:#64748b;margin-top:4px;" data-ko="3학년 1반 · 정보과" data-en="Grade 3, Class 1 · CS">3학년 1반 · 정보과</div>
+      </div>
+    </div>
+    <div style="height:1px;background:#1e293b;margin:0 16px;"></div>
+    <nav style="padding:12px 10px 0;display:flex;flex-direction:column;gap:2px;">
+      <button class="nav-item active">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+        <span data-ko="차시" data-en="Lessons">차시</span>
+      </button>
+      <button class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><polyline points="16 11 18 13 22 9"></polyline></svg>
+        <span data-ko="출석부" data-en="Attendance">출석부</span>
+      </button>
+      <button class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+        <span data-ko="평가 진행" data-en="Run Assessment">평가 진행</span>
+      </button>
+    </nav>
+    <div style="flex:1;min-height:24px;"></div>
+    <div style="height:1px;background:#1e293b;margin:0 16px 12px;"></div>
+    <nav style="padding:0 10px;display:flex;flex-direction:column;gap:2px;">
+      <button class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="M12 11h4"></path><path d="M12 16h4"></path><path d="M8 11h.01"></path><path d="M8 16h.01"></path></svg>
+        <span data-ko="평가 관리" data-en="Assessments">평가 관리</span>
+      </button>
+      <button class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <span data-ko="학생 관리" data-en="Students">학생 관리</span>
+      </button>
+    </nav>
+    <div style="padding:10px 10px 18px;margin-top:8px;">
+      <button class="profile-btn">
+        <div style="width:34px;height:34px;border-radius:9999px;background:rgba(37,99,235,.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;font-weight:700;color:#93c5fd;">김</div>
+        <span style="flex:1;font-size:16px;font-weight:500;color:#b8c5d3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" data-ko="김정보 선생님" data-en="Mr. Kim">김정보 선생님</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M20 7h-9"></path><path d="M14 17H5"></path><circle cx="17" cy="17" r="3"></circle><circle cx="7" cy="7" r="3"></circle></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN: Light -->
+  <div style="flex:1;min-width:0;background:#f8fafc;display:flex;flex-direction:column;">
+    <!-- Topbar -->
+    <header style="height:64px;padding:0 24px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <span style="font-size:18px;font-weight:600;color:#111827;" data-ko="정보과학 1반" data-en="Comp. Sci. 1">정보과학 1반</span>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <!-- IP chip -->
+        <button class="ip-chip" id="ip-light" onclick="copyIP('light')"
+          style="display:flex;align-items:center;gap:7px;height:36px;padding:0 11px;border:1px solid #e5e7eb;background:#f8fafc;border-radius:8px;cursor:pointer;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:15px;color:#475569;">
+          <span id="ip-icon-light"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></span>
+          <span id="ip-text-light">http://192.168.1.5:8080</span>
+        </button>
+        <!-- Fullscreen stub -->
+        <button class="tb-btn" title="전체 화면으로 보기"
+          style="width:36px;height:36px;border:1px solid #e5e7eb;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#6b7280;cursor:pointer;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"></path><path d="M9 21H3v-6"></path><path d="M21 3l-7 7"></path><path d="M3 21l7-7"></path></svg>
+        </button>
+        <!-- Dark mode toggle -->
+        <button class="tb-btn" style="width:36px;height:36px;border:1px solid #e5e7eb;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#6b7280;cursor:pointer;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+        </button>
+        <!-- Lang dropdown -->
+        <div style="position:relative;">
+          <button class="lang-btn" onclick="toggleMenu('light-lang')"
+            style="display:flex;align-items:center;gap:6px;height:36px;padding:0 10px;border:1px solid #e5e7eb;background:#fff;border-radius:8px;font-size:16px;color:#374151;cursor:pointer;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+            <span id="lang-label-light" data-ko="한국어" data-en="English">한국어</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.45;"><path d="m6 9 6 6 6-6"></path></svg>
+          </button>
+          <div id="dd-light-lang" class="dd-panel hidden"
+            style="top:42px;right:0;min-width:156px;background:#fff;border:1px solid #e5e7eb;">
+            <button class="dd-opt" onclick="setLang('ko')" style="color:#111827;">
+              <span>한국어</span>
+              <span id="lang-check-light-ko" style="display:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+            </button>
+            <button class="dd-opt" onclick="setLang('en')" style="color:#111827;">
+              <span>English</span>
+              <span id="lang-check-light-en" style="display:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div style="padding:28px 28px 36px;flex:1;">
+      <!-- Section header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:baseline;gap:8px;">
+          <h2 style="font-size:22px;font-weight:700;letter-spacing:-.015em;color:#111827;" data-ko="차시" data-en="Lessons">차시</h2>
+          <span style="font-size:17px;color:#9ca3af;font-weight:400;" id="lesson-count-light">· 총 4개</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <!-- Sort dropdown -->
+          <div style="position:relative;">
+            <button class="sort-btn" onclick="toggleMenu('light-sort')"
+              style="display:flex;align-items:center;gap:7px;height:38px;padding:0 13px;border:1px solid #e5e7eb;background:#fff;border-radius:9px;font-size:16px;color:#374151;font-weight:500;cursor:pointer;white-space:nowrap;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 16-4 4-4-4"></path><path d="M17 20V4"></path><path d="m3 8 4-4 4 4"></path><path d="M7 4v16"></path></svg>
+              <span id="sort-label-light" data-ko="사용자 지정" data-en="Custom order">사용자 지정</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.4;"><path d="m6 9 6 6 6-6"></path></svg>
+            </button>
+            <div id="dd-light-sort" class="dd-panel hidden"
+              style="top:44px;right:0;min-width:192px;background:#fff;border:1px solid #e5e7eb;">
+              <button class="dd-opt" onclick="setSort('custom')" style="color:#111827;">
+                <span data-ko="사용자 지정" data-en="Custom order">사용자 지정</span>
+                <span id="sort-check-light-custom"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+              </button>
+              <button class="dd-opt" onclick="setSort('name')" style="color:#111827;">
+                <span data-ko="이름순" data-en="A → Z">이름순</span>
+                <span id="sort-check-light-name" style="display:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+              </button>
+              <button class="dd-opt" onclick="setSort('newest')" style="color:#111827;">
+                <span data-ko="최근 생성" data-en="Newest first">최근 생성</span>
+                <span id="sort-check-light-newest" style="display:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+              </button>
+              <button class="dd-opt" onclick="setSort('oldest')" style="color:#111827;">
+                <span data-ko="나중 생성" data-en="Oldest first">나중 생성</span>
+                <span id="sort-check-light-oldest" style="display:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+              </button>
+            </div>
+          </div>
+          <!-- Add button -->
+          <button class="add-btn"
+            style="display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 16px;border:none;border-radius:9px;background:#2563eb;color:#fff;font-size:16px;font-weight:600;cursor:pointer;white-space:nowrap;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+            <span data-ko="차시 추가" data-en="Add lesson">차시 추가</span>
+          </button>
+        </div>
+      </div>
+      <p style="margin:0 0 20px;font-size:16px;color:#9ca3af;" data-ko="공개된 차시만 학생에게 노출됩니다." data-en="Only published lessons are visible to students.">공개된 차시만 학생에게 노출됩니다.</p>
+
+      <!-- Cards container -->
+      <div id="cards-light" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+  </div>
+</div>
+<!-- END LIGHT FRAME -->
+
+<!-- ══════════════════ DARK FRAME ══════════════════ -->
+<div class="frame-label">
+  <div class="frame-label-dot" style="background:#0f172a;border:1px solid #334155;"></div>
+  <span style="font-size:16px;font-weight:600;color:#64748b;" data-ko="다크 모드" data-en="Dark mode">다크 모드</span>
+</div>
+
+<div class="frame frame-dark" id="frame-dark">
+  <!-- SIDEBAR (identical structure) -->
+  <aside style="width:240px;flex-shrink:0;background:#0f172a;display:flex;flex-direction:column;border-right:1px solid #1e293b;">
+    <div style="padding:20px 16px 0;">
+      <button class="back-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
+        <span data-ko="수업 목록" data-en="Class list">수업 목록</span>
+      </button>
+      <div style="margin-top:16px;padding-bottom:20px;">
+        <div style="font-size:17px;font-weight:700;color:#f1f5f9;line-height:1.3;letter-spacing:-.01em;" data-ko="정보과학 1반" data-en="Comp. Sci. 1">정보과학 1반</div>
+        <div style="font-size:16px;color:#64748b;margin-top:4px;" data-ko="3학년 1반 · 정보과" data-en="Grade 3, Class 1 · CS">3학년 1반 · 정보과</div>
+      </div>
+    </div>
+    <div style="height:1px;background:#1e293b;margin:0 16px;"></div>
+    <nav style="padding:12px 10px 0;display:flex;flex-direction:column;gap:2px;">
+      <button class="nav-item active">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+        <span data-ko="차시" data-en="Lessons">차시</span>
+      </button>
+      <button class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><polyline points="16 11 18 13 22 9"></polyline></svg>
+        <span data-ko="출석부" data-en="Attendance">출석부</span>
+      </button>
+      <button class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+        <span data-ko="평가 진행" data-en="Run Assessment">평가 진행</span>
+      </button>
+    </nav>
+    <div style="flex:1;min-height:24px;"></div>
+    <div style="height:1px;background:#1e293b;margin:0 16px 12px;"></div>
+    <nav style="padding:0 10px;display:flex;flex-direction:column;gap:2px;">
+      <button class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="M12 11h4"></path><path d="M12 16h4"></path><path d="M8 11h.01"></path><path d="M8 16h.01"></path></svg>
+        <span data-ko="평가 관리" data-en="Assessments">평가 관리</span>
+      </button>
+      <button class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <span data-ko="학생 관리" data-en="Students">학생 관리</span>
+      </button>
+    </nav>
+    <div style="padding:10px 10px 18px;margin-top:8px;">
+      <button class="profile-btn">
+        <div style="width:34px;height:34px;border-radius:9999px;background:rgba(37,99,235,.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;font-weight:700;color:#93c5fd;">김</div>
+        <span style="flex:1;font-size:16px;font-weight:500;color:#b8c5d3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" data-ko="김정보 선생님" data-en="Mr. Kim">김정보 선생님</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M20 7h-9"></path><path d="M14 17H5"></path><circle cx="17" cy="17" r="3"></circle><circle cx="7" cy="7" r="3"></circle></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN: Dark -->
+  <div style="flex:1;min-width:0;background:#0f172a;display:flex;flex-direction:column;">
+    <header style="height:64px;padding:0 24px;background:#1e293b;border-bottom:1px solid #263347;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <span style="font-size:18px;font-weight:600;color:#f1f5f9;" data-ko="정보과학 1반" data-en="Comp. Sci. 1">정보과학 1반</span>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button class="ip-chip" id="ip-dark" onclick="copyIP('dark')"
+          style="display:flex;align-items:center;gap:7px;height:36px;padding:0 11px;border:1px solid #334155;background:#0f172a;border-radius:8px;cursor:pointer;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:15px;color:#94a3b8;">
+          <span id="ip-icon-dark"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></span>
+          <span id="ip-text-dark">http://192.168.1.5:8080</span>
+        </button>
+        <button class="tb-btn" style="width:36px;height:36px;border:1px solid #334155;background:#0f172a;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#94a3b8;cursor:pointer;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"></path><path d="M9 21H3v-6"></path><path d="M21 3l-7 7"></path><path d="M3 21l7-7"></path></svg>
+        </button>
+        <button class="tb-btn" style="width:36px;height:36px;border:1px solid #334155;background:#0f172a;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#94a3b8;cursor:pointer;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>
+        </button>
+        <div style="position:relative;">
+          <button class="lang-btn" onclick="toggleMenu('dark-lang')"
+            style="display:flex;align-items:center;gap:6px;height:36px;padding:0 10px;border:1px solid #334155;background:#1e293b;border-radius:8px;font-size:16px;color:#e2e8f0;cursor:pointer;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+            <span id="lang-label-dark" data-ko="한국어" data-en="English">한국어</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.45;"><path d="m6 9 6 6 6-6"></path></svg>
+          </button>
+          <div id="dd-dark-lang" class="dd-panel hidden"
+            style="top:42px;right:0;min-width:156px;background:#1e293b;border:1px solid #334155;">
+            <button class="dd-opt" onclick="setLang('ko')" style="color:#f1f5f9;">
+              <span>한국어</span>
+              <span id="lang-check-dark-ko" style="display:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+            </button>
+            <button class="dd-opt" onclick="setLang('en')" style="color:#f1f5f9;">
+              <span>English</span>
+              <span id="lang-check-dark-en" style="display:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div style="padding:28px 28px 36px;flex:1;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:baseline;gap:8px;">
+          <h2 style="font-size:22px;font-weight:700;letter-spacing:-.015em;color:#f1f5f9;" data-ko="차시" data-en="Lessons">차시</h2>
+          <span style="font-size:17px;color:#475569;font-weight:400;" id="lesson-count-dark">· 총 4개</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="position:relative;">
+            <button class="sort-btn" onclick="toggleMenu('dark-sort')"
+              style="display:flex;align-items:center;gap:7px;height:38px;padding:0 13px;border:1px solid #334155;background:#1e293b;border-radius:9px;font-size:16px;color:#e2e8f0;font-weight:500;cursor:pointer;white-space:nowrap;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 16-4 4-4-4"></path><path d="M17 20V4"></path><path d="m3 8 4-4 4 4"></path><path d="M7 4v16"></path></svg>
+              <span id="sort-label-dark" data-ko="사용자 지정" data-en="Custom order">사용자 지정</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.4;"><path d="m6 9 6 6 6-6"></path></svg>
+            </button>
+            <div id="dd-dark-sort" class="dd-panel hidden"
+              style="top:44px;right:0;min-width:192px;background:#1e293b;border:1px solid #334155;">
+              <button class="dd-opt" onclick="setSort('custom')" style="color:#f1f5f9;">
+                <span data-ko="사용자 지정" data-en="Custom order">사용자 지정</span>
+                <span id="sort-check-dark-custom"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+              </button>
+              <button class="dd-opt" onclick="setSort('name')" style="color:#f1f5f9;">
+                <span data-ko="이름순" data-en="A → Z">이름순</span>
+                <span id="sort-check-dark-name" style="display:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+              </button>
+              <button class="dd-opt" onclick="setSort('newest')" style="color:#f1f5f9;">
+                <span data-ko="최근 생성" data-en="Newest first">최근 생성</span>
+                <span id="sort-check-dark-newest" style="display:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+              </button>
+              <button class="dd-opt" onclick="setSort('oldest')" style="color:#f1f5f9;">
+                <span data-ko="나중 생성" data-en="Oldest first">나중 생성</span>
+                <span id="sort-check-dark-oldest" style="display:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+              </button>
+            </div>
+          </div>
+          <button class="add-btn"
+            style="display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 16px;border:none;border-radius:9px;background:#3b82f6;color:#fff;font-size:16px;font-weight:600;cursor:pointer;white-space:nowrap;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+            <span data-ko="차시 추가" data-en="Add lesson">차시 추가</span>
+          </button>
+        </div>
+      </div>
+      <p style="margin:0 0 20px;font-size:16px;color:#475569;" data-ko="공개된 차시만 학생에게 노출됩니다." data-en="Only published lessons are visible to students.">공개된 차시만 학생에게 노출됩니다.</p>
+      <div id="cards-dark" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+  </div>
+</div>
+<!-- END DARK FRAME -->
+
+<!-- ══════════════════ EMPTY FRAME ══════════════════ -->
+<div class="frame-label">
+  <div class="frame-label-dot" style="background:#fff;border:1px solid #c6cdd6;"></div>
+  <span style="font-size:16px;font-weight:600;color:#64748b;" data-ko="빈 상태 (라이트)" data-en="Empty state (Light)">빈 상태 (라이트)</span>
+</div>
+
+<div class="frame frame-empty" id="frame-empty">
+  <!-- SIDEBAR -->
+  <aside style="width:240px;flex-shrink:0;background:#0f172a;display:flex;flex-direction:column;">
+    <div style="padding:20px 16px 0;">
+      <button class="back-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
+        <span data-ko="수업 목록" data-en="Class list">수업 목록</span>
+      </button>
+      <div style="margin-top:16px;padding-bottom:20px;">
+        <div style="font-size:17px;font-weight:700;color:#f1f5f9;line-height:1.3;letter-spacing:-.01em;" data-ko="정보과학 3반" data-en="Comp. Sci. 3">정보과학 3반</div>
+        <div style="font-size:16px;color:#64748b;margin-top:4px;" data-ko="3학년 3반 · 정보과" data-en="Grade 3, Class 3 · CS">3학년 3반 · 정보과</div>
+      </div>
+    </div>
+    <div style="height:1px;background:#1e293b;margin:0 16px;"></div>
+    <nav style="padding:12px 10px 0;display:flex;flex-direction:column;gap:2px;">
+      <button class="nav-item active">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+        <span data-ko="차시" data-en="Lessons">차시</span>
+      </button>
+      <button class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><polyline points="16 11 18 13 22 9"></polyline></svg>
+        <span data-ko="출석부" data-en="Attendance">출석부</span>
+      </button>
+      <button class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+        <span data-ko="평가 진행" data-en="Run Assessment">평가 진행</span>
+      </button>
+    </nav>
+    <div style="flex:1;min-height:24px;"></div>
+    <div style="height:1px;background:#1e293b;margin:0 16px 12px;"></div>
+    <nav style="padding:0 10px;display:flex;flex-direction:column;gap:2px;">
+      <button class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="M12 11h4"></path><path d="M12 16h4"></path><path d="M8 11h.01"></path><path d="M8 16h.01"></path></svg>
+        <span data-ko="평가 관리" data-en="Assessments">평가 관리</span>
+      </button>
+      <button class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <span data-ko="학생 관리" data-en="Students">학생 관리</span>
+      </button>
+    </nav>
+    <div style="padding:10px 10px 18px;margin-top:8px;">
+      <button class="profile-btn">
+        <div style="width:34px;height:34px;border-radius:9999px;background:rgba(37,99,235,.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;font-weight:700;color:#93c5fd;">김</div>
+        <span style="flex:1;font-size:16px;font-weight:500;color:#b8c5d3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" data-ko="김정보 선생님" data-en="Mr. Kim">김정보 선생님</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M20 7h-9"></path><path d="M14 17H5"></path><circle cx="17" cy="17" r="3"></circle><circle cx="7" cy="7" r="3"></circle></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN: Empty -->
+  <div style="flex:1;min-width:0;background:#f8fafc;display:flex;flex-direction:column;">
+    <header style="height:64px;padding:0 24px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <span style="font-size:18px;font-weight:600;color:#111827;" data-ko="정보과학 3반" data-en="Comp. Sci. 3">정보과학 3반</span>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button class="ip-chip" id="ip-empty" onclick="copyIP('empty')"
+          style="display:flex;align-items:center;gap:7px;height:36px;padding:0 11px;border:1px solid #e5e7eb;background:#f8fafc;border-radius:8px;cursor:pointer;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:15px;color:#475569;">
+          <span id="ip-icon-empty"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></span>
+          <span id="ip-text-empty">http://192.168.1.5:8080</span>
+        </button>
+        <button class="tb-btn" style="width:36px;height:36px;border:1px solid #e5e7eb;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#6b7280;cursor:pointer;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"></path><path d="M9 21H3v-6"></path><path d="M21 3l-7 7"></path><path d="M3 21l7-7"></path></svg>
+        </button>
+        <button class="tb-btn" style="width:36px;height:36px;border:1px solid #e5e7eb;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#6b7280;cursor:pointer;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+        </button>
+        <div style="position:relative;">
+          <button class="lang-btn" onclick="toggleMenu('empty-lang')"
+            style="display:flex;align-items:center;gap:6px;height:36px;padding:0 10px;border:1px solid #e5e7eb;background:#fff;border-radius:8px;font-size:16px;color:#374151;cursor:pointer;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+            <span id="lang-label-empty" data-ko="한국어" data-en="English">한국어</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.45;"><path d="m6 9 6 6 6-6"></path></svg>
+          </button>
+          <div id="dd-empty-lang" class="dd-panel hidden"
+            style="top:42px;right:0;min-width:156px;background:#fff;border:1px solid #e5e7eb;">
+            <button class="dd-opt" onclick="setLang('ko')" style="color:#111827;">
+              <span>한국어</span>
+              <span id="lang-check-empty-ko" style="display:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+            </button>
+            <button class="dd-opt" onclick="setLang('en')" style="color:#111827;">
+              <span>English</span>
+              <span id="lang-check-empty-en" style="display:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div style="padding:28px 28px 36px;flex:1;display:flex;flex-direction:column;">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px;">
+        <h2 style="font-size:22px;font-weight:700;letter-spacing:-.015em;color:#111827;" data-ko="차시" data-en="Lessons">차시</h2>
+        <span style="font-size:17px;color:#9ca3af;font-weight:400;">· 0</span>
+      </div>
+      <p style="margin:0 0 20px;font-size:16px;color:#9ca3af;" data-ko="공개된 차시만 학생에게 노출됩니다." data-en="Only published lessons are visible to students.">공개된 차시만 학생에게 노출됩니다.</p>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:20px;">
+        <button class="add-btn"
+          style="display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 16px;border:none;border-radius:9px;background:#2563eb;color:#fff;font-size:16px;font-weight:600;cursor:pointer;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+          <span data-ko="차시 추가" data-en="Add lesson">차시 추가</span>
+        </button>
+      </div>
+      <!-- Empty state -->
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;">
+        <div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:52px 32px;border:1.5px dashed #d1d5db;border-radius:16px;background:#fff;max-width:440px;width:100%;">
+          <div style="width:60px;height:60px;border-radius:16px;background:rgba(37,99,235,.08);display:flex;align-items:center;justify-content:center;color:#2563eb;margin-bottom:16px;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+          </div>
+          <div style="font-size:18px;font-weight:600;color:#111827;margin-bottom:8px;" data-ko="아직 차시가 없어요" data-en="No lessons yet">아직 차시가 없어요</div>
+          <div style="font-size:16px;color:#9ca3af;margin-bottom:24px;line-height:1.6;" data-ko="첫 차시를 만들어볼까요?" data-en="Create your first lesson to get started.">첫 차시를 만들어볼까요?</div>
+          <button class="empty-cta"
+            style="display:inline-flex;align-items:center;gap:7px;height:42px;padding:0 20px;border:none;border-radius:10px;background:#2563eb;color:#fff;font-size:16px;font-weight:600;cursor:pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+            <span data-ko="첫 차시 만들기" data-en="Create first lesson">첫 차시 만들기</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- END EMPTY FRAME -->
+
+</div><!-- .page-wrapper -->
+
+<script>
+// ── State ──
+const state = {
+  lang: 'ko',
+  sortOption: 'custom',
+  openMenu: null,
+  copiedKey: null,
+  _copyTimer: null
+};
+
+// ── Lesson data ──
+const LESSONS_RAW = [
+  { num: '01', ko: '변수와 자료형',    en: 'Variables & Data Types', date: '2026-03-04', published: true  },
+  { num: '02', ko: '조건문과 반복문',  en: 'Conditionals & Loops',   date: '2026-03-11', published: true  },
+  { num: '03', ko: '함수 기초',        en: 'Functions Basics',       date: '2026-03-18', published: false },
+  { num: '04', ko: '리스트와 딕셔너리',en: 'Lists & Dictionaries',   date: '2026-03-25', published: false },
+];
+
+const SORT_OPTIONS = [
+  { key: 'custom', ko: '사용자 지정', en: 'Custom order' },
+  { key: 'name',   ko: '이름순',      en: 'A → Z'        },
+  { key: 'newest', ko: '최근 생성',   en: 'Newest first'  },
+  { key: 'oldest', ko: '나중 생성',   en: 'Oldest first'  },
+];
+
+// ── Sort ──
+function getSortedLessons() {
+  const ko = state.lang === 'ko';
+  let list = [...LESSONS_RAW];
+  if (state.sortOption === 'name')
+    list.sort((a, b) => (ko ? a.ko : a.en).localeCompare(ko ? b.ko : b.en));
+  else if (state.sortOption === 'newest')
+    list.sort((a, b) => b.date.localeCompare(a.date));
+  else if (state.sortOption === 'oldest')
+    list.sort((a, b) => a.date.localeCompare(b.date));
+  return list;
+}
+
+// ── Card HTML generators ──
+const SVG_GRIP = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="9" cy="12" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>`;
+const SVG_CAL  = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="M8 2v4"></path><path d="M16 2v4"></path></svg>`;
+const SVG_EDIT = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg>`;
+const SVG_DEL  = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>`;
+
+function makeCardLight(item) {
+  const ko = state.lang === 'ko';
+  const isCustom = state.sortOption === 'custom';
+  const gripOpacity = isCustom ? '1' : '0.28';
+  const gripCursor  = isCustom ? 'grab' : 'not-allowed';
+  const title = ko ? item.ko : item.en;
+  const publishedLabel = ko ? '공개' : 'Published';
+  const draftLabel     = ko ? '비공개' : 'Draft';
+  const editTitle   = ko ? '편집' : 'Edit';
+  const deleteTitle = ko ? '삭제' : 'Delete';
+
+  const badge = item.published
+    ? `<span style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:9999px;background:rgba(16,185,129,.1);color:#059669;font-size:16px;font-weight:600;flex-shrink:0;white-space:nowrap;"><span style="width:6px;height:6px;border-radius:9999px;background:#10b981;flex-shrink:0;"></span>${publishedLabel}</span>`
+    : `<span style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:9999px;background:#f1f5f9;color:#6b7280;font-size:16px;font-weight:600;flex-shrink:0;white-space:nowrap;"><span style="width:6px;height:6px;border-radius:9999px;background:#9ca3af;flex-shrink:0;"></span>${draftLabel}</span>`;
+
+  return `<div data-lesson-card style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #f0f3f8;border-radius:12px;padding:14px 16px;transition:border-color .15s,box-shadow .15s;">
+    <div style="display:flex;align-items:center;flex-shrink:0;color:#d1d5db;padding:0 2px;opacity:${gripOpacity};cursor:${gripCursor};">${SVG_GRIP}</div>
+    <div style="width:44px;height:44px;border-radius:10px;background:rgba(37,99,235,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:17px;font-weight:700;color:#2563eb;letter-spacing:-.02em;">${item.num}</div>
+    <div style="flex:1;min-width:0;">
+      <div style="font-size:17px;font-weight:600;color:#111827;letter-spacing:-.01em;line-height:1.4;">${title}</div>
+      <div style="display:flex;align-items:center;gap:5px;margin-top:4px;font-size:16px;color:#9ca3af;">${SVG_CAL}<span style="font-family:'JetBrains Mono',ui-monospace,monospace;">${item.date}</span></div>
+    </div>
+    ${badge}
+    <div data-card-actions style="display:flex;align-items:center;gap:2px;flex-shrink:0;">
+      <button class="card-edit" title="${editTitle}" style="width:34px;height:34px;border:none;background:transparent;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#9ca3af;cursor:pointer;">${SVG_EDIT}</button>
+      <button class="card-del"  title="${deleteTitle}" style="width:34px;height:34px;border:none;background:transparent;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#9ca3af;cursor:pointer;">${SVG_DEL}</button>
+    </div>
+  </div>`;
+}
+
+function makeCardDark(item) {
+  const ko = state.lang === 'ko';
+  const isCustom = state.sortOption === 'custom';
+  const gripOpacity = isCustom ? '1' : '0.28';
+  const gripCursor  = isCustom ? 'grab' : 'not-allowed';
+  const title = ko ? item.ko : item.en;
+  const publishedLabel = ko ? '공개' : 'Published';
+  const draftLabel     = ko ? '비공개' : 'Draft';
+  const editTitle   = ko ? '편집' : 'Edit';
+  const deleteTitle = ko ? '삭제' : 'Delete';
+
+  const badge = item.published
+    ? `<span style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:9999px;background:rgba(16,185,129,.15);color:#34d399;font-size:16px;font-weight:600;flex-shrink:0;white-space:nowrap;"><span style="width:6px;height:6px;border-radius:9999px;background:#34d399;flex-shrink:0;"></span>${publishedLabel}</span>`
+    : `<span style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:9999px;background:#1e2d40;color:#94a3b8;font-size:16px;font-weight:600;flex-shrink:0;white-space:nowrap;"><span style="width:6px;height:6px;border-radius:9999px;background:#475569;flex-shrink:0;"></span>${draftLabel}</span>`;
+
+  return `<div data-lesson-card style="display:flex;align-items:center;gap:12px;background:#1e293b;border:1px solid #263347;border-radius:12px;padding:14px 16px;transition:border-color .15s,box-shadow .15s;">
+    <div style="display:flex;align-items:center;flex-shrink:0;color:#2d3f55;padding:0 2px;opacity:${gripOpacity};cursor:${gripCursor};">${SVG_GRIP}</div>
+    <div style="width:44px;height:44px;border-radius:10px;background:rgba(59,130,246,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:17px;font-weight:700;color:#60a5fa;letter-spacing:-.02em;">${item.num}</div>
+    <div style="flex:1;min-width:0;">
+      <div style="font-size:17px;font-weight:600;color:#f1f5f9;letter-spacing:-.01em;line-height:1.4;">${title}</div>
+      <div style="display:flex;align-items:center;gap:5px;margin-top:4px;font-size:16px;color:#64748b;">${SVG_CAL}<span style="font-family:'JetBrains Mono',ui-monospace,monospace;">${item.date}</span></div>
+    </div>
+    ${badge}
+    <div data-card-actions style="display:flex;align-items:center;gap:2px;flex-shrink:0;">
+      <button class="card-edit" title="${editTitle}" style="width:34px;height:34px;border:none;background:transparent;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#475569;cursor:pointer;">${SVG_EDIT}</button>
+      <button class="card-del"  title="${deleteTitle}" style="width:34px;height:34px;border:none;background:transparent;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#475569;cursor:pointer;">${SVG_DEL}</button>
+    </div>
+  </div>`;
+}
+
+// ── Render cards ──
+function renderCards() {
+  const sorted = getSortedLessons();
+  document.getElementById('cards-light').innerHTML = sorted.map(makeCardLight).join('');
+  document.getElementById('cards-dark').innerHTML  = sorted.map(makeCardDark).join('');
+}
+
+// ── Apply language ──
+function applyLang() {
+  const ko = state.lang === 'ko';
+  document.querySelectorAll('[data-ko][data-en]').forEach(el => {
+    el.textContent = ko ? el.dataset.ko : el.dataset.en;
+  });
+  // Update lesson counts
+  const countText = ko ? `· 총 ${LESSONS_RAW.length}개` : `· ${LESSONS_RAW.length} total`;
+  const el1 = document.getElementById('lesson-count-light');
+  const el2 = document.getElementById('lesson-count-dark');
+  if (el1) el1.textContent = countText;
+  if (el2) el2.textContent = countText;
+  // Update sort labels
+  updateSortLabels();
+  // Update lang check marks
+  updateLangChecks();
+  // Re-render cards (titles change)
+  renderCards();
+}
+
+// ── Update sort labels ──
+function updateSortLabels() {
+  const ko = state.lang === 'ko';
+  const opt = SORT_OPTIONS.find(o => o.key === state.sortOption) || SORT_OPTIONS[0];
+  const label = ko ? opt.ko : opt.en;
+  ['light', 'dark'].forEach(f => {
+    const el = document.getElementById(`sort-label-${f}`);
+    if (el) el.textContent = label;
+  });
+  // Update check marks in sort dropdowns
+  SORT_OPTIONS.forEach(o => {
+    ['light', 'dark'].forEach(f => {
+      const el = document.getElementById(`sort-check-${f}-${o.key}`);
+      if (el) el.style.display = o.key === state.sortOption ? '' : 'none';
+    });
+  });
+}
+
+// ── Update lang check marks ──
+function updateLangChecks() {
+  const ko = state.lang === 'ko';
+  ['light', 'dark', 'empty'].forEach(f => {
+    const koEl = document.getElementById(`lang-check-${f}-ko`);
+    const enEl = document.getElementById(`lang-check-${f}-en`);
+    if (koEl) koEl.style.display = ko  ? '' : 'none';
+    if (enEl) enEl.style.display = !ko ? '' : 'none';
+  });
+}
+
+// ── Toggle menu ──
+function toggleMenu(key) {
+  state.openMenu = state.openMenu === key ? null : key;
+  updateMenuVisibility();
+}
+
+function updateMenuVisibility() {
+  const menus = ['light-lang', 'dark-lang', 'empty-lang', 'light-sort', 'dark-sort'];
+  menus.forEach(k => {
+    const el = document.getElementById(`dd-${k}`);
+    if (el) el.classList.toggle('hidden', state.openMenu !== k);
+  });
+}
+
+// ── Close menus on outside click ──
+document.addEventListener('mousedown', (e) => {
+  if (!state.openMenu) return;
+  if (e.target.closest('[data-lang-menu], [data-sort-menu]')) return;
+  // Check if click is inside any dropdown trigger or panel
+  const triggers = document.querySelectorAll('.lang-btn, .sort-btn');
+  const panels   = document.querySelectorAll('.dd-panel');
+  let inside = false;
+  triggers.forEach(t => { if (t.contains(e.target)) inside = true; });
+  panels.forEach(p  => { if (p.contains(e.target)) inside = true; });
+  if (!inside) {
+    state.openMenu = null;
+    updateMenuVisibility();
+  }
+});
+
+// ── Set language ──
+function setLang(lang) {
+  state.lang = lang;
+  state.openMenu = null;
+  updateMenuVisibility();
+  applyLang();
+}
+
+function toggleLangGlobal() {
+  setLang(state.lang === 'ko' ? 'en' : 'ko');
+}
+
+// ── Set sort ──
+function setSort(opt) {
+  state.sortOption = opt;
+  state.openMenu = null;
+  updateMenuVisibility();
+  updateSortLabels();
+  renderCards();
+}
+
+// ── IP Copy ──
+const IP_ADDR = 'http://192.168.1.5:8080';
+const SVG_COPY_ICON  = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>`;
+const SVG_COPY_DARK  = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>`;
+const SVG_CHECK_LIGHT = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>`;
+const SVG_CHECK_DARK  = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>`;
+
+function copyIP(frame) {
+  try { navigator.clipboard && navigator.clipboard.writeText(IP_ADDR); } catch(e) {}
+  state.copiedKey = frame;
+  clearTimeout(state._copyTimer);
+
+  const isDark = frame === 'dark';
+  const iconEl = document.getElementById(`ip-icon-${frame}`);
+  const textEl = document.getElementById(`ip-text-${frame}`);
+  if (iconEl) iconEl.innerHTML = isDark ? SVG_CHECK_DARK : SVG_CHECK_LIGHT;
+  if (textEl) {
+    textEl.textContent = state.lang === 'ko' ? '복사됨' : 'Copied';
+    textEl.style.color = isDark ? '#34d399' : '#16a34a';
+    textEl.style.fontWeight = '600';
+    textEl.style.fontFamily = 'inherit';
+  }
+
+  state._copyTimer = setTimeout(() => {
+    state.copiedKey = null;
+    const isDk = frame === 'dark';
+    if (iconEl) iconEl.innerHTML = isDk ? SVG_COPY_DARK : SVG_COPY_ICON;
+    if (textEl) {
+      textEl.textContent = IP_ADDR;
+      textEl.style.color = '';
+      textEl.style.fontWeight = '';
+      textEl.style.fontFamily = "'JetBrains Mono', ui-monospace, monospace";
+    }
+  }, 1600);
+}
+
+// ── Init ──
+renderCards();
+applyLang();
+</script>
+</body>
+</html>
