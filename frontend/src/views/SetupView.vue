@@ -1,6 +1,12 @@
 <template>
   <div class="min-h-screen flex items-center justify-center p-6"
        style="background: var(--color-bg-primary)">
+
+    <!-- 우상단 언어 선택 -->
+    <div class="fixed top-4 right-4">
+      <LanguageSelector />
+    </div>
+
     <div class="w-full max-w-md rounded-xl p-8"
          style="background: var(--color-bg-secondary); box-shadow: var(--shadow-card)">
 
@@ -139,6 +145,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { IconSchool, IconUser, IconAlertCircle, IconLoader2 } from '@tabler/icons-vue'
 import { useAuthStore } from '@/stores/auth'
+import LanguageSelector from '@/components/LanguageSelector.vue'
 
 const { t } = useI18n()
 const router = useRouter()
