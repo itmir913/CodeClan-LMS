@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>08 — 수행평가 관리 (목록 → 문제 구성 → 기본점수 → 내보내기)</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{font-family:'Pretendard',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;background:#dfe4ec;}
+button{font-family:inherit;cursor:pointer;}
+input,textarea{font-family:inherit;}
+
+/* sidebar */
+.nav-back:hover{color:#93c5fd !important;background:rgba(255,255,255,.04) !important;}
+.nav-item:hover{background:rgba(255,255,255,.05) !important;color:#e2e8f0 !important;}
+.nav-user:hover{background:rgba(255,255,255,.06) !important;}
+
+/* content */
+.assessment-row:hover{border-color:#e2e8f0 !important;box-shadow:0 2px 10px -4px rgba(37,99,235,.1) !important;}
+.btn-ghost:hover{background:#f1f5f9 !important;border-color:#cbd5e1 !important;}
+.btn-danger-ghost:hover{background:#fef2f2 !important;border-color:#fca5a5 !important;}
+.problem-add-btn:hover{border-color:#2563eb !important;color:#2563eb !important;background:rgba(37,99,235,.04) !important;}
+.score-input:focus{outline:none;border-color:#2563eb !important;box-shadow:0 0 0 3px rgba(37,99,235,.15) !important;}
+
+/* modal */
+.modal-problem-row:hover{background:#f8fafc !important;}
+.modal-overlay{position:absolute;inset:0;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;z-index:10;}
+
+/* target radio */
+.target-card{border:2px solid #e5e7eb;border-radius:12px;padding:14px 16px;cursor:pointer;transition:border-color .15s,background .15s;}
+.target-card.selected{border-color:#2563eb;background:rgba(37,99,235,.05);}
+.target-card:hover:not(.selected){border-color:#cbd5e1;background:#f8fafc;}
+</style>
+</head>
+<body>
+
+<div style="padding:44px 28px 80px;">
+<div style="max-width:1260px;margin:0 auto;">
+
+<!-- PAGE HEADER -->
+<div style="margin-bottom:12px;">
+  <div style="font-size:16px;font-weight:600;color:#8b98a9;letter-spacing:.09em;text-transform:uppercase;margin-bottom:6px;">CodeClan LMS — Mockup 08</div>
+  <h1 style="font-size:28px;font-weight:700;letter-spacing:-.02em;color:#1e293b;">수행평가 관리 — 목록 / 문제 구성 / 기본점수 / 내보내기</h1>
+</div>
+
+<!-- LANG TOGGLE -->
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:36px;">
+  <span style="font-size:16px;color:#64748b;font-weight:500;">언어:</span>
+  <button id="btn-ko" onclick="setLang('ko')" style="height:30px;padding:0 14px;border-radius:999px;border:none;background:#0f172a;color:#93c5fd;font-size:16px;font-weight:600;">한국어</button>
+  <button id="btn-en" onclick="setLang('en')" style="height:30px;padding:0 14px;border-radius:999px;border:1px solid #cbd5e1;background:#fff;color:#64748b;font-size:16px;font-weight:500;">English</button>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- FRAME A — 수업 운영 탭: 수행평가 목록                 -->
+<!-- ════════════════════════════════════════════════════ -->
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+  <span style="display:inline-flex;align-items:center;height:28px;padding:0 12px;border-radius:999px;background:#0f172a;color:#93c5fd;font-size:16px;font-weight:700;" data-ko="수업 운영 탭" data-en="Assessments Tab"></span>
+  <span style="font-size:16px;color:#94a3b8;font-weight:500;" data-ko="수행평가 목록 — 수업 운영 진입점" data-en="Assessment list — entry point"></span>
+</div>
+
+<div style="display:flex;align-items:stretch;border-radius:16px;overflow:hidden;box-shadow:0 24px 52px -18px rgba(15,23,42,.28),0 0 0 1px rgba(15,23,42,.07);margin-bottom:64px;min-height:600px;">
+
+  <!-- SIDEBAR (수업 운영 active) -->
+  <aside style="width:240px;flex-shrink:0;background:#0f172a;display:flex;flex-direction:column;">
+    <div style="padding:20px 16px 0;">
+      <button class="nav-back" style="display:flex;align-items:center;gap:7px;height:34px;padding:0 8px;margin:0 -8px;border:none;background:transparent;border-radius:7px;color:#64748b;font-size:16px;transition:color .15s,background .15s;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        <span data-ko="내 수업" data-en="My Classes"></span>
+      </button>
+      <div style="margin-top:16px;padding-bottom:20px;">
+        <div style="font-size:17px;font-weight:700;color:#f1f5f9;" data-ko="정보과학 1반" data-en="CS Class 1"></div>
+        <div style="font-size:16px;color:#64748b;margin-top:4px;" data-ko="3학년 1반 · 정보과" data-en="Grade 3–1 · Informatics"></div>
+      </div>
+    </div>
+    <div style="height:1px;background:#1e293b;margin:0 16px;"></div>
+    <nav style="padding:12px 10px 0;display:flex;flex-direction:column;gap:2px;">
+      <a class="nav-item" style="display:flex;align-items:center;gap:11px;height:42px;padding:0 12px;border-radius:8px;color:#64748b;font-size:16px;font-weight:500;flex-shrink:0;transition:background .15s,color .15s;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <span data-ko="차시" data-en="Lessons"></span>
+      </a>
+      <a class="nav-item" style="display:flex;align-items:center;gap:11px;height:42px;padding:0 12px;border-radius:8px;color:#64748b;font-size:16px;font-weight:500;flex-shrink:0;transition:background .15s,color .15s;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+        <span data-ko="출석" data-en="Attendance"></span>
+      </a>
+      <a style="display:flex;align-items:center;gap:11px;height:42px;padding:0 12px;border-radius:8px;box-shadow:inset 3px 0 0 #93c5fd;background:rgba(147,197,253,.1);color:#f8fafc;font-size:16px;font-weight:600;flex-shrink:0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+        <span data-ko="수업 운영" data-en="Assessments"></span>
+      </a>
+    </nav>
+    <div style="flex:1;"></div>
+    <div style="height:1px;background:#1e293b;margin:0 16px 12px;"></div>
+    <nav style="padding:0 10px;display:flex;flex-direction:column;gap:2px;">
+      <a class="nav-item" style="display:flex;align-items:center;gap:11px;height:42px;padding:0 12px;border-radius:8px;color:#64748b;font-size:16px;font-weight:500;flex-shrink:0;transition:background .15s,color .15s;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg><span data-ko="수업 관리" data-en="Class Settings"></span></a>
+      <a class="nav-item" style="display:flex;align-items:center;gap:11px;height:42px;padding:0 12px;border-radius:8px;color:#64748b;font-size:16px;font-weight:500;flex-shrink:0;transition:background .15s,color .15s;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-ko="학생" data-en="Students"></span></a>
+    </nav>
+    <div style="padding:10px 10px 18px;margin-top:8px;"><button class="nav-user" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:none;background:transparent;border-radius:9px;text-align:left;transition:background .15s;"><div style="width:34px;height:34px;border-radius:999px;background:rgba(37,99,235,.4);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#93c5fd;" data-ko="김" data-en="K"></div><span style="flex:1;font-size:16px;font-weight:500;color:#b8c5d3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" data-ko="김정보 선생님" data-en="Teacher Kim"></span></button></div>
+  </aside>
+
+  <!-- MAIN -->
+  <div style="flex:1;min-width:0;background:#f8fafc;display:flex;flex-direction:column;">
+    <header style="height:64px;padding:0 24px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <span style="font-size:18px;font-weight:600;color:#111827;" data-ko="정보과학 1반" data-en="CS Class 1"></span>
+    </header>
+
+    <div style="padding:28px;flex:1;overflow-y:auto;">
+
+      <!-- Section header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div>
+          <h2 style="font-size:20px;font-weight:700;color:#111827;margin-bottom:4px;" data-ko="수행평가 관리" data-en="Assessment Management"></h2>
+          <p style="font-size:16px;color:#9ca3af;" data-ko="수업의 수행평가를 구성하고 세션을 운영합니다." data-en="Configure assessments and run exam sessions."></p>
+        </div>
+        <button onclick="openCreateModal()" style="display:flex;align-items:center;gap:7px;height:40px;padding:0 16px;background:#2563eb;border:none;border-radius:8px;font-size:16px;font-weight:600;color:#fff;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          <span data-ko="새 수행평가" data-en="New Assessment"></span>
+        </button>
+      </div>
+
+      <!-- Assessment list -->
+      <div id="assessment-list-a" style="display:flex;flex-direction:column;gap:10px;"></div>
+
+    </div>
+  </div>
+</div>
+<!-- END FRAME A -->
+
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- FRAME B — 수행평가 상세: 문제 구성 + 배점 편집        -->
+<!-- ════════════════════════════════════════════════════ -->
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+  <span style="display:inline-flex;align-items:center;height:28px;padding:0 12px;border-radius:999px;background:#0f172a;color:#93c5fd;font-size:16px;font-weight:700;" data-ko="수행평가 상세" data-en="Assessment Detail"></span>
+  <span style="font-size:16px;color:#94a3b8;font-weight:500;" data-ko="문제 연결 + 배점 편집 (배점 입력 시 합산 자동 계산)" data-en="Link problems + edit scores (total auto-calculated)"></span>
+</div>
+
+<div style="display:flex;align-items:stretch;border-radius:16px;overflow:hidden;box-shadow:0 24px 52px -18px rgba(15,23,42,.28),0 0 0 1px rgba(15,23,42,.07);margin-bottom:64px;min-height:640px;position:relative;">
+
+  <!-- Sidebar (same, 수업 운영 active) -->
+  <aside style="width:240px;flex-shrink:0;background:#0f172a;display:flex;flex-direction:column;">
+    <div style="padding:20px 16px 0;"><button class="nav-back" style="display:flex;align-items:center;gap:7px;height:34px;padding:0 8px;margin:0 -8px;border:none;background:transparent;border-radius:7px;color:#64748b;font-size:16px;transition:color .15s,background .15s;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg><span data-ko="내 수업" data-en="My Classes"></span></button><div style="margin-top:16px;padding-bottom:20px;"><div style="font-size:17px;font-weight:700;color:#f1f5f9;" data-ko="정보과학 1반" data-en="CS Class 1"></div><div style="font-size:16px;color:#64748b;margin-top:4px;" data-ko="3학년 1반 · 정보과" data-en="Grade 3–1 · Informatics"></div></div></div>
+    <div style="height:1px;background:#1e293b;margin:0 16px;"></div>
+    <nav style="padding:12px 10px 0;display:flex;flex-direction:column;gap:2px;">
+      <a class="nav-item" style="display:flex;align-items:center;gap:11px;height:42px;padding:0 12px;border-radius:8px;color:#64748b;font-size:16px;font-weight:500;flex-shrink:0;transition:background .15s,color .15s;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span data-ko="차시" data-en="Lessons"></span></a>
+      <a class="nav-item" style="display:flex;align-items:center;gap:11px;height:42px;padding:0 12px;border-radius:8px;color:#64748b;font-size:16px;font-weight:500;flex-shrink:0;transition:background .15s,color .15s;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg><span data-ko="출석" data-en="Attendance"></span></a>
+      <a style="display:flex;align-items:center;gap:11px;height:42px;padding:0 12px;border-radius:8px;box-shadow:inset 3px 0 0 #93c5fd;background:rgba(147,197,253,.1);color:#f8fafc;font-size:16px;font-weight:600;flex-shrink:0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg><span data-ko="수업 운영" data-en="Assessments"></span></a>
+    </nav>
+    <div style="flex:1;"></div>
+    <div style="height:1px;background:#1e293b;margin:0 16px 12px;"></div>
+    <nav style="padding:0 10px;display:flex;flex-direction:column;gap:2px;"><a class="nav-item" style="display:flex;align-items:center;gap:11px;height:42px;padding:0 12px;border-radius:8px;color:#64748b;font-size:16px;font-weight:500;flex-shrink:0;transition:background .15s,color .15s;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg><span data-ko="수업 관리" data-en="Class Settings"></span></a><a class="nav-item" style="display:flex;align-items:center;gap:11px;height:42px;padding:0 12px;border-radius:8px;color:#64748b;font-size:16px;font-weight:500;flex-shrink:0;transition:background .15s,color .15s;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-ko="학생" data-en="Students"></span></a></nav>
+    <div style="padding:10px 10px 18px;margin-top:8px;"><button class="nav-user" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:none;background:transparent;border-radius:9px;text-align:left;transition:background .15s;"><div style="width:34px;height:34px;border-radius:999px;background:rgba(37,99,235,.4);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#93c5fd;" data-ko="김" data-en="K"></div><span style="flex:1;font-size:16px;font-weight:500;color:#b8c5d3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" data-ko="김정보 선생님" data-en="Teacher Kim"></span></button></div>
+  </aside>
+
+  <!-- MAIN: assessment detail -->
+  <div style="flex:1;min-width:0;background:#f8fafc;display:flex;flex-direction:column;">
+    <header style="height:64px;padding:0 24px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <span style="font-size:18px;font-weight:600;color:#111827;" data-ko="정보과학 1반" data-en="CS Class 1"></span>
+    </header>
+
+    <div style="padding:24px 28px 36px;flex:1;overflow-y:auto;">
+
+      <!-- Back link + breadcrumb -->
+      <a style="display:inline-flex;align-items:center;gap:6px;font-size:16px;color:#6b7280;font-weight:500;margin-bottom:18px;cursor:pointer;transition:color .15s;" class="btn-ghost" style="border-radius:6px;padding:2px 4px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        <span data-ko="수행평가 목록" data-en="Assessment List"></span>
+      </a>
+
+      <!-- Assessment header -->
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;">
+        <div>
+          <h2 style="font-size:22px;font-weight:700;color:#111827;margin-bottom:6px;" data-ko="1회 수행평가 — 파이썬 기초" data-en="Assessment 1 — Python Basics"></h2>
+          <!-- Score summary row -->
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <!-- 원점수 -->
+            <div style="display:flex;align-items:baseline;gap:3px;">
+              <span style="font-size:16px;color:#9ca3af;" data-ko="원점수" data-en="Raw"></span>
+              <span id="total-score" style="font-size:22px;font-weight:700;color:#2563eb;font-family:'JetBrains Mono',ui-monospace,monospace;margin-left:4px;">100</span>
+              <span style="font-size:16px;color:#9ca3af;" data-ko="점" data-en="pt"></span>
+            </div>
+            <span style="color:#d1d5db;font-size:18px;">+</span>
+            <!-- 기본점수 inline edit -->
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:16px;color:#9ca3af;" data-ko="기본점수" data-en="Base"></span>
+              <input id="base-score-input" type="number" value="0" min="0" max="100"
+                onchange="updateFinalScore()"
+                style="width:60px;height:30px;border:1.5px solid #e5e7eb;border-radius:7px;padding:0 8px;font-size:16px;font-weight:700;color:#374151;font-family:'JetBrains Mono',ui-monospace,monospace;text-align:center;background:#f8fafc;">
+              <span style="font-size:16px;color:#9ca3af;" data-ko="점" data-en="pt"></span>
+            </div>
+            <span style="color:#d1d5db;font-size:18px;">=</span>
+            <!-- 최종 만점 -->
+            <div style="display:flex;align-items:baseline;gap:3px;padding:3px 10px;background:rgba(37,99,235,.07);border-radius:7px;">
+              <span style="font-size:16px;color:#2563eb;font-weight:600;" data-ko="최종" data-en="Final"></span>
+              <span id="final-score" style="font-size:22px;font-weight:700;color:#2563eb;font-family:'JetBrains Mono',ui-monospace,monospace;margin-left:4px;">100</span>
+              <span style="font-size:16px;color:#2563eb;" data-ko="점 만점" data-en="pt max"></span>
+            </div>
+            <span style="color:#e5e7eb;">·</span>
+            <span id="problem-count-b" style="font-size:16px;color:#6b7280;font-weight:500;"></span>
+            <span style="color:#e5e7eb;">·</span>
+            <span style="display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px;border-radius:999px;background:#f1f5f9;font-size:16px;color:#6b7280;font-weight:500;" data-ko="세션 2회 진행됨" data-en="2 sessions run"></span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+          <button onclick="showExportFrame()" style="display:flex;align-items:center;gap:6px;height:36px;padding:0 14px;border:1px solid #d1d5db;background:#fff;border-radius:8px;font-size:16px;color:#374151;transition:background .15s,border-color .15s;" class="btn-ghost">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span data-ko="결과 내보내기" data-en="Export Results"></span>
+          </button>
+          <button class="btn-ghost" style="height:36px;padding:0 14px;border:1px solid #e5e7eb;background:#fff;border-radius:8px;font-size:16px;color:#374151;transition:background .15s,border-color .15s;" data-ko="세션 기록" data-en="Session History"></button>
+          <button onclick="openSessionModal()" style="display:flex;align-items:center;gap:7px;height:40px;padding:0 18px;background:#2563eb;border:none;border-radius:8px;font-size:16px;font-weight:700;color:#fff;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span data-ko="새 세션 시작" data-en="New Session"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Score distribution card -->
+      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span style="font-size:16px;font-weight:600;color:#374151;" data-ko="문항 배점 구성" data-en="Score Distribution"></span>
+          <!-- mini formula -->
+          <div style="display:flex;align-items:center;gap:6px;font-size:16px;color:#9ca3af;">
+            <span data-ko="문항 합계" data-en="Item total"></span>
+            <span id="dist-raw" style="font-weight:700;color:#2563eb;font-family:'JetBrains Mono',ui-monospace,monospace;">100</span>
+            <span data-ko="점" data-en="pt"></span>
+            <span>+</span>
+            <span data-ko="기본" data-en="base"></span>
+            <span id="dist-base" style="font-weight:700;color:#374151;font-family:'JetBrains Mono',ui-monospace,monospace;">0</span>
+            <span data-ko="점" data-en="pt"></span>
+            <span>=</span>
+            <span data-ko="최종 만점" data-en="max"></span>
+            <span id="dist-final" style="font-weight:700;color:#2563eb;font-family:'JetBrains Mono',ui-monospace,monospace;">100</span>
+            <span data-ko="점" data-en="pt"></span>
+          </div>
+        </div>
+        <div style="display:flex;height:10px;border-radius:999px;overflow:hidden;gap:2px;" id="score-bar"></div>
+        <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;" id="score-legend"></div>
+      </div>
+
+      <!-- Problem list header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <h3 style="font-size:17px;font-weight:700;color:#111827;" data-ko="문제 목록" data-en="Problems"></h3>
+        <span style="font-size:16px;color:#9ca3af;" data-ko="배점을 직접 입력해 조정하세요" data-en="Click scores to edit them"></span>
+      </div>
+
+      <!-- Problem rows (editable scores) -->
+      <div id="problem-rows-b" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;"></div>
+
+      <!-- Add problem button -->
+      <button onclick="openProblemModal()" class="problem-add-btn" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:46px;border:1.5px dashed #d1d5db;background:transparent;border-radius:10px;font-size:16px;font-weight:600;color:#9ca3af;transition:border-color .15s,color .15s,background .15s;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        <span data-ko="문제 은행에서 문제 추가" data-en="Add from Problem Bank"></span>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ── MODAL C: 문제 선택 ── -->
+  <div id="problem-modal" class="modal-overlay" style="display:none;">
+    <div style="width:580px;max-height:80vh;background:#fff;border-radius:16px;box-shadow:0 32px 64px -12px rgba(0,0,0,.25);display:flex;flex-direction:column;overflow:hidden;">
+      <div style="padding:20px 24px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+        <div>
+          <h3 style="font-size:18px;font-weight:700;color:#111827;" data-ko="문제 은행에서 추가" data-en="Add from Problem Bank"></h3>
+          <p style="font-size:16px;color:#9ca3af;margin-top:2px;" data-ko="추가할 문제를 선택하세요" data-en="Select problems to add"></p>
+        </div>
+        <button onclick="closeProblemModal()" class="btn-ghost" style="width:36px;height:36px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <!-- Search -->
+      <div style="padding:12px 20px;border-bottom:1px solid #f0f3f8;flex-shrink:0;">
+        <div style="position:relative;">
+          <svg style="position:absolute;left:11px;top:50%;transform:translateY(-50%);" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" style="width:100%;height:38px;border:1px solid #e5e7eb;border-radius:8px;padding:0 12px 0 34px;font-size:16px;background:#f8fafc;" placeholder="" id="modal-search-placeholder">
+        </div>
+      </div>
+      <!-- Problem list -->
+      <div style="flex:1;overflow-y:auto;padding:8px 0;" id="modal-problem-list"></div>
+      <!-- Footer -->
+      <div style="padding:14px 20px;border-top:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:#f8fafc;">
+        <span id="modal-select-count" style="font-size:16px;color:#6b7280;"></span>
+        <div style="display:flex;gap:8px;">
+          <button onclick="closeProblemModal()" class="btn-ghost" style="height:38px;padding:0 16px;border:1px solid #e5e7eb;background:#fff;border-radius:8px;font-size:16px;color:#374151;transition:background .15s,border-color .15s;" data-ko="취소" data-en="Cancel"></button>
+          <button onclick="confirmProblemAdd()" style="height:38px;padding:0 18px;background:#2563eb;border:none;border-radius:8px;font-size:16px;font-weight:600;color:#fff;" data-ko="추가하기" data-en="Add Selected"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MODAL D: 세션 생성 ── -->
+  <div id="session-modal" class="modal-overlay" style="display:none;">
+    <div style="width:480px;background:#fff;border-radius:16px;box-shadow:0 32px 64px -12px rgba(0,0,0,.25);overflow:hidden;">
+      <div style="padding:20px 24px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <h3 style="font-size:18px;font-weight:700;color:#111827;" data-ko="새 세션 시작" data-en="New Session"></h3>
+          <p style="font-size:16px;color:#9ca3af;margin-top:2px;" data-ko="1회 수행평가 — 파이썬 기초" data-en="Assessment 1 — Python Basics"></p>
+        </div>
+        <button onclick="closeSessionModal()" class="btn-ghost" style="width:36px;height:36px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+
+      <div style="padding:22px 24px;display:flex;flex-direction:column;gap:20px;">
+
+        <!-- Time limit -->
+        <div>
+          <label style="display:block;font-size:16px;font-weight:600;color:#374151;margin-bottom:8px;" data-ko="시간 제한" data-en="Time Limit"></label>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input type="number" value="40" min="1" max="300" style="width:100px;height:44px;border:1.5px solid #e5e7eb;border-radius:9px;padding:0 14px;font-size:18px;font-weight:600;color:#111827;font-family:'JetBrains Mono',ui-monospace,monospace;text-align:center;">
+            <span style="font-size:16px;color:#374151;" data-ko="분" data-en="minutes"></span>
+            <div style="display:flex;gap:6px;margin-left:4px;">
+              <button class="btn-ghost" style="height:32px;padding:0 12px;border:1px solid #e5e7eb;background:#fff;border-radius:7px;font-size:16px;color:#374151;transition:background .15s,border-color .15s;" data-ko="20분" data-en="20 min"></button>
+              <button class="btn-ghost" style="height:32px;padding:0 12px;border:1px solid #e5e7eb;background:#fff;border-radius:7px;font-size:16px;color:#374151;transition:background .15s,border-color .15s;" data-ko="30분" data-en="30 min"></button>
+              <button class="btn-ghost" style="height:32px;padding:0 12px;border:1px solid #2563eb;background:rgba(37,99,235,.06);border-radius:7px;font-size:16px;color:#2563eb;font-weight:600;" data-ko="40분" data-en="40 min"></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Target type -->
+        <div>
+          <label style="display:block;font-size:16px;font-weight:600;color:#374151;margin-bottom:10px;" data-ko="응시 대상" data-en="Target Students"></label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;" id="target-cards">
+            <div class="target-card selected" onclick="selectTarget('all')" id="target-all">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                <div id="radio-all" style="width:18px;height:18px;border-radius:999px;border:2px solid #2563eb;background:#2563eb;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="width:7px;height:7px;border-radius:999px;background:#fff;display:block;"></span></div>
+                <span style="font-size:16px;font-weight:600;color:#111827;" data-ko="전체 학생" data-en="All Students"></span>
+              </div>
+              <p style="font-size:16px;color:#6b7280;padding-left:26px;" data-ko="수업의 모든 학생 (32명)" data-en="All students in class (32)"></p>
+            </div>
+            <div class="target-card" onclick="selectTarget('individual')" id="target-individual">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                <div id="radio-individual" style="width:18px;height:18px;border-radius:999px;border:2px solid #d1d5db;background:#fff;flex-shrink:0;"></div>
+                <span style="font-size:16px;font-weight:600;color:#111827;" data-ko="개별 지정" data-en="Individual"></span>
+              </div>
+              <p style="font-size:16px;color:#6b7280;padding-left:26px;" data-ko="특정 학생만 선택 (재시험 등)" data-en="Select specific students (retake, etc.)"></p>
+            </div>
+          </div>
+          <!-- Individual student picker (hidden initially) -->
+          <div id="individual-picker" style="display:none;margin-top:12px;padding:14px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;">
+            <p style="font-size:16px;color:#6b7280;margin-bottom:10px;" data-ko="응시할 학생을 선택하세요" data-en="Select students to take the exam"></p>
+            <div style="display:flex;flex-wrap:wrap;gap:7px;" id="student-picker-chips"></div>
+          </div>
+        </div>
+
+        <!-- Lobby option -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;">
+          <div>
+            <div style="font-size:16px;font-weight:600;color:#374151;" data-ko="로비 대기 후 시작" data-en="Wait in Lobby First"></div>
+            <div style="font-size:16px;color:#9ca3af;margin-top:2px;" data-ko="학생 입장 확인 후 교사가 직접 시작" data-en="Teacher manually starts after students join"></div>
+          </div>
+          <button id="lobby-toggle" onclick="toggleLobby()" style="position:relative;width:48px;height:26px;border-radius:999px;border:none;background:#2563eb;transition:background .2s;">
+            <span id="lobby-knob" style="position:absolute;top:3px;left:25px;width:20px;height:20px;border-radius:999px;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);"></span>
+          </button>
+        </div>
+
+      </div>
+
+      <div style="padding:16px 24px;border-top:1px solid #e5e7eb;display:flex;gap:8px;justify-content:flex-end;background:#f8fafc;">
+        <button onclick="closeSessionModal()" class="btn-ghost" style="height:40px;padding:0 16px;border:1px solid #e5e7eb;background:#fff;border-radius:8px;font-size:16px;color:#374151;transition:background .15s,border-color .15s;" data-ko="취소" data-en="Cancel"></button>
+        <button style="height:40px;padding:0 20px;background:#2563eb;border:none;border-radius:8px;font-size:16px;font-weight:700;color:#fff;" data-ko="로비 생성" data-en="Create Lobby" id="session-create-btn"></button>
+      </div>
+    </div>
+  </div>
+
+</div>
+<!-- END FRAME B (+ embedded modals C & D) -->
+
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- FRAME C — 결과 내보내기 (Export Preview)              -->
+<!-- ════════════════════════════════════════════════════ -->
+<div id="frame-c-export" style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+  <span style="display:inline-flex;align-items:center;height:28px;padding:0 12px;border-radius:999px;background:#0f172a;color:#93c5fd;font-size:16px;font-weight:700;" data-ko="결과 내보내기" data-en="Export Results"></span>
+  <span style="font-size:16px;color:#94a3b8;font-weight:500;" data-ko="정오 기록 + 원점수 + 기본점수 → CSV / NEIS 업로드용" data-en="Correct/Wrong + Raw + Base → CSV for grade upload"></span>
+</div>
+
+<div style="display:flex;align-items:stretch;border-radius:16px;overflow:hidden;box-shadow:0 24px 52px -18px rgba(15,23,42,.28),0 0 0 1px rgba(15,23,42,.07);margin-bottom:64px;min-height:580px;">
+
+  <!-- Sidebar -->
+  <aside style="width:240px;flex-shrink:0;background:#0f172a;display:flex;flex-direction:column;">
+    <div style="padding:20px 16px 0;"><button class="nav-back" style="display:flex;align-items:center;gap:7px;height:34px;padding:0 8px;margin:0 -8px;border:none;background:transparent;border-radius:7px;color:#64748b;font-size:16px;transition:color .15s,background .15s;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg><span data-ko="내 수업" data-en="My Classes"></span></button><div style="margin-top:16px;padding-bottom:20px;"><div style="font-size:17px;font-weight:700;color:#f1f5f9;" data-ko="정보과학 1반" data-en="CS Class 1"></div><div style="font-size:16px;color:#64748b;margin-top:4px;" data-ko="3학년 1반 · 정보과" data-en="Grade 3–1 · Informatics"></div></div></div>
+    <div style="height:1px;background:#1e293b;margin:0 16px;"></div>
+    <nav style="padding:12px 10px 0;display:flex;flex-direction:column;gap:2px;">
+      <a class="nav-item" style="display:flex;align-items:center;gap:11px;height:42px;padding:0 12px;border-radius:8px;color:#64748b;font-size:16px;font-weight:500;flex-shrink:0;transition:background .15s,color .15s;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span data-ko="차시" data-en="Lessons"></span></a>
+      <a class="nav-item" style="display:flex;align-items:center;gap:11px;height:42px;padding:0 12px;border-radius:8px;color:#64748b;font-size:16px;font-weight:500;flex-shrink:0;transition:background .15s,color .15s;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg><span data-ko="출석" data-en="Attendance"></span></a>
+      <a style="display:flex;align-items:center;gap:11px;height:42px;padding:0 12px;border-radius:8px;box-shadow:inset 3px 0 0 #93c5fd;background:rgba(147,197,253,.1);color:#f8fafc;font-size:16px;font-weight:600;flex-shrink:0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg><span data-ko="수업 운영" data-en="Assessments"></span></a>
+    </nav>
+    <div style="flex:1;"></div>
+    <div style="height:1px;background:#1e293b;margin:0 16px 12px;"></div>
+    <nav style="padding:0 10px;display:flex;flex-direction:column;gap:2px;"><a class="nav-item" style="display:flex;align-items:center;gap:11px;height:42px;padding:0 12px;border-radius:8px;color:#64748b;font-size:16px;font-weight:500;flex-shrink:0;transition:background .15s,color .15s;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg><span data-ko="수업 관리" data-en="Class Settings"></span></a><a class="nav-item" style="display:flex;align-items:center;gap:11px;height:42px;padding:0 12px;border-radius:8px;color:#64748b;font-size:16px;font-weight:500;flex-shrink:0;transition:background .15s,color .15s;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span data-ko="학생" data-en="Students"></span></a></nav>
+    <div style="padding:10px 10px 18px;margin-top:8px;"><button class="nav-user" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:none;background:transparent;border-radius:9px;text-align:left;transition:background .15s;"><div style="width:34px;height:34px;border-radius:999px;background:rgba(37,99,235,.4);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#93c5fd;" data-ko="김" data-en="K"></div><span style="flex:1;font-size:16px;font-weight:500;color:#b8c5d3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" data-ko="김정보 선생님" data-en="Teacher Kim"></span></button></div>
+  </aside>
+
+  <!-- MAIN: export view -->
+  <div style="flex:1;min-width:0;background:#f8fafc;display:flex;flex-direction:column;overflow:hidden;">
+    <header style="height:64px;padding:0 24px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <span style="font-size:18px;font-weight:600;color:#111827;" data-ko="정보과학 1반" data-en="CS Class 1"></span>
+    </header>
+
+    <div style="padding:22px 28px 32px;flex:1;overflow-x:auto;overflow-y:auto;">
+
+      <!-- Breadcrumb -->
+      <div style="display:flex;align-items:center;gap:7px;font-size:16px;color:#9ca3af;margin-bottom:18px;">
+        <span data-ko="수업 운영" data-en="Assessments"></span>
+        <span>/</span>
+        <span style="color:#6b7280;" data-ko="1회 수행평가" data-en="Assessment 1"></span>
+        <span>/</span>
+        <span style="color:#111827;font-weight:600;" data-ko="결과 내보내기" data-en="Export Results"></span>
+      </div>
+
+      <!-- Options bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px;">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+          <!-- 세션 선택 -->
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:16px;color:#6b7280;font-weight:500;" data-ko="세션" data-en="Session"></span>
+            <select style="height:34px;padding:0 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:16px;background:#fff;color:#374151;">
+              <option data-ko="2025-06-14 (최근)" data-en="2025-06-14 (latest)">2025-06-14 (최근)</option>
+              <option>2025-06-10</option>
+            </select>
+          </div>
+          <!-- 기본점수 (synced) -->
+          <div style="display:flex;align-items:center;gap:7px;padding:6px 12px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;">
+            <span style="font-size:16px;color:#6b7280;" data-ko="기본점수" data-en="Base Score"></span>
+            <input id="export-base-input" type="number" value="0" min="0" max="100" onchange="syncBaseScore(this.value)" style="width:52px;height:28px;border:1.5px solid #e5e7eb;border-radius:6px;padding:0 6px;font-size:16px;font-weight:700;color:#2563eb;font-family:'JetBrains Mono',ui-monospace,monospace;text-align:center;background:#f8fafc;">
+            <span style="font-size:16px;color:#9ca3af;" data-ko="점" data-en="pt"></span>
+          </div>
+          <!-- Format toggle -->
+          <div style="display:flex;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;background:#fff;">
+            <button id="fmt-full" onclick="setExportFmt('full')" style="height:34px;padding:0 14px;border:none;background:#0f172a;color:#f8fafc;font-size:16px;font-weight:600;" data-ko="정오+점수" data-en="Score + ✓✗">정오+점수</button>
+            <button id="fmt-ox" onclick="setExportFmt('ox')" style="height:34px;padding:0 14px;border:none;background:transparent;color:#6b7280;font-size:16px;" data-ko="정오만" data-en="✓✗ only">정오만</button>
+          </div>
+        </div>
+        <!-- Download button -->
+        <button style="display:flex;align-items:center;gap:7px;height:38px;padding:0 18px;background:#059669;border:none;border-radius:8px;font-size:16px;font-weight:700;color:#fff;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span data-ko="CSV 다운로드" data-en="Download CSV"></span>
+        </button>
+      </div>
+
+      <!-- Export table -->
+      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">
+        <div style="overflow-x:auto;">
+          <table id="export-table" style="width:100%;border-collapse:collapse;min-width:820px;"></table>
+        </div>
+        <!-- Footer note -->
+        <div style="padding:12px 20px;border-top:1px solid #f0f3f8;display:flex;align-items:center;gap:8px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          <span style="font-size:16px;color:#9ca3af;" data-ko="CSV 첫 행은 열 이름(헤더)으로 시작합니다. NEIS 업로드 전 기본점수 열을 삭제하거나 최종점수 열만 복사해 붙여넣으세요." data-en="First row is the header. Before uploading to the grade system, delete the base score column or copy only the final score column."></span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- END FRAME C -->
+
+</div>
+</div>
+
+<script>
+// ─── Data ────────────────────────────────────────────────────────────────────
+let lang = 'ko';
+let lobbyOn = true;
+let targetMode = 'all';
+let selectedStudents = new Set();
+let selectedProblems = new Set(); // for problem add modal
+
+const ASSESSMENTS = [
+  {
+    id: 1,
+    ko: '1회 수행평가 — 파이썬 기초',
+    en: 'Assessment 1 — Python Basics',
+    problems: 6, maxScore: 100,
+    sessions: [
+      { ko: '2025-06-10 종료', en: 'Ended 2025-06-10', status: 'closed' },
+      { ko: '2025-06-14 종료', en: 'Ended 2025-06-14', status: 'closed' },
+    ],
+  },
+  {
+    id: 2,
+    ko: '2회 수행평가 — 제어문과 함수',
+    en: 'Assessment 2 — Control Flow',
+    problems: 4, maxScore: 80,
+    sessions: [],
+  },
+  {
+    id: 3,
+    ko: '3회 수행평가 — 자료구조',
+    en: 'Assessment 3 — Data Structures',
+    problems: 0, maxScore: 0,
+    sessions: [],
+  },
+];
+
+const TYPE_META = {
+  coding: { ko:'코딩',   en:'Coding',       color:'#2563eb', bg:'rgba(37,99,235,.1)'  },
+  mcq:    { ko:'객관식', en:'MCQ',          color:'#7c3aed', bg:'rgba(124,58,237,.1)' },
+  short:  { ko:'단답형', en:'Short Answer', color:'#0891b2', bg:'rgba(8,145,178,.1)'  },
+  ox:     { ko:'OX',     en:'T/F',          color:'#9d174d', bg:'rgba(244,114,182,.1)'},
+  essay:  { ko:'서술형', en:'Essay',        color:'#b45309', bg:'rgba(245,158,11,.1)' },
+};
+
+// Problems currently in assessment 1
+let assessmentProblems = [
+  { id:1, type:'coding', ko:'Hello, World! 출력',          en:'Hello, World! Output',         score:10 },
+  { id:2, type:'coding', ko:'변수 선언과 출력',              en:'Declare & Print Var',           score:15 },
+  { id:3, type:'mcq',    ko:'자료형 맞추기',                 en:'Match the Data Types',          score:20 },
+  { id:4, type:'short',  ko:'정수↔실수 형변환',             en:'Int↔Float Cast',                score:15 },
+  { id:5, type:'coding', ko:'함수 정의하기',                 en:'Define a Function',             score:20 },
+  { id:6, type:'coding', ko:'재귀함수 작성',                 en:'Write Recursion',               score:20 },
+];
+
+// Problems available in bank but NOT in assessment
+const BANK_PROBLEMS = [
+  { id:7,  type:'coding', ko:'리스트 정렬하기',       en:'Sort a List',             },
+  { id:8,  type:'short',  ko:'딕셔너리 사용법',       en:'Dictionary Usage',        },
+  { id:9,  type:'ox',     ko:'파이썬은 인터프리터 언어다', en:'Python is interpreted.', },
+  { id:10, type:'essay',  ko:'클래스와 객체의 차이',  en:'Class vs. Object',        },
+  { id:11, type:'mcq',    ko:'반복문 종류 선택',      en:'Choose Loop Type',        },
+];
+
+const STUDENTS_KO = ['김민수','이수빈','박지훈','최예은','정도현','한소희','오준혁','임채원'];
+const STUDENTS_EN = ['Min-su','Su-bin','Ji-hun','Ye-eun','Do-hyeon','So-hee','Jun-hyeok','Chae-won'];
+
+const SCORE_COLORS = ['#2563eb','#7c3aed','#0891b2','#059669','#d97706','#dc2626'];
+
+// ─── Frame A: Assessment List ─────────────────────────────────────────────────
+function renderAssessmentList() {
+  const el = document.getElementById('assessment-list-a');
+  if (!el) return;
+  el.innerHTML = ASSESSMENTS.map(a => {
+    const name = a[lang === 'ko' ? 'ko' : 'en'];
+    const hasProblems = a.problems > 0;
+    const sessionLabel = a.sessions.length > 0
+      ? (lang === 'ko' ? `세션 ${a.sessions.length}회` : `${a.sessions.length} session${a.sessions.length>1?'s':''}`)
+      : (lang === 'ko' ? '세션 없음' : 'No sessions');
+    const statusColor = a.sessions.length > 0 ? '#059669' : '#9ca3af';
+    const problemLabel = hasProblems
+      ? (lang === 'ko' ? `${a.problems}문제 · ${a.maxScore}점 만점` : `${a.problems} problems · ${a.maxScore} pts`)
+      : (lang === 'ko' ? '문제 미구성' : 'No problems yet');
+    const problemColor = hasProblems ? '#374151' : '#f59e0b';
+
+    return `<div class="assessment-row" style="display:flex;align-items:center;gap:16px;background:#fff;border:1px solid #f0f3f8;border-radius:12px;padding:16px 20px;cursor:pointer;transition:border-color .15s,box-shadow .15s;">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:17px;font-weight:600;color:#111827;margin-bottom:4px;">${name}</div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <span style="font-size:16px;color:${problemColor};font-weight:500;">${problemLabel}</span>
+          ${hasProblems ? `<span style="color:#e5e7eb;">·</span><span style="font-size:16px;color:${statusColor};font-weight:500;">${sessionLabel}</span>` : ''}
+        </div>
+      </div>
+      <div style="display:flex;gap:7px;flex-shrink:0;">
+        <button class="btn-ghost" style="height:34px;padding:0 14px;border:1px solid #e5e7eb;background:#fff;border-radius:8px;font-size:16px;color:#374151;transition:background .15s,border-color .15s;" data-ko="문제 구성" data-en="Configure">${lang==='ko'?'문제 구성':'Configure'}</button>
+        <button class="btn-danger-ghost" style="height:34px;padding:0 12px;border:1px solid #fecaca;background:#fff;border-radius:8px;font-size:16px;color:#dc2626;transition:background .15s,border-color .15s;" data-ko="삭제" data-en="Delete">${lang==='ko'?'삭제':'Delete'}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── Frame B: Problem rows ────────────────────────────────────────────────────
+function recalcTotal() {
+  const inputs = document.querySelectorAll('.score-input-field');
+  let total = 0;
+  inputs.forEach(inp => { total += parseInt(inp.value) || 0; });
+  const el = document.getElementById('total-score');
+  if (el) el.textContent = total;
+  // sync scores array from live inputs for export table
+  assessmentProblems.forEach((p, i) => {
+    const inp = document.querySelectorAll('.score-input-field')[i];
+    if (inp) p.score = parseInt(inp.value) || 0;
+  });
+  renderScoreBar();
+  updateFinalScore();
+}
+
+function renderProblemRows() {
+  const el = document.getElementById('problem-rows-b');
+  const countEl = document.getElementById('problem-count-b');
+  if (!el) return;
+  const label = lang === 'ko' ? `${assessmentProblems.length}문제` : `${assessmentProblems.length} problems`;
+  if (countEl) countEl.textContent = label;
+
+  el.innerHTML = assessmentProblems.map((p, i) => {
+    const m = TYPE_META[p.type];
+    const name = p[lang === 'ko' ? 'ko' : 'en'];
+    return `<div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #f0f3f8;border-radius:12px;padding:12px 16px;">
+      <!-- drag handle -->
+      <svg style="flex-shrink:0;color:#d1d5db;cursor:grab;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+      <!-- num chip -->
+      <div style="width:38px;height:38px;border-radius:9px;background:rgba(37,99,235,.08);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:16px;font-weight:700;color:#2563eb;flex-shrink:0;">P${i+1}</div>
+      <!-- title + type -->
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:16px;font-weight:600;color:#111827;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${name}</div>
+        <div style="margin-top:4px;"><span style="display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:999px;background:${m.bg};color:${m.color};font-size:16px;font-weight:600;">${m[lang]}</span></div>
+      </div>
+      <!-- score input -->
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+        <input type="number" class="score-input score-input-field" value="${p.score}" min="0" max="999" oninput="recalcTotal()" style="width:72px;height:38px;border:1.5px solid #e5e7eb;border-radius:8px;padding:0 10px;font-size:17px;font-weight:700;color:#111827;text-align:center;font-family:'JetBrains Mono',ui-monospace,monospace;transition:border-color .15s,box-shadow .15s;">
+        <span style="font-size:16px;color:#9ca3af;" data-ko="점" data-en="pt">${lang==='ko'?'점':'pt'}</span>
+      </div>
+      <!-- remove -->
+      <button onclick="removeAssessmentProblem(${i})" class="btn-danger-ghost" style="width:34px;height:34px;border:1px solid #fecaca;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s,border-color .15s;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>`;
+  }).join('');
+}
+
+function removeAssessmentProblem(i) {
+  assessmentProblems.splice(i, 1);
+  renderProblemRows();
+  recalcTotal();
+}
+
+function renderScoreBar() {
+  const barEl = document.getElementById('score-bar');
+  const legendEl = document.getElementById('score-legend');
+  if (!barEl || !legendEl) return;
+  const total = assessmentProblems.reduce((s, p) => s + (parseInt(p.score) || 0), 0);
+  if (total === 0) { barEl.innerHTML = '<div style="flex:1;background:#f1f5f9;height:100%;border-radius:999px;"></div>'; legendEl.innerHTML = ''; return; }
+  barEl.innerHTML = assessmentProblems.map((p, i) => {
+    const pct = Math.round((parseInt(p.score)||0) / total * 100);
+    if (pct === 0) return '';
+    return `<div style="height:100%;background:${SCORE_COLORS[i%SCORE_COLORS.length]};flex:${pct};min-width:4px;" title="P${i+1}: ${p.score}pt"></div>`;
+  }).join('');
+  legendEl.innerHTML = assessmentProblems.map((p, i) => {
+    const name = p[lang==='ko'?'ko':'en'].substring(0,8);
+    return `<span style="display:flex;align-items:center;gap:5px;font-size:16px;color:#6b7280;"><span style="width:8px;height:8px;border-radius:999px;background:${SCORE_COLORS[i%SCORE_COLORS.length]};flex-shrink:0;"></span>P${i+1} ${name}… <strong style="color:#374151;">${p.score}${lang==='ko'?'점':'pt'}</strong></span>`;
+  }).join('');
+}
+
+// ─── Modal C: Problem picker ──────────────────────────────────────────────────
+function openProblemModal() {
+  selectedProblems.clear();
+  renderModalProblemList();
+  document.getElementById('problem-modal').style.display = 'flex';
+}
+function closeProblemModal() {
+  document.getElementById('problem-modal').style.display = 'none';
+}
+function toggleProblemSelect(id) {
+  if (selectedProblems.has(id)) selectedProblems.delete(id);
+  else selectedProblems.add(id);
+  renderModalProblemList();
+}
+function renderModalProblemList() {
+  const el = document.getElementById('modal-problem-list');
+  const countEl = document.getElementById('modal-select-count');
+  if (!el) return;
+  const n = selectedProblems.size;
+  if (countEl) countEl.textContent = n > 0
+    ? (lang==='ko' ? `${n}개 선택됨` : `${n} selected`)
+    : (lang==='ko' ? '문제를 선택하세요' : 'Select problems');
+
+  el.innerHTML = BANK_PROBLEMS.map(p => {
+    const m = TYPE_META[p.type];
+    const name = p[lang==='ko'?'ko':'en'];
+    const sel = selectedProblems.has(p.id);
+    return `<div class="modal-problem-row" onclick="toggleProblemSelect(${p.id})" style="display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;transition:background .1s;background:${sel?'rgba(37,99,235,.04)':'#fff'};">
+      <input type="checkbox" ${sel?'checked':''} onclick="event.stopPropagation();toggleProblemSelect(${p.id})" style="width:18px;height:18px;accent-color:#2563eb;flex-shrink:0;">
+      <span style="display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:999px;background:${m.bg};color:${m.color};font-size:16px;font-weight:600;flex-shrink:0;">${m[lang]}</span>
+      <span style="font-size:16px;color:#111827;font-weight:500;">${name}</span>
+    </div>`;
+  }).join('');
+}
+function confirmProblemAdd() {
+  BANK_PROBLEMS.filter(p => selectedProblems.has(p.id)).forEach(p => {
+    assessmentProblems.push({ ...p, score: 0 });
+  });
+  closeProblemModal();
+  renderProblemRows();
+  recalcTotal();
+}
+
+// ─── Modal D: Session create ──────────────────────────────────────────────────
+function openSessionModal() {
+  document.getElementById('session-modal').style.display = 'flex';
+  renderStudentPicker();
+}
+function closeSessionModal() {
+  document.getElementById('session-modal').style.display = 'none';
+}
+function selectTarget(mode) {
+  targetMode = mode;
+  const allCard = document.getElementById('target-all');
+  const indCard = document.getElementById('target-individual');
+  const radioAll = document.getElementById('radio-all');
+  const radioInd = document.getElementById('radio-individual');
+  const picker = document.getElementById('individual-picker');
+
+  if (mode === 'all') {
+    allCard.classList.add('selected'); indCard.classList.remove('selected');
+    radioAll.style.cssText = 'width:18px;height:18px;border-radius:999px;border:2px solid #2563eb;background:#2563eb;display:flex;align-items:center;justify-content:center;flex-shrink:0;';
+    radioAll.innerHTML = '<span style="width:7px;height:7px;border-radius:999px;background:#fff;display:block;"></span>';
+    radioInd.style.cssText = 'width:18px;height:18px;border-radius:999px;border:2px solid #d1d5db;background:#fff;flex-shrink:0;';
+    radioInd.innerHTML = '';
+    picker.style.display = 'none';
+  } else {
+    indCard.classList.add('selected'); allCard.classList.remove('selected');
+    radioInd.style.cssText = 'width:18px;height:18px;border-radius:999px;border:2px solid #2563eb;background:#2563eb;display:flex;align-items:center;justify-content:center;flex-shrink:0;';
+    radioInd.innerHTML = '<span style="width:7px;height:7px;border-radius:999px;background:#fff;display:block;"></span>';
+    radioAll.style.cssText = 'width:18px;height:18px;border-radius:999px;border:2px solid #d1d5db;background:#fff;flex-shrink:0;';
+    radioAll.innerHTML = '';
+    picker.style.display = 'block';
+  }
+}
+function renderStudentPicker() {
+  const el = document.getElementById('student-picker-chips');
+  if (!el) return;
+  const names = lang === 'ko' ? STUDENTS_KO : STUDENTS_EN;
+  el.innerHTML = names.map((n, i) => {
+    const sel = selectedStudents.has(i);
+    return `<button onclick="toggleStudent(${i})" style="height:34px;padding:0 14px;border-radius:999px;border:1.5px solid ${sel?'#2563eb':'#e5e7eb'};background:${sel?'rgba(37,99,235,.08)':'#fff'};font-size:16px;font-weight:${sel?'600':'400'};color:${sel?'#2563eb':'#374151'};transition:all .15s;">${n}</button>`;
+  }).join('');
+}
+function toggleStudent(i) {
+  if (selectedStudents.has(i)) selectedStudents.delete(i);
+  else selectedStudents.add(i);
+  renderStudentPicker();
+}
+
+function toggleLobby() {
+  lobbyOn = !lobbyOn;
+  const btn = document.getElementById('lobby-toggle');
+  const knob = document.getElementById('lobby-knob');
+  const createBtn = document.getElementById('session-create-btn');
+  if (lobbyOn) {
+    btn.style.background = '#2563eb';
+    knob.style.left = '25px';
+    if (createBtn) createBtn.dataset.ko = '로비 생성';
+    if (createBtn) createBtn.dataset.en = 'Create Lobby';
+    if (createBtn) createBtn.textContent = lang === 'ko' ? '로비 생성' : 'Create Lobby';
+  } else {
+    btn.style.background = '#d1d5db';
+    knob.style.left = '3px';
+    if (createBtn) createBtn.dataset.ko = '시험 바로 시작';
+    if (createBtn) createBtn.dataset.en = 'Start Immediately';
+    if (createBtn) createBtn.textContent = lang === 'ko' ? '시험 바로 시작' : 'Start Immediately';
+  }
+}
+
+function openCreateModal() {
+  alert(lang === 'ko' ? '[새 수행평가 생성 모달 — 제목 입력 후 저장]' : '[Create Assessment Modal — Enter title and save]');
+}
+
+// ─── Base score sync ──────────────────────────────────────────────────────────
+let baseScore = 0;
+let exportFmt = 'full';
+
+function updateFinalScore() {
+  const raw = assessmentProblems.reduce((s, p) => s + (parseInt(p.score) || 0), 0);
+  baseScore = parseInt(document.getElementById('base-score-input')?.value) || 0;
+  const final = raw + baseScore;
+
+  const el = document.getElementById('final-score');
+  if (el) el.textContent = final;
+  const db = document.getElementById('dist-base');
+  if (db) db.textContent = baseScore;
+  const df = document.getElementById('dist-final');
+  if (df) df.textContent = final;
+  const dr = document.getElementById('dist-raw');
+  if (dr) dr.textContent = raw;
+
+  // keep export panel in sync
+  const expInput = document.getElementById('export-base-input');
+  if (expInput) expInput.value = baseScore;
+  renderExportTable();
+}
+
+function syncBaseScore(val) {
+  baseScore = parseInt(val) || 0;
+  const inp = document.getElementById('base-score-input');
+  if (inp) inp.value = baseScore;
+  updateFinalScore();
+}
+
+function setExportFmt(fmt) {
+  exportFmt = fmt;
+  const full = document.getElementById('fmt-full');
+  const ox = document.getElementById('fmt-ox');
+  if (full) { full.style.background = fmt==='full'?'#0f172a':'transparent'; full.style.color = fmt==='full'?'#f8fafc':'#6b7280'; }
+  if (ox)   { ox.style.background   = fmt==='ox'  ?'#0f172a':'transparent'; ox.style.color   = fmt==='ox'  ?'#f8fafc':'#6b7280'; }
+  renderExportTable();
+}
+
+function showExportFrame() {
+  document.getElementById('frame-c-export').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ─── Export table ─────────────────────────────────────────────────────────────
+const EXPORT_STUDENTS = [
+  { no:1,  ko:'김민수', en:'Min-su K.',    results:[1,1,0,1,1,1] },
+  { no:2,  ko:'이수빈', en:'Su-bin L.',    results:[1,1,1,1,0,1] },
+  { no:3,  ko:'박지훈', en:'Ji-hun P.',    results:[0,1,1,0,1,1] },
+  { no:4,  ko:'최예은', en:'Ye-eun C.',    results:[1,1,1,1,1,1] },
+  { no:5,  ko:'정도현', en:'Do-hyeon J.',  results:[0,0,1,0,1,0] },
+  { no:6,  ko:'한소희', en:'So-hee H.',    results:[1,0,1,1,1,1] },
+];
+
+function renderExportTable() {
+  const el = document.getElementById('export-table');
+  if (!el) return;
+
+  const scores = assessmentProblems.map(p => parseInt(p.score) || 0);
+  const thBase = 'padding:10px 12px;font-size:16px;font-weight:600;color:#374151;text-align:center;border-bottom:2px solid #e5e7eb;white-space:nowrap;background:#f8fafc;';
+  const tdBase = 'padding:10px 12px;font-size:16px;text-align:center;border-bottom:1px solid #f0f3f8;';
+
+  // Header
+  let header = `<thead><tr>
+    <th style="${thBase}text-align:right;">${lang==='ko'?'번호':'No.'}</th>
+    <th style="${thBase}text-align:left;">${lang==='ko'?'이름':'Name'}</th>`;
+  assessmentProblems.forEach((p, i) => {
+    const m = TYPE_META[p.type];
+    header += `<th style="${thBase}"><div style="font-family:'JetBrains Mono',ui-monospace,monospace;">P${i+1}</div>`;
+    if (exportFmt === 'full') header += `<div style="font-size:16px;color:${m.color};font-weight:700;">${scores[i]}${lang==='ko'?'점':'pt'}</div>`;
+    header += `</th>`;
+  });
+  if (exportFmt === 'full') {
+    header += `<th style="${thBase}background:rgba(37,99,235,.05);color:#2563eb;">${lang==='ko'?'원점수':'Raw'}</th>`;
+    header += `<th style="${thBase}background:rgba(37,99,235,.05);color:#6b7280;">${lang==='ko'?'기본점수':'Base'}</th>`;
+    header += `<th style="${thBase}background:rgba(37,99,235,.08);color:#2563eb;font-size:17px;">${lang==='ko'?'최종점수':'Final'}</th>`;
+  }
+  header += `</tr></thead>`;
+
+  // Body
+  let body = '<tbody>';
+  let colCorrect = new Array(scores.length).fill(0);
+  EXPORT_STUDENTS.forEach(s => {
+    const raw = s.results.reduce((sum, r, i) => sum + (r ? scores[i] : 0), 0);
+    const final = raw + baseScore;
+    s.results.forEach((r, i) => { if (r) colCorrect[i]++; });
+    const name = s[lang==='ko'?'ko':'en'];
+    body += `<tr style="transition:background .1s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+      <td style="${tdBase}font-family:'JetBrains Mono',ui-monospace,monospace;color:#9ca3af;text-align:right;">${s.no}</td>
+      <td style="${tdBase}text-align:left;font-weight:500;color:#111827;">${name}</td>`;
+    s.results.forEach(r => {
+      body += r
+        ? `<td style="${tdBase}background:rgba(5,150,105,.06);"><span style="font-size:18px;font-weight:700;color:#059669;">✓</span></td>`
+        : `<td style="${tdBase}"><span style="font-size:18px;color:#d1d5db;">✗</span></td>`;
+    });
+    if (exportFmt === 'full') {
+      body += `<td style="${tdBase}background:rgba(37,99,235,.04);font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:600;color:#2563eb;">${raw}</td>`;
+      body += `<td style="${tdBase}background:rgba(37,99,235,.04);font-family:'JetBrains Mono',ui-monospace,monospace;color:#6b7280;">+${baseScore}</td>`;
+      body += `<td style="${tdBase}background:rgba(37,99,235,.07);font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:700;font-size:17px;color:#2563eb;">${final}</td>`;
+    }
+    body += `</tr>`;
+  });
+
+  // Footer: 정답률
+  const n = EXPORT_STUDENTS.length;
+  body += `<tr style="background:#f8fafc;">
+    <td colspan="2" style="${tdBase}text-align:right;color:#9ca3af;font-weight:600;border-top:2px solid #e5e7eb;" data-ko="정답률" data-en="Correct rate">${lang==='ko'?'정답률':'Correct rate'}</td>`;
+  colCorrect.forEach(c => {
+    const pct = Math.round(c / n * 100);
+    const color = pct >= 70 ? '#059669' : pct >= 40 ? '#d97706' : '#dc2626';
+    body += `<td style="${tdBase}border-top:2px solid #e5e7eb;"><span style="font-size:16px;font-weight:700;color:${color};">${pct}%</span><div style="font-size:16px;color:#9ca3af;">${c}/${n}</div></td>`;
+  });
+  if (exportFmt === 'full') {
+    const avgRaw = Math.round(EXPORT_STUDENTS.reduce((s, st) => s + st.results.reduce((r, v, i) => r + (v?scores[i]:0), 0), 0) / n);
+    body += `<td style="${tdBase}border-top:2px solid #e5e7eb;background:rgba(37,99,235,.04);font-weight:700;color:#2563eb;font-family:'JetBrains Mono',ui-monospace,monospace;">${avgRaw}</td>`;
+    body += `<td style="${tdBase}border-top:2px solid #e5e7eb;background:rgba(37,99,235,.04);color:#9ca3af;">—</td>`;
+    body += `<td style="${tdBase}border-top:2px solid #e5e7eb;background:rgba(37,99,235,.07);font-weight:700;color:#2563eb;font-family:'JetBrains Mono',ui-monospace,monospace;">${avgRaw+baseScore}</td>`;
+  }
+  body += `</tr></tbody>`;
+
+  el.innerHTML = header + body;
+}
+
+// ─── Language ────────────────────────────────────────────────────────────────
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll('[data-ko]').forEach(el => {
+    const val = el.dataset[l] || el.dataset.ko;
+    if (val !== undefined) el.textContent = val;
+  });
+  const sp = document.getElementById('modal-search-placeholder');
+  if (sp) sp.placeholder = l === 'ko' ? '문제 검색...' : 'Search problems...';
+
+  document.getElementById('btn-ko').style.cssText = l==='ko'
+    ? 'height:30px;padding:0 14px;border-radius:999px;border:none;background:#0f172a;color:#93c5fd;font-size:16px;font-weight:600;cursor:pointer;'
+    : 'height:30px;padding:0 14px;border-radius:999px;border:1px solid #cbd5e1;background:#fff;color:#64748b;font-size:16px;font-weight:500;cursor:pointer;';
+  document.getElementById('btn-en').style.cssText = l==='en'
+    ? 'height:30px;padding:0 14px;border-radius:999px;border:none;background:#0f172a;color:#93c5fd;font-size:16px;font-weight:600;cursor:pointer;'
+    : 'height:30px;padding:0 14px;border-radius:999px;border:1px solid #cbd5e1;background:#fff;color:#64748b;font-size:16px;font-weight:500;cursor:pointer;';
+
+  renderAssessmentList();
+  renderProblemRows();
+  renderScoreBar();
+  renderModalProblemList();
+  renderStudentPicker();
+  renderExportTable();
+}
+
+// ─── Init ────────────────────────────────────────────────────────────────────
+renderAssessmentList();
+renderProblemRows();
+renderScoreBar();
+renderExportTable();
+setLang('ko');
+</script>
+</body>
+</html>

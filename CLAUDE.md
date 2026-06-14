@@ -143,6 +143,18 @@ frontend/
 - `type_config TEXT NOT NULL DEFAULT '{}'`: 문항 유형별 설정 JSON
 - `auth_tokens`: 교사 세션 토큰 (expires_at 12시간)
 - `sessions`: 수행평가 세션 전용 — `auth_tokens`와 별개, 이름 혼동 주의
+- **`divisions` 테이블 폐지** — `classes`로 전면 대체. 코드에서 `division` 참조 금지.
+- **`lesson_releases`, `assessment_divisions` 테이블 폐지** — `lessons.is_released`, `assessments.class_id`로 단순화.
+
+### 핵심 테이블 변경 이력 (구 → 신)
+| 구 | 신 | 비고 |
+|----|----|----|
+| `divisions` | `classes` | `subject`, `grade`, `class_no` 필드 추가 |
+| `teacher_divisions` | `teacher_classes` | FK `class_id` |
+| `students.division_id` | `students.class_id` | |
+| `lesson_releases` | (폐지) | `lessons.is_released` + `lessons.class_id`로 대체 |
+| `assessment_divisions` | (폐지) | `assessments.class_id`로 대체 |
+| `sessions.division_id` | `sessions.class_id` | |
 
 ### 마이그레이션 규칙 (릴리즈 전)
 - **스키마 변경은 `001_initial.sql` 직접 수정**. 새 마이그레이션 파일(`002_*.sql` 등) 추가 금지.

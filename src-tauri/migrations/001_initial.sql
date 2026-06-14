@@ -24,24 +24,28 @@ CREATE TABLE IF NOT EXISTS auth_tokens (
     expires_at TEXT NOT NULL
 );
 
--- 분반
-CREATE TABLE IF NOT EXISTS divisions (
+-- 수업 (과목 × 학생 그룹 단위. 예: "정보과학 1반")
+-- 구 divisions 테이블. admin은 전체 접근, 일반교사는 teacher_classes로 제한.
+CREATE TABLE IF NOT EXISTS classes (
     id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL,
+    name TEXT NOT NULL,                    -- 표시명. 예: "정보과학 1반"
+    subject TEXT NOT NULL DEFAULT '',      -- 과목명. 예: "정보과학"
+    grade INTEGER NOT NULL DEFAULT 0,      -- 학년. 예: 3
+    class_no INTEGER NOT NULL DEFAULT 0,   -- 반. 예: 1
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- 교사-분반 M:N (일반교사 전용, admin은 전체 접근)
-CREATE TABLE IF NOT EXISTS teacher_divisions (
+-- 교사-수업 M:N (일반교사 전용, admin은 전체 접근)
+CREATE TABLE IF NOT EXISTS teacher_classes (
     teacher_id INTEGER NOT NULL REFERENCES teachers(id) ON DELETE CASCADE,
-    division_id INTEGER NOT NULL REFERENCES divisions(id) ON DELETE CASCADE,
-    PRIMARY KEY (teacher_id, division_id)
+    class_id INTEGER NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+    PRIMARY KEY (teacher_id, class_id)
 );
 
 -- 학생 (학번 + 비밀번호 로그인)
 CREATE TABLE IF NOT EXISTS students (
     id INTEGER PRIMARY KEY,
-    division_id INTEGER NOT NULL REFERENCES divisions(id),
+    class_id INTEGER NOT NULL REFERENCES classes(id),
     student_number TEXT NOT NULL UNIQUE,
     name TEXT NOT NULL,
     password_hash TEXT NOT NULL DEFAULT '',
@@ -58,10 +62,11 @@ CREATE TABLE IF NOT EXISTS student_sessions (
     expires_at TEXT NOT NULL
 );
 
--- 문제 은행 (전역 단일 마스터)
+-- 문제 은행 (전역 공유. 수업에 속하지 않음)
 CREATE TABLE IF NOT EXISTS problems (
     id INTEGER PRIMARY KEY,
     type INTEGER NOT NULL CHECK (type BETWEEN 1 AND 5),
+    -- 1=OX  2=단답형  3=객관식  4=서술형  5=코딩
     title TEXT NOT NULL,
     description TEXT NOT NULL DEFAULT '',
     type_config TEXT NOT NULL DEFAULT '{}',
@@ -69,12 +74,15 @@ CREATE TABLE IF NOT EXISTS problems (
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- 차시 (교과 단위 공통)
+-- 차시 (수업 소속. is_released로 학생 공개 여부 관리)
 CREATE TABLE IF NOT EXISTS lessons (
     id INTEGER PRIMARY KEY,
+    class_id INTEGER NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
     description TEXT NOT NULL DEFAULT '',
     order_no INTEGER NOT NULL DEFAULT 0,
+    is_released INTEGER NOT NULL DEFAULT 0,
+    released_at TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -87,19 +95,10 @@ CREATE TABLE IF NOT EXISTS lesson_problems (
     UNIQUE (lesson_id, problem_id)
 );
 
--- 차시 분반별 공개 상태
-CREATE TABLE IF NOT EXISTS lesson_releases (
-    id INTEGER PRIMARY KEY,
-    lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
-    division_id INTEGER NOT NULL REFERENCES divisions(id) ON DELETE CASCADE,
-    is_released INTEGER NOT NULL DEFAULT 0,
-    released_at TEXT,
-    UNIQUE (lesson_id, division_id)
-);
-
--- 수행평가 (전역 엔티티)
+-- 수행평가 (수업 소속)
 CREATE TABLE IF NOT EXISTS assessments (
     id INTEGER PRIMARY KEY,
+    class_id INTEGER NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
     description TEXT NOT NULL DEFAULT '',
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -115,19 +114,12 @@ CREATE TABLE IF NOT EXISTS assessment_problems (
     UNIQUE (assessment_id, problem_id)
 );
 
--- 수행평가-분반 연결 (참조, 복사 아님)
-CREATE TABLE IF NOT EXISTS assessment_divisions (
-    id INTEGER PRIMARY KEY,
-    assessment_id INTEGER NOT NULL REFERENCES assessments(id) ON DELETE CASCADE,
-    division_id INTEGER NOT NULL REFERENCES divisions(id) ON DELETE CASCADE,
-    UNIQUE (assessment_id, division_id)
-);
-
 -- 수행평가 세션 (CREATED → LOBBY → RUNNING → CLOSED)
+-- class_id는 assessment.class_id와 항상 동일. 직접 참조로 쿼리 편의 확보.
 CREATE TABLE IF NOT EXISTS sessions (
     id INTEGER PRIMARY KEY,
     assessment_id INTEGER NOT NULL REFERENCES assessments(id),
-    division_id INTEGER NOT NULL REFERENCES divisions(id),
+    class_id INTEGER NOT NULL REFERENCES classes(id),
     status TEXT NOT NULL CHECK (status IN ('CREATED', 'LOBBY', 'RUNNING', 'CLOSED')) DEFAULT 'CREATED',
     target_type TEXT NOT NULL CHECK (target_type IN ('ALL', 'INDIVIDUAL')) DEFAULT 'ALL',
     time_limit_min INTEGER,
@@ -148,7 +140,7 @@ CREATE TABLE IF NOT EXISTS session_targets (
     UNIQUE (session_id, student_id)
 );
 
--- 제출 기록 (session_id=NULL이면 평소 수업 제출)
+-- 제출 기록 (session_id=NULL이면 평소 수업 중 제출)
 CREATE TABLE IF NOT EXISTS submissions (
     id INTEGER PRIMARY KEY,
     problem_id INTEGER NOT NULL REFERENCES problems(id),
@@ -191,9 +183,11 @@ CREATE INDEX IF NOT EXISTS idx_auth_tokens_token ON auth_tokens(token);
 CREATE INDEX IF NOT EXISTS idx_auth_tokens_teacher ON auth_tokens(teacher_id);
 CREATE INDEX IF NOT EXISTS idx_student_sessions_token ON student_sessions(token);
 CREATE INDEX IF NOT EXISTS idx_student_sessions_student ON student_sessions(student_id);
+CREATE INDEX IF NOT EXISTS idx_students_class ON students(class_id);
+CREATE INDEX IF NOT EXISTS idx_lessons_class_order ON lessons(class_id, order_no);
+CREATE INDEX IF NOT EXISTS idx_lesson_problems_order ON lesson_problems(lesson_id, order_no);
+CREATE INDEX IF NOT EXISTS idx_assessments_class ON assessments(class_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_class ON sessions(class_id, status);
 CREATE INDEX IF NOT EXISTS idx_submissions_student_session ON submissions(student_id, session_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_is_latest ON submissions(problem_id, student_id, is_latest);
 CREATE INDEX IF NOT EXISTS idx_attendance_context ON attendance_heartbeats(context_type, context_id);
-CREATE INDEX IF NOT EXISTS idx_sessions_division ON sessions(division_id, status);
-CREATE INDEX IF NOT EXISTS idx_lessons_order ON lessons(order_no);
-CREATE INDEX IF NOT EXISTS idx_lesson_problems_order ON lesson_problems(lesson_id, order_no);
