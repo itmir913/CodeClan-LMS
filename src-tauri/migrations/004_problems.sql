@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS problem_types (
 -- 차시/수행평가 모두에서 참조하는 공통 자원.
 -- description: 마크다운. 코드 제출형의 경우 문제 본문 역할.
 -- comment: 교사 메모. 예: "Python 기준으로 설계됨"
+-- is_draft: 1=임시저장(문제 은행 비공개), 0=공개
 
 CREATE TABLE IF NOT EXISTS problems (
     id          INTEGER PRIMARY KEY,
@@ -20,6 +21,7 @@ CREATE TABLE IF NOT EXISTS problems (
     title       TEXT NOT NULL,
     description TEXT NOT NULL DEFAULT '',
     comment     TEXT NOT NULL DEFAULT '',
+    is_draft    INTEGER NOT NULL DEFAULT 1,
     created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -53,6 +55,10 @@ CREATE TABLE IF NOT EXISTS problem_choices (
 
 -- ── 코드 제출형 설정 ──────────────────────────────────────────────────────────
 -- input_format / output_format / constraints: 마크다운
+-- compare_mode: 출력 비교 방식. 문항별 교사 설정.
+--   'exact' — 바이트 단위 완전 일치
+--   'trim'  — 앞뒤 공백·개행 제거 후 비교 (기본값)
+--   'token' — 공백 기준 토큰 분리 후 순서대로 비교
 -- show_io_on_fail: 실패 시 입력·기댓값·실제출력을 학생에게 공개할지 여부
 
 CREATE TABLE IF NOT EXISTS problem_code_submits (
@@ -62,6 +68,8 @@ CREATE TABLE IF NOT EXISTS problem_code_submits (
     constraints     TEXT NOT NULL DEFAULT '',
     time_limit_ms   INTEGER NOT NULL DEFAULT 1000,
     memory_limit_mb INTEGER NOT NULL DEFAULT 128,
+    compare_mode    TEXT NOT NULL DEFAULT 'trim'
+                        CHECK (compare_mode IN ('exact', 'trim', 'token')),
     show_io_on_fail INTEGER NOT NULL DEFAULT 1
 );
 
@@ -69,13 +77,15 @@ CREATE TABLE IF NOT EXISTS problem_code_submits (
 -- 실제 내용은 파일: {data_dir}/problems/{problem_id}/{number}.in|out
 -- is_sample=1: 문제 화면에 공개 (입출력 예시)
 -- is_sample=0: 히든 케이스 (채점 전용)
+-- explanation: 샘플 케이스 풀이 힌트. is_sample=1인 경우만 의미 있음.
 -- 부분 점수 없음. 각 케이스는 통과/실패만.
 
 CREATE TABLE IF NOT EXISTS problem_test_cases (
-    id         INTEGER PRIMARY KEY,
-    problem_id INTEGER NOT NULL REFERENCES problems(id) ON DELETE CASCADE,
-    number     INTEGER NOT NULL,
-    is_sample  INTEGER NOT NULL DEFAULT 0,
+    id          INTEGER PRIMARY KEY,
+    problem_id  INTEGER NOT NULL REFERENCES problems(id) ON DELETE CASCADE,
+    number      INTEGER NOT NULL,
+    is_sample   INTEGER NOT NULL DEFAULT 0,
+    explanation TEXT NOT NULL DEFAULT '',
     UNIQUE (problem_id, number)
 );
 
@@ -85,10 +95,24 @@ CREATE TABLE IF NOT EXISTS problem_portfolios (
     problem_id INTEGER PRIMARY KEY REFERENCES problems(id) ON DELETE CASCADE
 );
 
+-- ── 차시-문항 배정 (M:N) ─────────────────────────────────────────────────────
+-- 같은 문항을 여러 차시에 배정 가능.
+-- order_no: 차시 내 문항 순서.
+
+CREATE TABLE IF NOT EXISTS lesson_problems (
+    id         INTEGER PRIMARY KEY,
+    lesson_id  INTEGER NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+    problem_id INTEGER NOT NULL REFERENCES problems(id) ON DELETE RESTRICT,
+    order_no   INTEGER NOT NULL DEFAULT 0,
+    UNIQUE (lesson_id, problem_id)
+);
+
 -- ── 인덱스 ────────────────────────────────────────────────────────────────────
 
-CREATE INDEX IF NOT EXISTS idx_problems_type       ON problems(type_id);
-CREATE INDEX IF NOT EXISTS idx_problems_subject    ON problems(subject_id);
-CREATE INDEX IF NOT EXISTS idx_problems_created_by ON problems(created_by);
-CREATE INDEX IF NOT EXISTS idx_problem_choices     ON problem_choices(problem_id, order_no);
-CREATE INDEX IF NOT EXISTS idx_test_cases_problem  ON problem_test_cases(problem_id, number);
+CREATE INDEX IF NOT EXISTS idx_problems_type        ON problems(type_id);
+CREATE INDEX IF NOT EXISTS idx_problems_subject     ON problems(subject_id);
+CREATE INDEX IF NOT EXISTS idx_problems_created_by  ON problems(created_by);
+CREATE INDEX IF NOT EXISTS idx_problems_draft       ON problems(is_draft);
+CREATE INDEX IF NOT EXISTS idx_problem_choices      ON problem_choices(problem_id, order_no);
+CREATE INDEX IF NOT EXISTS idx_test_cases_problem   ON problem_test_cases(problem_id, number);
+CREATE INDEX IF NOT EXISTS idx_lesson_problems      ON lesson_problems(lesson_id, order_no);
