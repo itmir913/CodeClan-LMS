@@ -163,6 +163,8 @@ const submitting = ref(false)
 const errorMsg = ref<string | null>(null)
 
 async function onSubmit() {
+  if (submitting.value) return                    // Layer 1: 중복 실행 방지
+
   errorMsg.value = null
 
   if (form.value.adminPassword !== form.value.adminPasswordConfirm) {
@@ -170,7 +172,7 @@ async function onSubmit() {
     return
   }
 
-  submitting.value = true
+  submitting.value = true                         // Layer 2: 즉시 잠금
   try {
     await auth.completeSetup({
       school_name: form.value.schoolName,

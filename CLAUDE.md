@@ -66,6 +66,42 @@
 - `<script setup lang="ts">` 형식 사용 (Options API 금지)
 - **`any` 타입 사용 금지** — 명시적 interface로 대체.
 
+### 버튼 가드 구조 (제출·삭제·저장 등 모든 비동기 액션)
+
+모든 비동기 액션 버튼은 아래 4-레이어 구조를 반드시 준수한다.
+
+```vue
+<!-- ① 템플릿: disabled + 로딩 표시 -->
+<button :disabled="isSubmitting" @click="onSubmit">
+  <IconLoader2 v-if="isSubmitting" class="spin" />
+  {{ isSubmitting ? $t('common.submitting') : $t('common.submit') }}
+</button>
+
+<!-- ② 핸들러: 4-레이어 구조 -->
+const isSubmitting = ref(false)
+
+async function onSubmit() {
+  if (isSubmitting.value) return          // Layer 1: 중복 실행 방지 (최상단 필수)
+  isSubmitting.value = true               // Layer 2: 즉시 잠금
+  try {
+    await store.doSomething()             // Layer 3: 실제 작업
+  } catch (e) {
+    const code = e instanceof Error ? e.message : 'ERR_UNKNOWN'
+    errorMsg.value = t(`errors.${code}`, t('errors.ERR_UNKNOWN'))
+  } finally {
+    isSubmitting.value = false            // Layer 4: 항상 해제 (성공·실패 무관)
+  }
+}
+```
+
+**규칙:**
+- `if (isSubmitting.value) return` — 핸들러 **첫 줄**에 반드시 존재. `disabled`만으로는 Enter 키·프로그래매틱 호출을 막을 수 없다.
+- `isSubmitting.value = true` — try 블록 **바깥 위**에 위치. try 안에 두면 예외 발생 시 잠금이 풀리지 않는다.
+- `finally { isSubmitting.value = false }` — 성공·실패·예외 모든 경로에서 해제.
+- 상태 변수명: `isSubmitting`, `isDeleting`, `isSaving` 등 `is` + 동명사 형태.
+- 폼 입력 필드도 `:disabled="isSubmitting"` 적용 — 제출 중 수정 방지.
+- **프론트엔드 자체 검증 오류** (비밀번호 불일치 등)는 `t('ns.key')` 직접 사용 가능. 백엔드 응답 오류만 `t('errors.ERR_CODE')` 패턴 사용.
+
 ### API
 - 모든 API 경로: `/api/` 접두어.
 - 인증: `cc_session` 쿠키. fetch 시 `credentials: 'include'` 필수.
@@ -95,6 +131,7 @@
 - **색만으로 상태 전달**: 상태 표시 시 색 + 텍스트를 항상 함께 사용. 색각 이상 사용자를 고려.
 - **파일 임포트 시 열 인덱스 사용**: CSV/XLSX 파싱 시 열 인덱스(0, 1, 2...) 접근 금지. 반드시 열 이름으로 매핑하며, 매핑 사전을 통해 동의어 처리.
 - **모달 외부 클릭 닫기**: `@click.self`로 모달 바깥 클릭 시 닫히도록 구현 금지. 모달은 ESC 키로만 닫힌다.
+- **버튼 가드 누락**: 비동기 액션 핸들러 첫 줄에 `if (isSubmitting.value) return` 없이 구현 금지. `:disabled` 바인딩만으로는 중복 실행을 완전히 막을 수 없다.
 
 ---
 
