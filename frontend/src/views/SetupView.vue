@@ -47,7 +47,7 @@
             autocomplete="off"
             :disabled="submitting"
           />
-          <p class="mt-1" style="color: var(--color-text-muted); font-size: 0.875rem">
+          <p class="mt-1" style="color: var(--color-text-muted)">
             {{ $t('setup.schoolNameHint') }}
           </p>
         </div>
