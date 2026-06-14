@@ -75,8 +75,8 @@ pub async fn complete(
     if body.admin_password.len() < 8 {
         return Err(ApiError::BadRequest("비밀번호는 8자 이상이어야 합니다".into()));
     }
-    if !["ko", "en"].contains(&locale.as_str()) {
-        return Err(ApiError::BadRequest("지원하지 않는 언어입니다".into()));
+    if locale.is_empty() || locale.len() > 10 || !locale.chars().all(|c| c.is_ascii_alphanumeric() || c == '-') {
+        return Err(ApiError::BadRequest("올바르지 않은 언어 코드입니다".into()));
     }
 
     let salt = SaltString::generate(&mut OsRng);
