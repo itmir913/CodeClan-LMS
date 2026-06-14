@@ -74,6 +74,17 @@ export const useAuthStore = defineStore('auth', () => {
     student.value = await api.auth.meStudent()
   }
 
+  async function updateTeacherName(name: string) {
+    await api.auth.updateTeacherName(name)
+    if (teacher.value) {
+      teacher.value = { ...teacher.value, name }
+    }
+  }
+
+  async function changePasswordTeacher(currentPassword: string, newPassword: string) {
+    await api.auth.changePasswordTeacher(currentPassword, newPassword)
+  }
+
   async function changePasswordStudent(currentPassword: string | null, newPassword: string) {
     await api.auth.changePasswordStudent(currentPassword, newPassword)
     if (student.value) {
@@ -96,6 +107,8 @@ export const useAuthStore = defineStore('auth', () => {
     loginStudent,
     logoutStudent,
     fetchStudentMe,
+    updateTeacherName,
+    changePasswordTeacher,
     changePasswordStudent,
   }
 })

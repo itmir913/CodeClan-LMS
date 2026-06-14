@@ -18,5 +18,8 @@
   "ERR_SUBJECT_NAME_TAKEN": "A subject with this name already exists",
   "ERR_SUBJECT_IN_USE": "This subject is used by one or more classes and cannot be deleted",
   "ERR_CANNOT_DELETE_SELF": "You cannot delete your own account",
+  "ERR_LAST_ADMIN": "The last administrator cannot be deleted or demoted",
+  "ERR_NAME_REQUIRED": "Name is required",
+  "ERR_PASSWORD_MISMATCH": "New passwords do not match",
   "ERR_UNKNOWN": "An unknown error occurred"
 }

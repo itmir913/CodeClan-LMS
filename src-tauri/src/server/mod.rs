@@ -19,7 +19,8 @@ pub fn build_router(state: AppState) -> Router {
         // Auth — teacher
         .route("/auth/login/teacher", post(routes::auth::login_teacher))
         .route("/auth/logout", post(routes::auth::logout_teacher))
-        .route("/auth/me", get(routes::auth::me_teacher))
+        .route("/auth/me", get(routes::auth::me_teacher).put(routes::auth::update_teacher_name))
+        .route("/auth/me/password", put(routes::auth::change_password_teacher))
         .route("/auth/school-name", get(routes::auth::school_name))
         // Auth — student
         .route("/auth/login/student", post(routes::auth::login_student))

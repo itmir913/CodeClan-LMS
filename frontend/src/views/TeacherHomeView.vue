@@ -20,6 +20,15 @@
           <button
             class="w-9 h-9 p-0 rounded-lg flex items-center justify-center"
             style="border: 1px solid var(--color-border); color: var(--color-text-muted); background: transparent"
+            @click="showSettings = true"
+            :aria-label="$t('common.settings')"
+          >
+            <IconSettings :size="18" />
+          </button>
+
+          <button
+            class="w-9 h-9 p-0 rounded-lg flex items-center justify-center"
+            style="border: 1px solid var(--color-border); color: var(--color-text-muted); background: transparent"
             @click="toggleTheme"
             :aria-label="$t('auth.toggleTheme')"
           >
@@ -345,6 +354,8 @@
       </div>
     </Teleport>
 
+    <SettingsModal v-model="showSettings" />
+
   </div>
 </template>
 
@@ -354,11 +365,12 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import {
   IconMoon, IconSun, IconPlus, IconLoader2, IconAlertCircle,
-  IconPencil, IconTrash, IconUsers, IconSchool,
+  IconPencil, IconTrash, IconUsers, IconSchool, IconSettings,
 } from '@tabler/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import { useClassStore } from '@/stores/class'
 import LanguageSelector from '@/components/LanguageSelector.vue'
+import SettingsModal from '@/components/SettingsModal.vue'
 import type { ClassItem } from '@/api/client'
 
 const { t } = useI18n()
@@ -368,6 +380,7 @@ const classStore = useClassStore()
 
 const isDark = ref(document.documentElement.getAttribute('data-theme') === 'dark')
 const isLoggingOut = ref(false)
+const showSettings = ref(false)
 
 // ── Modal state ────────────────────────────────────────────────
 const showAddModal = ref(false)

@@ -19,7 +19,7 @@
   "subjects": "과목 관리",
   "addSubject": "과목 추가",
   "subjectName": "과목 이름",
-  "subjectNamePlaceholder": "예: 정보과학",
+  "subjectNamePlaceholder": "예: 프로그래밍",
   "noSubjects": "등록된 과목이 없습니다",
   "deleteSubjectConfirm": "\"{name}\" 과목을 삭제하겠습니까?",
   "deleteSubjectConfirmHint": "수업에 사용 중인 과목은 삭제할 수 없습니다.",

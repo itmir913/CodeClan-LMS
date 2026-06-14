@@ -11,6 +11,14 @@
           <span class="font-semibold" style="color: var(--color-text-primary)">CodeClan LMS</span>
         </div>
         <div class="flex items-center gap-2">
+          <button
+            class="w-9 h-9 p-0 rounded-lg flex items-center justify-center"
+            style="border: 1px solid var(--color-border); color: var(--color-text-muted); background: transparent"
+            @click="showSettings = true"
+            :aria-label="$t('common.settings')"
+          >
+            <IconSettings :size="18" />
+          </button>
           <LanguageSelector />
           <button
             class="h-9 px-3 rounded-lg font-medium"
@@ -56,19 +64,24 @@
       </div>
 
     </main>
+
+    <SettingsModal v-model="showSettings" />
+
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { IconClipboardOff } from '@tabler/icons-vue'
+import { IconClipboardOff, IconSettings } from '@tabler/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import LanguageSelector from '@/components/LanguageSelector.vue'
+import SettingsModal from '@/components/SettingsModal.vue'
 
 const router = useRouter()
 const auth = useAuthStore()
 const isLoggingOut = ref(false)
+const showSettings = ref(false)
 
 const studentInitial = computed(() =>
   auth.student?.name ? auth.student.name.charAt(0) : '?'

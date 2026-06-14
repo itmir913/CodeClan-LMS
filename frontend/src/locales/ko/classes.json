@@ -6,7 +6,7 @@
   "editClass": "수업 수정",
   "deleteClass": "수업 삭제",
   "className": "수업 이름",
-  "classNamePlaceholder": "예: 1반",
+  "classNamePlaceholder": "예: 프로그래밍 1반",
   "subject": "과목",
   "subjectPlaceholder": "과목을 선택하세요",
   "students": "{count}명",

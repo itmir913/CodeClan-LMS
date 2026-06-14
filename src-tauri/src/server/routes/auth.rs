@@ -425,6 +425,87 @@ pub async fn me_student(
     }))
 }
 
+// ── Teacher update name ───────────────────────────────────────────────────────
+
+#[derive(Deserialize)]
+pub struct UpdateTeacherNameRequest {
+    pub name: String,
+}
+
+/// PUT /api/auth/me
+pub async fn update_teacher_name(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<UpdateTeacherNameRequest>,
+) -> Result<Json<Value>, ApiError> {
+    let session = parse_session(&headers, &state.db).await?;
+    let teacher_id = session.teacher_id.ok_or(ApiError::Forbidden)?;
+
+    let name = body.name.trim().to_string();
+    if name.is_empty() {
+        return Err(ApiError::BadRequest("ERR_NAME_REQUIRED".into()));
+    }
+
+    sqlx::query("UPDATE teachers SET name = ? WHERE id = ?")
+        .bind(&name)
+        .bind(teacher_id)
+        .execute(&state.db)
+        .await?;
+
+    Ok(Json(json!({ "ok": true })))
+}
+
+// ── Teacher change password ───────────────────────────────────────────────────
+
+#[derive(Deserialize)]
+pub struct ChangePasswordTeacherRequest {
+    pub current_password: String,
+    pub new_password: String,
+}
+
+/// PUT /api/auth/me/password
+pub async fn change_password_teacher(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<ChangePasswordTeacherRequest>,
+) -> Result<Json<Value>, ApiError> {
+    let session = parse_session(&headers, &state.db).await?;
+    let teacher_id = session.teacher_id.ok_or(ApiError::Forbidden)?;
+
+    if body.new_password.len() < 8 {
+        return Err(ApiError::BadRequest("ERR_PASSWORD_TOO_SHORT".into()));
+    }
+
+    let row = sqlx::query("SELECT password_hash FROM teachers WHERE id = ?")
+        .bind(teacher_id)
+        .fetch_optional(&state.db)
+        .await?
+        .ok_or(ApiError::NotFound)?;
+
+    use sqlx::Row as _;
+    let current_hash: String = row.get("password_hash");
+
+    let parsed_hash = PasswordHash::new(&current_hash)
+        .map_err(|_| ApiError::BadRequest("ERR_INVALID_CREDENTIALS".into()))?;
+    Argon2::default()
+        .verify_password(body.current_password.as_bytes(), &parsed_hash)
+        .map_err(|_| ApiError::BadRequest("ERR_INVALID_CREDENTIALS".into()))?;
+
+    let salt = SaltString::generate(&mut OsRng);
+    let new_hash = Argon2::default()
+        .hash_password(body.new_password.as_bytes(), &salt)
+        .map_err(|e| ApiError::Internal(format!("argon2: {e}")))?
+        .to_string();
+
+    sqlx::query("UPDATE teachers SET password_hash = ? WHERE id = ?")
+        .bind(&new_hash)
+        .bind(teacher_id)
+        .execute(&state.db)
+        .await?;
+
+    Ok(Json(json!({ "ok": true })))
+}
+
 // ── Student change password ───────────────────────────────────────────────────
 
 #[derive(Deserialize)]

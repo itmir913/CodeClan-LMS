@@ -65,7 +65,8 @@
 - 에러: `crate::error::ApiError` (IntoResponse impl). 핸들러 반환: `Result<Json<T>, ApiError>`.
 - 인증: argon2 해시, `auth_tokens` 테이블 쿠키 세션(12시간). **JWT 사용 금지.**
 - DB: `sqlx::query()` / `sqlx::query_as::<_, Type>()` 런타임 쿼리. `query!` 매크로 금지.
-- 트랜잭션 필요 시: `db.begin().await?` → `tx.commit().await?`.
+- **모든 DB 쓰기 작업은 트랜잭션으로 묶는다**: `let mut tx = db.begin().await?` → 작업 → `tx.commit().await?`. 단순 단일 INSERT/UPDATE도 원칙적으로 트랜잭션 사용. 트랜잭션 내 쿼리는 `&mut *tx`로 실행.
+- **마지막 관리자 보호**: admin 삭제·역할 강등 시 트랜잭션 안에서 `COUNT(*) WHERE role='admin'`을 확인하고 1 이하면 `ERR_LAST_ADMIN` 반환.
 
 ### TypeScript / Vue
 - 컴포넌트 파일명: `PascalCase.vue`

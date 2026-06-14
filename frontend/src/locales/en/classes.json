@@ -6,7 +6,7 @@
   "editClass": "Edit Class",
   "deleteClass": "Delete Class",
   "className": "Class Name",
-  "classNamePlaceholder": "e.g., Section 1",
+  "classNamePlaceholder": "e.g., Programming Section 1",
   "subject": "Subject",
   "subjectPlaceholder": "Select a subject",
   "students": "{count} students",

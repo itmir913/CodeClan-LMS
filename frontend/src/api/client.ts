@@ -107,6 +107,13 @@ export const api = {
       request<StudentLoginResponse>('POST', '/auth/login/student', { username, password }),
     logoutStudent: () => request<{ ok: boolean }>('POST', '/auth/logout/student'),
     meStudent: () => request<StudentUser>('GET', '/auth/student/me'),
+    updateTeacherName: (name: string) =>
+      request<{ ok: boolean }>('PUT', '/auth/me', { name }),
+    changePasswordTeacher: (currentPassword: string, newPassword: string) =>
+      request<{ ok: boolean }>('PUT', '/auth/me/password', {
+        current_password: currentPassword,
+        new_password: newPassword,
+      }),
     changePasswordStudent: (currentPassword: string | null, newPassword: string) =>
       request<{ ok: boolean }>('POST', '/auth/student/change-password', {
         current_password: currentPassword,

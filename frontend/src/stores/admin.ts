@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { api, type AdminTeacher, type Subject } from '@/api/client'
+import { useAuthStore } from '@/stores/auth'
 
 export const useAdminStore = defineStore('admin', () => {
   const teachers = ref<AdminTeacher[]>([])
@@ -40,6 +41,10 @@ export const useAdminStore = defineStore('admin', () => {
   ) {
     await api.admin.updateTeacher(id, data)
     await fetchTeachers()
+    const auth = useAuthStore()
+    if (auth.teacher?.id === id) {
+      await auth.fetchTeacherMe()
+    }
   }
 
   async function deleteTeacher(id: number) {

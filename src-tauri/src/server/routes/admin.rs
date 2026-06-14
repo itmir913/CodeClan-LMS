@@ -240,22 +240,51 @@ pub async fn update_teacher(
     let teacher_id = session.teacher_id.ok_or(ApiError::Forbidden)?;
     require_admin(teacher_id, &state.db).await?;
 
+    if let Some(ref name) = body.name {
+        if name.trim().is_empty() {
+            return Err(ApiError::BadRequest("ERR_ADMIN_NAME_REQUIRED".into()));
+        }
+    }
+    if let Some(ref password) = body.password {
+        if !password.is_empty() && password.len() < 8 {
+            return Err(ApiError::BadRequest("ERR_PASSWORD_TOO_SHORT".into()));
+        }
+    }
+
+    let mut tx = state.db.begin().await?;
+
     let exists: Option<i64> = sqlx::query_scalar("SELECT id FROM teachers WHERE id = ?")
         .bind(target_id)
-        .fetch_optional(&state.db)
+        .fetch_optional(&mut *tx)
         .await?;
     if exists.is_none() {
         return Err(ApiError::NotFound);
     }
 
-    if let Some(ref name) = body.name {
-        if name.trim().is_empty() {
-            return Err(ApiError::BadRequest("ERR_ADMIN_NAME_REQUIRED".into()));
+    // role을 teacher로 내리려는 경우 마지막 관리자 보호
+    if let Some(ref role) = body.role {
+        if role != "admin" {
+            let admin_count: i64 =
+                sqlx::query_scalar("SELECT COUNT(*) FROM teachers WHERE role = 'admin'")
+                    .fetch_one(&mut *tx)
+                    .await?;
+            let target_is_admin: Option<i64> = sqlx::query_scalar(
+                "SELECT id FROM teachers WHERE id = ? AND role = 'admin'",
+            )
+            .bind(target_id)
+            .fetch_optional(&mut *tx)
+            .await?;
+            if target_is_admin.is_some() && admin_count <= 1 {
+                return Err(ApiError::BadRequest("ERR_LAST_ADMIN".into()));
+            }
         }
+    }
+
+    if let Some(ref name) = body.name {
         sqlx::query("UPDATE teachers SET name = ? WHERE id = ?")
             .bind(name.trim())
             .bind(target_id)
-            .execute(&state.db)
+            .execute(&mut *tx)
             .await?;
     }
 
@@ -264,15 +293,12 @@ pub async fn update_teacher(
         sqlx::query("UPDATE teachers SET role = ? WHERE id = ?")
             .bind(role_val)
             .bind(target_id)
-            .execute(&state.db)
+            .execute(&mut *tx)
             .await?;
     }
 
     if let Some(ref password) = body.password {
         if !password.is_empty() {
-            if password.len() < 8 {
-                return Err(ApiError::BadRequest("ERR_PASSWORD_TOO_SHORT".into()));
-            }
             let salt = SaltString::generate(&mut OsRng);
             let hash = Argon2::default()
                 .hash_password(password.as_bytes(), &salt)
@@ -281,11 +307,12 @@ pub async fn update_teacher(
             sqlx::query("UPDATE teachers SET password_hash = ? WHERE id = ?")
                 .bind(&hash)
                 .bind(target_id)
-                .execute(&state.db)
+                .execute(&mut *tx)
                 .await?;
         }
     }
 
+    tx.commit().await?;
     Ok(Json(json!({ "ok": true })))
 }
 
@@ -303,18 +330,31 @@ pub async fn delete_teacher(
         return Err(ApiError::BadRequest("ERR_CANNOT_DELETE_SELF".into()));
     }
 
-    let exists: Option<i64> = sqlx::query_scalar("SELECT id FROM teachers WHERE id = ?")
-        .bind(target_id)
-        .fetch_optional(&state.db)
-        .await?;
-    if exists.is_none() {
-        return Err(ApiError::NotFound);
+    let mut tx = state.db.begin().await?;
+
+    let target_role: Option<String> =
+        sqlx::query_scalar("SELECT role FROM teachers WHERE id = ?")
+            .bind(target_id)
+            .fetch_optional(&mut *tx)
+            .await?;
+    let target_role = target_role.ok_or(ApiError::NotFound)?;
+
+    // 마지막 관리자 삭제 방지
+    if target_role == "admin" {
+        let admin_count: i64 =
+            sqlx::query_scalar("SELECT COUNT(*) FROM teachers WHERE role = 'admin'")
+                .fetch_one(&mut *tx)
+                .await?;
+        if admin_count <= 1 {
+            return Err(ApiError::BadRequest("ERR_LAST_ADMIN".into()));
+        }
     }
 
     sqlx::query("DELETE FROM teachers WHERE id = ?")
         .bind(target_id)
-        .execute(&state.db)
+        .execute(&mut *tx)
         .await?;
 
+    tx.commit().await?;
     Ok(Json(json!({ "ok": true })))
 }

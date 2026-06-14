@@ -2,5 +2,11 @@
   "loading": "Loading...",
   "error": "Error",
   "retry": "Retry",
-  "logout": "Log out"
+  "logout": "Log out",
+  "settings": "Settings",
+  "save": "Save",
+  "saving": "Saving...",
+  "cancel": "Cancel",
+  "submit": "Submit",
+  "submitting": "Submitting..."
 }

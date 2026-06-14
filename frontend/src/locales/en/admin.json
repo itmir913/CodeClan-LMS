@@ -19,7 +19,7 @@
   "subjects": "Subject Management",
   "addSubject": "Add Subject",
   "subjectName": "Subject Name",
-  "subjectNamePlaceholder": "e.g., Computer Science",
+  "subjectNamePlaceholder": "e.g., Programming",
   "noSubjects": "No subjects registered",
   "deleteSubjectConfirm": "Delete subject \"{name}\"?",
   "deleteSubjectConfirmHint": "Subjects in use by classes cannot be deleted.",
