@@ -16,22 +16,28 @@ const router = createRouter({
       component: () => import('@/views/LoginView.vue'),
     },
     {
-      path: '/dashboard',
-      name: 'dashboard',
-      component: () => import('@/views/DashboardView.vue'),
-      meta: { requiresTeacherAuth: true },
+      path: '/teacher',
+      name: 'teacher-home',
+      component: () => import('@/views/TeacherHomeView.vue'),
+      meta: { requiresAuth: 'teacher' },
+    },
+    {
+      path: '/admin',
+      name: 'admin-home',
+      component: () => import('@/views/AdminView.vue'),
+      meta: { requiresAuth: 'admin' },
     },
     {
       path: '/student',
       name: 'student-home',
       component: () => import('@/views/StudentHomeView.vue'),
-      meta: { requiresStudentAuth: true },
+      meta: { requiresAuth: 'student' },
     },
     {
       path: '/student/change-password',
       name: 'student-change-password',
       component: () => import('@/views/StudentChangePasswordView.vue'),
-      meta: { requiresStudentAuth: true },
+      meta: { requiresAuth: 'student' },
     },
     {
       path: '/:pathMatch(.*)*',
@@ -60,17 +66,22 @@ router.beforeEach(async (to) => {
     if (to.name !== 'setup') return { name: 'setup' }
   }
 
-  // 교사 인증 필요 라우트
-  if (to.meta.requiresTeacherAuth) {
+  const requiredRole = to.meta.requiresAuth as string | undefined
+
+  if (requiredRole === 'admin' || requiredRole === 'teacher') {
     try {
-      await api.auth.meTeacher()
+      const user = await api.auth.meTeacher()
+      // 역할 불일치 시 로그아웃 후 로그인 화면으로
+      if (user.role !== requiredRole) {
+        await api.auth.logoutTeacher().catch(() => {})
+        return { name: 'login' }
+      }
     } catch {
       return { name: 'login' }
     }
   }
 
-  // 학생 인증 필요 라우트
-  if (to.meta.requiresStudentAuth) {
+  if (requiredRole === 'student') {
     try {
       await api.auth.meStudent()
     } catch {

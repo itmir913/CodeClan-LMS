@@ -41,6 +41,14 @@
   --radius-sm:           4px;
   --radius-md:           8px;
   --radius-lg:           12px;
+
+  /* Card accent palette (수업 카드 색상 순환) */
+  --color-card-accent-0: #2563eb;
+  --color-card-accent-1: #7c3aed;
+  --color-card-accent-2: #059669;
+  --color-card-accent-3: #d97706;
+  --color-card-accent-4: #0891b2;
+  --color-card-accent-5: #dc2626;
 }
 
 /* ── Dark Mode ───────────────────────────────────────────────────────────── */
@@ -71,6 +79,14 @@
 
   --shadow-card:         0 18px 40px -12px rgba(2, 6, 23, 0.6);
   --shadow-dropdown:     0 12px 32px -10px rgba(2, 6, 23, 0.6);
+
+  /* Card accent palette — dark mode */
+  --color-card-accent-0: #3b82f6;
+  --color-card-accent-1: #8b5cf6;
+  --color-card-accent-2: #10b981;
+  --color-card-accent-3: #f59e0b;
+  --color-card-accent-4: #06b6d4;
+  --color-card-accent-5: #f87171;
 }
 
 /* ── Base ────────────────────────────────────────────────────────────────── */

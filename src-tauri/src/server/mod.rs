@@ -1,7 +1,7 @@
 pub mod routes;
 pub mod state;
 
-use axum::{routing::{get, post}, Router};
+use axum::{routing::{delete, get, post, put}, Router};
 use std::net::SocketAddr;
 use tower_http::cors::{Any, CorsLayer};
 
@@ -25,7 +25,27 @@ pub fn build_router(state: AppState) -> Router {
         .route("/auth/login/student", post(routes::auth::login_student))
         .route("/auth/logout/student", post(routes::auth::logout_student))
         .route("/auth/student/me", get(routes::auth::me_student))
-        .route("/auth/student/change-password", post(routes::auth::change_password_student));
+        .route("/auth/student/change-password", post(routes::auth::change_password_student))
+        // Subjects (교사·admin 공용 조회)
+        .route("/subjects", get(routes::admin::list_subjects))
+        // Classes
+        .route("/classes", get(routes::classes::list_classes).post(routes::classes::create_class))
+        .route(
+            "/classes/:id",
+            put(routes::classes::update_class).delete(routes::classes::delete_class),
+        )
+        // Admin — teachers
+        .route(
+            "/admin/teachers",
+            get(routes::admin::list_teachers).post(routes::admin::create_teacher),
+        )
+        .route(
+            "/admin/teachers/:id",
+            put(routes::admin::update_teacher).delete(routes::admin::delete_teacher),
+        )
+        // Admin — subjects
+        .route("/admin/subjects", post(routes::admin::create_subject))
+        .route("/admin/subjects/:id", delete(routes::admin::delete_subject));
 
     Router::new()
         .nest("/api", api)

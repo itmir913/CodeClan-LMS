@@ -6,11 +6,17 @@
   "ERR_INTERNAL": "An internal server error occurred",
   "ERR_SETUP_ALREADY_COMPLETE": "Initial setup has already been completed",
   "ERR_SCHOOL_NAME_REQUIRED": "School name is required",
-  "ERR_ADMIN_NAME_REQUIRED": "Admin name is required",
+  "ERR_ADMIN_NAME_REQUIRED": "Name is required",
   "ERR_USERNAME_REQUIRED": "Username is required",
   "ERR_PASSWORD_TOO_SHORT": "Password must be at least 8 characters",
   "ERR_USERNAME_TAKEN": "This username is already taken",
   "ERR_INVALID_CREDENTIALS": "Invalid username or password",
   "ERR_CURRENT_PASSWORD_REQUIRED": "Please enter your current password",
+  "ERR_CLASS_NAME_REQUIRED": "Class name is required",
+  "ERR_SUBJECT_NOT_FOUND": "The selected subject was not found",
+  "ERR_SUBJECT_NAME_REQUIRED": "Subject name is required",
+  "ERR_SUBJECT_NAME_TAKEN": "A subject with this name already exists",
+  "ERR_SUBJECT_IN_USE": "This subject is used by one or more classes and cannot be deleted",
+  "ERR_CANNOT_DELETE_SELF": "You cannot delete your own account",
   "ERR_UNKNOWN": "An unknown error occurred"
 }

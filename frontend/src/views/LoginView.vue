@@ -168,7 +168,7 @@ async function onSubmit() {
   try {
     if (activeTab.value === 'teacher') {
       await auth.loginTeacher(form.value.username, form.value.password)
-      router.push('/dashboard')
+      router.push(auth.teacher?.role === 'admin' ? '/admin' : '/teacher')
     } else {
       await auth.loginStudent(form.value.username, form.value.password)
       router.push(auth.student?.password_reset_required ? '/student/change-password' : '/student')

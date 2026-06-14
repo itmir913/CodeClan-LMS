@@ -66,6 +66,30 @@ export interface SchoolNameResponse {
   school_name: string
 }
 
+export interface Subject {
+  id: number
+  name: string
+}
+
+export interface ClassItem {
+  id: number
+  name: string
+  subject_id: number
+  subject_name: string
+  teacher_id: number
+  student_count: number
+  has_active_session: boolean
+  created_at: string
+}
+
+export interface AdminTeacher {
+  id: number
+  username: string
+  name: string
+  role: string
+  created_at: string
+}
+
 // ── API object ────────────────────────────────────────────────
 
 export const api = {
@@ -88,5 +112,27 @@ export const api = {
         current_password: currentPassword,
         new_password: newPassword,
       }),
+  },
+  subjects: {
+    list: () => request<Subject[]>('GET', '/subjects'),
+  },
+  classes: {
+    list: () => request<ClassItem[]>('GET', '/classes'),
+    create: (name: string, subject_id: number) =>
+      request<{ id: number }>('POST', '/classes', { name, subject_id }),
+    update: (id: number, name: string, subject_id: number) =>
+      request<{ ok: boolean }>('PUT', `/classes/${id}`, { name, subject_id }),
+    delete: (id: number) => request<{ ok: boolean }>('DELETE', `/classes/${id}`),
+  },
+  admin: {
+    listTeachers: () => request<AdminTeacher[]>('GET', '/admin/teachers'),
+    createTeacher: (data: { username: string; name: string; password: string; role?: string }) =>
+      request<{ id: number }>('POST', '/admin/teachers', data),
+    updateTeacher: (id: number, data: { name?: string; role?: string; password?: string }) =>
+      request<{ ok: boolean }>('PUT', `/admin/teachers/${id}`, data),
+    deleteTeacher: (id: number) => request<{ ok: boolean }>('DELETE', `/admin/teachers/${id}`),
+    createSubject: (name: string) =>
+      request<{ id: number }>('POST', '/admin/subjects', { name }),
+    deleteSubject: (id: number) => request<{ ok: boolean }>('DELETE', `/admin/subjects/${id}`),
   },
 }
