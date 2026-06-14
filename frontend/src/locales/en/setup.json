@@ -1,0 +1,19 @@
+{
+  "title": "CodeClan LMS Setup",
+  "subtitle": "This only needs to be done once on first launch",
+  "schoolName": "School Name",
+  "schoolNamePlaceholder": "e.g. Hankuk High School",
+  "schoolNameHint": "Displayed on the login screen as your school name",
+  "adminSection": "Create Admin Account",
+  "adminName": "Name",
+  "adminNamePlaceholder": "e.g. Mr. Kim",
+  "adminUsername": "Username",
+  "adminUsernamePlaceholder": "e.g. admin",
+  "adminPassword": "Password",
+  "adminPasswordPlaceholder": "At least 8 characters",
+  "adminPasswordConfirm": "Confirm Password",
+  "adminPasswordConfirmPlaceholder": "Re-enter password",
+  "submit": "Complete Setup",
+  "submitting": "Setting up...",
+  "passwordMismatch": "Passwords do not match"
+}
