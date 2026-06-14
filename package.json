@@ -12,7 +12,8 @@
     "build:backend": "cargo build --manifest-path src-tauri/Cargo.toml",
     "check": "cargo check --manifest-path src-tauri/Cargo.toml",
     "install:all": "npm install && npm install --prefix frontend",
-    "install:frontend": "npm install --prefix frontend"
+    "install:frontend": "npm install --prefix frontend",
+    "test": "cargo test --manifest-path src-tauri/Cargo.toml"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.11.2",
