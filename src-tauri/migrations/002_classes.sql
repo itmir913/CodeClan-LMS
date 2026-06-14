@@ -23,10 +23,15 @@ CREATE TABLE IF NOT EXISTS class_students (
 -- is_enabled: admin이 전역 on/off.
 -- 표시 이름은 프론트엔드 i18n에서 처리 ($t('language.python') 등).
 
+-- time_multiplier_pct: 정수 퍼센트 배율. 100 = 1.0x, 300 = 3.0x
+-- 실효 제한 = problem_code_submits.time_limit_ms * time_multiplier_pct / 100
+-- 표시(소수점 변환)는 Rust 백엔드 구조체에서 담당.
+
 CREATE TABLE IF NOT EXISTS languages (
-    id         INTEGER PRIMARY KEY,
-    slug       TEXT NOT NULL UNIQUE,
-    is_enabled INTEGER NOT NULL DEFAULT 1
+    id                  INTEGER PRIMARY KEY,
+    slug                TEXT NOT NULL UNIQUE,
+    is_enabled          INTEGER NOT NULL DEFAULT 1,
+    time_multiplier_pct INTEGER NOT NULL DEFAULT 100
 );
 
 -- ── 수업별 허용 언어 ──────────────────────────────────────────────────────────

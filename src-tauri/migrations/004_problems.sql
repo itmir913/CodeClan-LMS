@@ -31,6 +31,14 @@ CREATE TABLE IF NOT EXISTS problem_short_answers (
     case_sensitive INTEGER NOT NULL DEFAULT 0
 );
 
+-- ── 선다형 설정 ───────────────────────────────────────────────────────────────
+-- allow_multiple: 0=단일선택(라디오), 1=복수선택(체크박스)
+
+CREATE TABLE IF NOT EXISTS problem_multiple_choices (
+    problem_id     INTEGER PRIMARY KEY REFERENCES problems(id) ON DELETE CASCADE,
+    allow_multiple INTEGER NOT NULL DEFAULT 0
+);
+
 -- ── 선다형 보기 ───────────────────────────────────────────────────────────────
 -- 보기 개수 유동적 (2~n개).
 
