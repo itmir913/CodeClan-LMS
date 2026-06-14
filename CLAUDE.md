@@ -162,8 +162,8 @@ frontend/
   - `002_classes.sql` — classes, class_students, languages, class_allowed_languages
   - `003_lessons.sql` — lessons, class_lessons
   - `004_problems.sql` — problem_types, problems, problem_*, test_cases
-  - `005_assessments.sql` — (논의 예정)
-  - `006_sessions.sql` — (논의 예정)
+  - `005_assessments.sql` — assessments, class_assessments, assessment_problems
+  - `006_sessions.sql` — assessment_sessions, assessment_session_targets
   - `007_submissions.sql` — (논의 예정)
   - `008_attendance.sql` — (논의 예정)
 - **릴리즈 전**: 해당 도메인 파일 직접 수정. 새 번호 파일 추가 금지.
