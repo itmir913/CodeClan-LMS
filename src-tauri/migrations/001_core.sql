@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS students (
     class_no                INTEGER NOT NULL,
     number                  INTEGER NOT NULL,
     password_hash           TEXT NOT NULL DEFAULT '',
-    password_reset_required INTEGER NOT NULL DEFAULT 1,
+    password_reset_required INTEGER NOT NULL DEFAULT 1 CHECK (password_reset_required IN (0, 1)),
     created_at              TEXT NOT NULL DEFAULT (datetime('now')),
     UNIQUE (grade, class_no, number)
 );

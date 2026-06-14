@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS problems (
     title       TEXT NOT NULL,
     description TEXT NOT NULL DEFAULT '',
     comment     TEXT NOT NULL DEFAULT '',
-    is_draft    INTEGER NOT NULL DEFAULT 1,
+    is_draft    INTEGER NOT NULL DEFAULT 1 CHECK (is_draft IN (0, 1)),
     created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS problems (
 CREATE TABLE IF NOT EXISTS problem_short_answers (
     problem_id     INTEGER PRIMARY KEY REFERENCES problems(id) ON DELETE CASCADE,
     answer         TEXT NOT NULL,
-    case_sensitive INTEGER NOT NULL DEFAULT 0
+    case_sensitive INTEGER NOT NULL DEFAULT 0 CHECK (case_sensitive IN (0, 1))
 );
 
 -- ── 선다형 설정 ───────────────────────────────────────────────────────────────
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS problem_short_answers (
 
 CREATE TABLE IF NOT EXISTS problem_multiple_choices (
     problem_id     INTEGER PRIMARY KEY REFERENCES problems(id) ON DELETE CASCADE,
-    allow_multiple INTEGER NOT NULL DEFAULT 0
+    allow_multiple INTEGER NOT NULL DEFAULT 0 CHECK (allow_multiple IN (0, 1))
 );
 
 -- ── 선다형 보기 ───────────────────────────────────────────────────────────────
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS problem_choices (
     problem_id INTEGER NOT NULL REFERENCES problems(id) ON DELETE CASCADE,
     order_no   INTEGER NOT NULL,
     content    TEXT NOT NULL,
-    is_correct INTEGER NOT NULL DEFAULT 0,
+    is_correct INTEGER NOT NULL DEFAULT 0 CHECK (is_correct IN (0, 1)),
     UNIQUE (problem_id, order_no)
 );
 
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS problem_code_submits (
     constraints     TEXT NOT NULL DEFAULT '',
     time_limit_ms   INTEGER NOT NULL DEFAULT 1000,
     memory_limit_mb INTEGER NOT NULL DEFAULT 128,
-    show_io_on_fail INTEGER NOT NULL DEFAULT 1
+    show_io_on_fail INTEGER NOT NULL DEFAULT 1 CHECK (show_io_on_fail IN (0, 1))
 );
 
 -- ── 테스트케이스 메타데이터 ───────────────────────────────────────────────────
@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS problem_test_cases (
     id          INTEGER PRIMARY KEY,
     problem_id  INTEGER NOT NULL REFERENCES problems(id) ON DELETE CASCADE,
     number      INTEGER NOT NULL,
-    is_sample   INTEGER NOT NULL DEFAULT 0,
+    is_sample   INTEGER NOT NULL DEFAULT 0 CHECK (is_sample IN (0, 1)),
     explanation TEXT NOT NULL DEFAULT '',
     UNIQUE (problem_id, number)
 );

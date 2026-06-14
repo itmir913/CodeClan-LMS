@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS assessments (
     subject_id  INTEGER NOT NULL REFERENCES subjects(id),
     title       TEXT NOT NULL,
     description TEXT NOT NULL DEFAULT '',
-    is_draft    INTEGER NOT NULL DEFAULT 1,
+    is_draft    INTEGER NOT NULL DEFAULT 1 CHECK (is_draft IN (0, 1)),
     created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -27,8 +27,8 @@ CREATE TABLE IF NOT EXISTS class_assessments (
     class_id           INTEGER NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
     assessment_id      INTEGER NOT NULL REFERENCES assessments(id) ON DELETE CASCADE,
     order_no           INTEGER NOT NULL DEFAULT 0,
-    is_announced       INTEGER NOT NULL DEFAULT 0,
-    is_result_released INTEGER NOT NULL DEFAULT 0,
+    is_announced       INTEGER NOT NULL DEFAULT 0 CHECK (is_announced IN (0, 1)),
+    is_result_released INTEGER NOT NULL DEFAULT 0 CHECK (is_result_released IN (0, 1)),
     UNIQUE (class_id, assessment_id)
 );
 

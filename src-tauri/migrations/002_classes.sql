@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS class_students (
 CREATE TABLE IF NOT EXISTS languages (
     id                  INTEGER PRIMARY KEY,
     slug                TEXT NOT NULL UNIQUE,
-    is_enabled          INTEGER NOT NULL DEFAULT 1,
+    is_enabled          INTEGER NOT NULL DEFAULT 1 CHECK (is_enabled IN (0, 1)),
     time_multiplier_pct INTEGER NOT NULL DEFAULT 100
 );
 
