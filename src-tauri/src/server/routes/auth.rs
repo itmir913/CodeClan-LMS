@@ -101,7 +101,6 @@ pub async fn login_teacher(
     State(state): State<AppState>,
     Json(body): Json<TeacherLoginRequest>,
 ) -> Result<impl IntoResponse, ApiError> {
-    // 기존 세션이 있으면 교체 (재로그인 허용)
     struct TeacherRow {
         id: i64,
         username: String,
@@ -137,16 +136,6 @@ pub async fn login_teacher(
         .verify_password(body.password.as_bytes(), &parsed_hash)
         .map_err(|_| ApiError::BadRequest("ERR_INVALID_CREDENTIALS".into()))?;
 
-    let token = Uuid::new_v4().to_string();
-    sqlx::query(
-        "INSERT INTO auth_sessions (token, teacher_id, expires_at) \
-         VALUES (?, ?, datetime('now', '+12 hours'))",
-    )
-    .bind(&token)
-    .bind(teacher.id)
-    .execute(&state.db)
-    .await?;
-
     // 교사 개인 locale 조회 (없으면 앱 기본값)
     let locale = sqlx::query_scalar::<_, String>(
         "SELECT value FROM teacher_settings WHERE teacher_id = ? AND key = 'locale'",
@@ -155,12 +144,23 @@ pub async fn login_teacher(
     .fetch_optional(&state.db)
     .await?
     .unwrap_or_default();
-
     let locale = if locale.is_empty() {
         get_default_locale(&state.db).await
     } else {
         locale
     };
+
+    let token = Uuid::new_v4().to_string();
+    let mut tx = state.db.begin().await?;
+    sqlx::query(
+        "INSERT INTO auth_sessions (token, teacher_id, expires_at) \
+         VALUES (?, ?, datetime('now', '+12 hours'))",
+    )
+    .bind(&token)
+    .bind(teacher.id)
+    .execute(&mut *tx)
+    .await?;
+    tx.commit().await?;
 
     let mut resp_headers = HeaderMap::new();
     resp_headers.insert(header::SET_COOKIE, set_session_cookie(&token));
@@ -187,12 +187,14 @@ pub async fn logout_teacher(
     headers: HeaderMap,
 ) -> Result<impl IntoResponse, ApiError> {
     if let Some(token) = get_cookie_value(&headers, "cc_session") {
+        let mut tx = state.db.begin().await?;
         sqlx::query(
             "DELETE FROM auth_sessions WHERE token = ? AND teacher_id IS NOT NULL",
         )
         .bind(&token)
-        .execute(&state.db)
+        .execute(&mut *tx)
         .await?;
+        tx.commit().await?;
     }
 
     let mut resp_headers = HeaderMap::new();
@@ -225,6 +227,92 @@ pub async fn me_teacher(
         name: row.get("name"),
         role: row.get("role"),
     }))
+}
+
+// ── Teacher update name ───────────────────────────────────────────────────────
+
+#[derive(Deserialize)]
+pub struct UpdateTeacherNameRequest {
+    pub name: String,
+}
+
+/// PUT /api/auth/me
+pub async fn update_teacher_name(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<UpdateTeacherNameRequest>,
+) -> Result<Json<Value>, ApiError> {
+    let session = parse_session(&headers, &state.db).await?;
+    let teacher_id = session.teacher_id.ok_or(ApiError::Forbidden)?;
+
+    let name = body.name.trim().to_string();
+    if name.is_empty() {
+        return Err(ApiError::BadRequest("ERR_NAME_REQUIRED".into()));
+    }
+
+    let mut tx = state.db.begin().await?;
+    sqlx::query("UPDATE teachers SET name = ? WHERE id = ?")
+        .bind(&name)
+        .bind(teacher_id)
+        .execute(&mut *tx)
+        .await?;
+    tx.commit().await?;
+
+    Ok(Json(json!({ "ok": true })))
+}
+
+// ── Teacher change password ───────────────────────────────────────────────────
+
+#[derive(Deserialize)]
+pub struct ChangePasswordTeacherRequest {
+    pub current_password: String,
+    pub new_password: String,
+}
+
+/// PUT /api/auth/me/password
+pub async fn change_password_teacher(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<ChangePasswordTeacherRequest>,
+) -> Result<Json<Value>, ApiError> {
+    let session = parse_session(&headers, &state.db).await?;
+    let teacher_id = session.teacher_id.ok_or(ApiError::Forbidden)?;
+
+    if body.new_password.len() < 8 {
+        return Err(ApiError::BadRequest("ERR_PASSWORD_TOO_SHORT".into()));
+    }
+
+    let mut tx = state.db.begin().await?;
+
+    let row = sqlx::query("SELECT password_hash FROM teachers WHERE id = ?")
+        .bind(teacher_id)
+        .fetch_optional(&mut *tx)
+        .await?
+        .ok_or(ApiError::NotFound)?;
+
+    use sqlx::Row as _;
+    let current_hash: String = row.get("password_hash");
+
+    let parsed_hash = PasswordHash::new(&current_hash)
+        .map_err(|_| ApiError::BadRequest("ERR_INVALID_CREDENTIALS".into()))?;
+    Argon2::default()
+        .verify_password(body.current_password.as_bytes(), &parsed_hash)
+        .map_err(|_| ApiError::BadRequest("ERR_INVALID_CREDENTIALS".into()))?;
+
+    let salt = SaltString::generate(&mut OsRng);
+    let new_hash = Argon2::default()
+        .hash_password(body.new_password.as_bytes(), &salt)
+        .map_err(|e| ApiError::Internal(format!("argon2: {e}")))?
+        .to_string();
+
+    sqlx::query("UPDATE teachers SET password_hash = ? WHERE id = ?")
+        .bind(&new_hash)
+        .bind(teacher_id)
+        .execute(&mut *tx)
+        .await?;
+
+    tx.commit().await?;
+    Ok(Json(json!({ "ok": true })))
 }
 
 // ── School name ───────────────────────────────────────────────────────────────
@@ -314,7 +402,6 @@ pub async fn login_student(
         }
     };
 
-    // 비밀번호 검증 (hash가 비어있으면 로그인 불가)
     if student.password_hash.is_empty() {
         return Err(ApiError::BadRequest("ERR_INVALID_CREDENTIALS".into()));
     }
@@ -325,16 +412,6 @@ pub async fn login_student(
         .verify_password(body.password.as_bytes(), &parsed_hash)
         .map_err(|_| ApiError::BadRequest("ERR_INVALID_CREDENTIALS".into()))?;
 
-    let token = Uuid::new_v4().to_string();
-    sqlx::query(
-        "INSERT INTO auth_sessions (token, student_id, expires_at) \
-         VALUES (?, ?, datetime('now', '+12 hours'))",
-    )
-    .bind(&token)
-    .bind(student.id)
-    .execute(&state.db)
-    .await?;
-
     // 학생 개인 locale 조회 (없으면 앱 기본값)
     let locale = sqlx::query_scalar::<_, String>(
         "SELECT value FROM student_settings WHERE student_id = ? AND key = 'locale'",
@@ -342,13 +419,24 @@ pub async fn login_student(
     .bind(student.id)
     .fetch_optional(&state.db)
     .await?
-    .unwrap_or_else(|| "".to_string());
-
+    .unwrap_or_default();
     let locale = if locale.is_empty() {
         get_default_locale(&state.db).await
     } else {
         locale
     };
+
+    let token = Uuid::new_v4().to_string();
+    let mut tx = state.db.begin().await?;
+    sqlx::query(
+        "INSERT INTO auth_sessions (token, student_id, expires_at) \
+         VALUES (?, ?, datetime('now', '+12 hours'))",
+    )
+    .bind(&token)
+    .bind(student.id)
+    .execute(&mut *tx)
+    .await?;
+    tx.commit().await?;
 
     let mut resp_headers = HeaderMap::new();
     resp_headers.insert(header::SET_COOKIE, set_session_cookie(&token));
@@ -378,12 +466,14 @@ pub async fn logout_student(
     headers: HeaderMap,
 ) -> Result<impl IntoResponse, ApiError> {
     if let Some(token) = get_cookie_value(&headers, "cc_session") {
+        let mut tx = state.db.begin().await?;
         sqlx::query(
             "DELETE FROM auth_sessions WHERE token = ? AND student_id IS NOT NULL",
         )
         .bind(&token)
-        .execute(&state.db)
+        .execute(&mut *tx)
         .await?;
+        tx.commit().await?;
     }
 
     let mut resp_headers = HeaderMap::new();
@@ -425,87 +515,6 @@ pub async fn me_student(
     }))
 }
 
-// ── Teacher update name ───────────────────────────────────────────────────────
-
-#[derive(Deserialize)]
-pub struct UpdateTeacherNameRequest {
-    pub name: String,
-}
-
-/// PUT /api/auth/me
-pub async fn update_teacher_name(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-    Json(body): Json<UpdateTeacherNameRequest>,
-) -> Result<Json<Value>, ApiError> {
-    let session = parse_session(&headers, &state.db).await?;
-    let teacher_id = session.teacher_id.ok_or(ApiError::Forbidden)?;
-
-    let name = body.name.trim().to_string();
-    if name.is_empty() {
-        return Err(ApiError::BadRequest("ERR_NAME_REQUIRED".into()));
-    }
-
-    sqlx::query("UPDATE teachers SET name = ? WHERE id = ?")
-        .bind(&name)
-        .bind(teacher_id)
-        .execute(&state.db)
-        .await?;
-
-    Ok(Json(json!({ "ok": true })))
-}
-
-// ── Teacher change password ───────────────────────────────────────────────────
-
-#[derive(Deserialize)]
-pub struct ChangePasswordTeacherRequest {
-    pub current_password: String,
-    pub new_password: String,
-}
-
-/// PUT /api/auth/me/password
-pub async fn change_password_teacher(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-    Json(body): Json<ChangePasswordTeacherRequest>,
-) -> Result<Json<Value>, ApiError> {
-    let session = parse_session(&headers, &state.db).await?;
-    let teacher_id = session.teacher_id.ok_or(ApiError::Forbidden)?;
-
-    if body.new_password.len() < 8 {
-        return Err(ApiError::BadRequest("ERR_PASSWORD_TOO_SHORT".into()));
-    }
-
-    let row = sqlx::query("SELECT password_hash FROM teachers WHERE id = ?")
-        .bind(teacher_id)
-        .fetch_optional(&state.db)
-        .await?
-        .ok_or(ApiError::NotFound)?;
-
-    use sqlx::Row as _;
-    let current_hash: String = row.get("password_hash");
-
-    let parsed_hash = PasswordHash::new(&current_hash)
-        .map_err(|_| ApiError::BadRequest("ERR_INVALID_CREDENTIALS".into()))?;
-    Argon2::default()
-        .verify_password(body.current_password.as_bytes(), &parsed_hash)
-        .map_err(|_| ApiError::BadRequest("ERR_INVALID_CREDENTIALS".into()))?;
-
-    let salt = SaltString::generate(&mut OsRng);
-    let new_hash = Argon2::default()
-        .hash_password(body.new_password.as_bytes(), &salt)
-        .map_err(|e| ApiError::Internal(format!("argon2: {e}")))?
-        .to_string();
-
-    sqlx::query("UPDATE teachers SET password_hash = ? WHERE id = ?")
-        .bind(&new_hash)
-        .bind(teacher_id)
-        .execute(&state.db)
-        .await?;
-
-    Ok(Json(json!({ "ok": true })))
-}
-
 // ── Student change password ───────────────────────────────────────────────────
 
 #[derive(Deserialize)]
@@ -527,27 +536,21 @@ pub async fn change_password_student(
         return Err(ApiError::BadRequest("ERR_PASSWORD_TOO_SHORT".into()));
     }
 
-    struct PwRow {
-        password_hash: String,
-        password_reset_required: i64,
-    }
+    let mut tx = state.db.begin().await?;
 
     let row = sqlx::query(
         "SELECT password_hash, password_reset_required FROM students WHERE id = ?",
     )
     .bind(student_id)
-    .fetch_optional(&state.db)
+    .fetch_optional(&mut *tx)
     .await?
     .ok_or(ApiError::NotFound)?;
 
     use sqlx::Row as _;
-    let pw_row = PwRow {
-        password_hash: row.get("password_hash"),
-        password_reset_required: row.get("password_reset_required"),
-    };
+    let password_hash: String = row.get("password_hash");
+    let password_reset_required: i64 = row.get("password_reset_required");
 
-    // 기존 비밀번호가 있는 경우 반드시 검증
-    let skip_current_check = pw_row.password_hash.is_empty() && pw_row.password_reset_required == 1;
+    let skip_current_check = password_hash.is_empty() && password_reset_required == 1;
 
     if !skip_current_check {
         let current = body
@@ -555,7 +558,7 @@ pub async fn change_password_student(
             .as_deref()
             .ok_or_else(|| ApiError::BadRequest("ERR_CURRENT_PASSWORD_REQUIRED".into()))?;
 
-        let parsed_hash = PasswordHash::new(&pw_row.password_hash)
+        let parsed_hash = PasswordHash::new(&password_hash)
             .map_err(|_| ApiError::BadRequest("ERR_INVALID_CREDENTIALS".into()))?;
         Argon2::default()
             .verify_password(current.as_bytes(), &parsed_hash)
@@ -573,8 +576,9 @@ pub async fn change_password_student(
     )
     .bind(&new_hash)
     .bind(student_id)
-    .execute(&state.db)
+    .execute(&mut *tx)
     .await?;
 
+    tx.commit().await?;
     Ok(Json(json!({ "ok": true })))
 }

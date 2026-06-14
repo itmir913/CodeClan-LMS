@@ -126,10 +126,11 @@ pub async fn create_class(
         return Err(ApiError::BadRequest("ERR_CLASS_NAME_REQUIRED".into()));
     }
 
-    // subject 존재 확인
+    let mut tx = state.db.begin().await?;
+
     let subject_exists: Option<i64> = sqlx::query_scalar("SELECT id FROM subjects WHERE id = ?")
         .bind(body.subject_id)
-        .fetch_optional(&state.db)
+        .fetch_optional(&mut *tx)
         .await?;
     if subject_exists.is_none() {
         return Err(ApiError::BadRequest("ERR_SUBJECT_NOT_FOUND".into()));
@@ -141,9 +142,10 @@ pub async fn create_class(
     .bind(teacher_id)
     .bind(body.subject_id)
     .bind(body.name.trim())
-    .execute(&state.db)
+    .execute(&mut *tx)
     .await?;
 
+    tx.commit().await?;
     Ok(Json(json!({ "id": result.last_insert_rowid() })))
 }
 
@@ -167,11 +169,14 @@ pub async fn update_class(
         .await?
         .ok_or(ApiError::NotFound)?;
 
+    // 접근 권한 확인 (pool 기반 read, tx 밖에서 수행)
     check_class_access(teacher_id, class_id, &role, &state.db).await?;
+
+    let mut tx = state.db.begin().await?;
 
     let subject_exists: Option<i64> = sqlx::query_scalar("SELECT id FROM subjects WHERE id = ?")
         .bind(body.subject_id)
-        .fetch_optional(&state.db)
+        .fetch_optional(&mut *tx)
         .await?;
     if subject_exists.is_none() {
         return Err(ApiError::BadRequest("ERR_SUBJECT_NOT_FOUND".into()));
@@ -181,9 +186,10 @@ pub async fn update_class(
         .bind(body.name.trim())
         .bind(body.subject_id)
         .bind(class_id)
-        .execute(&state.db)
+        .execute(&mut *tx)
         .await?;
 
+    tx.commit().await?;
     Ok(Json(json!({ "ok": true })))
 }
 
@@ -204,10 +210,12 @@ pub async fn delete_class(
 
     check_class_access(teacher_id, class_id, &role, &state.db).await?;
 
+    let mut tx = state.db.begin().await?;
     sqlx::query("DELETE FROM classes WHERE id = ?")
         .bind(class_id)
-        .execute(&state.db)
+        .execute(&mut *tx)
         .await?;
+    tx.commit().await?;
 
     Ok(Json(json!({ "ok": true })))
 }

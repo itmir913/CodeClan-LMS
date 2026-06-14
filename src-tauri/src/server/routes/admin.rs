@@ -72,9 +72,10 @@ pub async fn create_subject(
         return Err(ApiError::BadRequest("ERR_SUBJECT_NAME_REQUIRED".into()));
     }
 
+    let mut tx = state.db.begin().await?;
     let result = sqlx::query("INSERT INTO subjects (name) VALUES (?)")
         .bind(body.name.trim())
-        .execute(&state.db)
+        .execute(&mut *tx)
         .await
         .map_err(|e| {
             if let sqlx::Error::Database(ref db_err) = e {
@@ -84,6 +85,7 @@ pub async fn create_subject(
             }
             ApiError::Database(e)
         })?;
+    tx.commit().await?;
 
     Ok(Json(json!({ "id": result.last_insert_rowid() })))
 }
@@ -98,30 +100,33 @@ pub async fn delete_subject(
     let teacher_id = session.teacher_id.ok_or(ApiError::Forbidden)?;
     require_admin(teacher_id, &state.db).await?;
 
-    // 이 과목을 사용하는 수업이 있으면 삭제 불가
-    let in_use: Option<i64> = sqlx::query_scalar(
-        "SELECT id FROM classes WHERE subject_id = ? LIMIT 1",
-    )
-    .bind(subject_id)
-    .fetch_optional(&state.db)
-    .await?;
-    if in_use.is_some() {
-        return Err(ApiError::BadRequest("ERR_SUBJECT_IN_USE".into()));
-    }
+    let mut tx = state.db.begin().await?;
 
     let exists: Option<i64> = sqlx::query_scalar("SELECT id FROM subjects WHERE id = ?")
         .bind(subject_id)
-        .fetch_optional(&state.db)
+        .fetch_optional(&mut *tx)
         .await?;
     if exists.is_none() {
         return Err(ApiError::NotFound);
     }
 
+    // 이 과목을 사용하는 수업이 있으면 삭제 불가
+    let in_use: Option<i64> = sqlx::query_scalar(
+        "SELECT id FROM classes WHERE subject_id = ? LIMIT 1",
+    )
+    .bind(subject_id)
+    .fetch_optional(&mut *tx)
+    .await?;
+    if in_use.is_some() {
+        return Err(ApiError::BadRequest("ERR_SUBJECT_IN_USE".into()));
+    }
+
     sqlx::query("DELETE FROM subjects WHERE id = ?")
         .bind(subject_id)
-        .execute(&state.db)
+        .execute(&mut *tx)
         .await?;
 
+    tx.commit().await?;
     Ok(Json(json!({ "ok": true })))
 }
 
@@ -208,6 +213,7 @@ pub async fn create_teacher(
         .map_err(|e| ApiError::Internal(format!("argon2: {e}")))?
         .to_string();
 
+    let mut tx = state.db.begin().await?;
     let result = sqlx::query(
         "INSERT INTO teachers (username, name, password_hash, role) VALUES (?, ?, ?, ?)",
     )
@@ -215,7 +221,7 @@ pub async fn create_teacher(
     .bind(body.name.trim())
     .bind(&hash)
     .bind(role)
-    .execute(&state.db)
+    .execute(&mut *tx)
     .await
     .map_err(|e| {
         if let sqlx::Error::Database(ref db_err) = e {
@@ -225,6 +231,7 @@ pub async fn create_teacher(
         }
         ApiError::Database(e)
     })?;
+    tx.commit().await?;
 
     Ok(Json(json!({ "id": result.last_insert_rowid() })))
 }
