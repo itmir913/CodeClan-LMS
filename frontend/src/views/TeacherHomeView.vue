@@ -61,14 +61,24 @@
           {{ $t('classes.myClasses') }}
           <span v-if="!classStore.loading">({{ classStore.classes.length }})</span>
         </h2>
-        <button
-          class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium"
-          style="background: var(--color-accent); color: var(--color-accent-text); border: none"
-          @click="openAddModal"
-        >
-          <IconPlus :size="17" />
-          {{ $t('classes.addClass') }}
-        </button>
+        <div class="flex items-center gap-2">
+          <button
+            class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium border"
+            style="background: transparent; color: var(--color-text-muted); border-color: var(--color-border)"
+            @click="$router.push('/problem-bank')"
+          >
+            <IconBooks :size="16" />
+            {{ $t('problems.title') }}
+          </button>
+          <button
+            class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium"
+            style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+            @click="openAddModal"
+          >
+            <IconPlus :size="17" />
+            {{ $t('classes.addClass') }}
+          </button>
+        </div>
       </div>
 
       <!-- Loading -->
@@ -365,7 +375,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import {
   IconMoon, IconSun, IconPlus, IconLoader2, IconAlertCircle,
-  IconPencil, IconTrash, IconUsers, IconSchool, IconSettings,
+  IconPencil, IconTrash, IconUsers, IconSchool, IconSettings, IconBooks,
 } from '@tabler/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import { useClassStore } from '@/stores/class'

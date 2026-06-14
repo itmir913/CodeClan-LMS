@@ -27,5 +27,11 @@
   "ERR_STUDENT_CLASS_NO_INVALID": "Class number must be between 1 and 99",
   "ERR_STUDENT_NUMBER_INVALID": "Student number must be between 1 and 99",
   "ERR_BULK_EMPTY": "No student data to import",
+  "ERR_PROBLEM_TITLE_REQUIRED": "Problem title is required",
+  "ERR_PROBLEM_TYPE_INVALID": "Invalid problem type",
+  "ERR_PROBLEM_ANSWER_REQUIRED": "Please enter an answer or select a correct choice",
+  "ERR_PROBLEM_CHOICES_MIN": "At least 2 choices are required",
+  "ERR_PROBLEM_IN_USE": "This problem is used in a lesson or assessment and cannot be deleted",
+  "ERR_PROBLEM_TYPE_MISMATCH": "Problem type cannot be changed after creation",
   "ERR_UNKNOWN": "An unknown error occurred"
 }

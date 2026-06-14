@@ -56,7 +56,15 @@ pub fn build_router(state: AppState) -> Router {
         )
         // Admin — subjects
         .route("/admin/subjects", post(routes::admin::create_subject))
-        .route("/admin/subjects/:id", delete(routes::admin::delete_subject));
+        .route("/admin/subjects/:id", delete(routes::admin::delete_subject))
+        // Problems
+        .route("/problems", get(routes::problems::list_problems).post(routes::problems::create_problem))
+        .route(
+            "/problems/:id",
+            get(routes::problems::get_problem)
+                .put(routes::problems::update_problem)
+                .delete(routes::problems::delete_problem),
+        );
 
     Router::new()
         .nest("/api", api)

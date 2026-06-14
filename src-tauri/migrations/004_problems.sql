@@ -97,6 +97,13 @@ CREATE TABLE IF NOT EXISTS lesson_problems (
     UNIQUE (lesson_id, problem_id)
 );
 
+-- ── 문항 유형 초기값 ──────────────────────────────────────────────────────────
+
+INSERT OR IGNORE INTO problem_types (id, slug) VALUES
+    (1, 'short_answer'),
+    (2, 'multiple_choice'),
+    (3, 'code_submit');
+
 -- ── 인덱스 ────────────────────────────────────────────────────────────────────
 
 CREATE INDEX IF NOT EXISTS idx_problems_type        ON problems(type_id);

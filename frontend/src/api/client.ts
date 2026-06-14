@@ -123,6 +123,90 @@ export interface BulkResult {
   skipped: number
 }
 
+export interface ProblemListItem {
+  id: number
+  type: string
+  title: string
+  subject_id: number | null
+  subject_name: string | null
+  is_draft: boolean
+  created_at: string
+}
+
+export interface ProblemChoice {
+  id: number
+  order_no: number
+  content: string
+  is_correct: boolean
+}
+
+export interface ProblemTestCase {
+  id: number
+  number: number
+  input: string
+  expected_output: string
+  is_sample: boolean
+  explanation: string
+}
+
+export interface ProblemDetail {
+  id: number
+  type: string
+  title: string
+  description: string
+  comment: string
+  subject_id: number | null
+  subject_name: string | null
+  is_draft: boolean
+  created_at: string
+  // short_answer
+  answer?: string
+  case_sensitive?: boolean
+  // multiple_choice
+  allow_multiple?: boolean
+  choices?: ProblemChoice[]
+  // code_submit
+  input_format?: string
+  output_format?: string
+  constraints?: string
+  time_limit_ms?: number
+  memory_limit_mb?: number
+  show_io_on_fail?: boolean
+  test_cases?: ProblemTestCase[]
+}
+
+export interface ChoiceInput {
+  content: string
+  is_correct: boolean
+}
+
+export interface TestCaseInput {
+  input: string
+  expected_output: string
+  is_sample: boolean
+  explanation: string
+}
+
+export interface CreateProblemBody {
+  type: string
+  title: string
+  description: string
+  comment: string
+  is_draft: boolean
+  subject_id: number | null
+  answer?: string
+  case_sensitive?: boolean
+  allow_multiple?: boolean
+  choices?: ChoiceInput[]
+  input_format?: string
+  output_format?: string
+  constraints?: string
+  time_limit_ms?: number
+  memory_limit_mb?: number
+  show_io_on_fail?: boolean
+  test_cases?: TestCaseInput[]
+}
+
 // ── API object ────────────────────────────────────────────────
 
 export const api = {
@@ -185,5 +269,14 @@ export const api = {
     createSubject: (name: string) =>
       request<{ id: number }>('POST', '/admin/subjects', { name }),
     deleteSubject: (id: number) => request<{ ok: boolean }>('DELETE', `/admin/subjects/${id}`),
+  },
+  problems: {
+    list: (type?: string) =>
+      request<ProblemListItem[]>('GET', `/problems${type ? `?type=${type}` : ''}`),
+    get: (id: number) => request<ProblemDetail>('GET', `/problems/${id}`),
+    create: (data: CreateProblemBody) => request<{ id: number }>('POST', '/problems', data),
+    update: (id: number, data: CreateProblemBody) =>
+      request<{ ok: boolean }>('PUT', `/problems/${id}`, data),
+    delete: (id: number) => request<{ ok: boolean }>('DELETE', `/problems/${id}`),
   },
 }

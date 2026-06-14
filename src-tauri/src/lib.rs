@@ -23,13 +23,14 @@ pub fn run() {
                 .parent()
                 .expect("exe 부모 디렉토리 없음")
                 .to_path_buf();
-            let db_path = exe_dir.join("data").join("codeclan.db");
+            let data_dir = exe_dir.join("data");
+            let db_path = data_dir.join("codeclan.db");
 
             tauri::async_runtime::spawn(async move {
                 let pool = db::init(&db_path)
                     .await
                     .expect("Database initialization failed");
-                let state = AppState { db: pool };
+                let state = AppState { db: pool, data_dir };
                 server::start(state)
                     .await
                     .expect("Axum server failed");

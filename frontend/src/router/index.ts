@@ -46,6 +46,12 @@ const router = createRouter({
       meta: { requiresAuth: 'student' },
     },
     {
+      path: '/problem-bank',
+      name: 'problem-bank',
+      component: () => import('@/views/ProblemBankView.vue'),
+      meta: { requiresAuth: 'teacher' },
+    },
+    {
       path: '/:pathMatch(.*)*',
       redirect: '/login',
     },
