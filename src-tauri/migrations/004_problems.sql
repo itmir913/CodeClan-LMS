@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS lesson_problems (
     id         INTEGER PRIMARY KEY,
     lesson_id  INTEGER NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
     problem_id INTEGER NOT NULL REFERENCES problems(id) ON DELETE RESTRICT,
-    order_no   INTEGER NOT NULL DEFAULT 0,
+    order_no   INTEGER NOT NULL DEFAULT 0 CHECK (order_no >= 0),
     UNIQUE (lesson_id, problem_id)
 );
 

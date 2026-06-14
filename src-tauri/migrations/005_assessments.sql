@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS class_assessments (
     id                 INTEGER PRIMARY KEY,
     class_id           INTEGER NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
     assessment_id      INTEGER NOT NULL REFERENCES assessments(id) ON DELETE CASCADE,
-    order_no           INTEGER NOT NULL DEFAULT 0,
+    order_no           INTEGER NOT NULL DEFAULT 0 CHECK (order_no >= 0),
     is_announced       INTEGER NOT NULL DEFAULT 0 CHECK (is_announced IN (0, 1)),
     is_result_released INTEGER NOT NULL DEFAULT 0 CHECK (is_result_released IN (0, 1)),
     UNIQUE (class_id, assessment_id)
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS assessment_problems (
     id            INTEGER PRIMARY KEY,
     assessment_id INTEGER NOT NULL REFERENCES assessments(id) ON DELETE CASCADE,
     problem_id    INTEGER NOT NULL REFERENCES problems(id) ON DELETE RESTRICT,
-    order_no      INTEGER NOT NULL DEFAULT 0,
+    order_no      INTEGER NOT NULL DEFAULT 0 CHECK (order_no >= 0),
     score         INTEGER NOT NULL DEFAULT 0 CHECK (score >= 0),
     UNIQUE (assessment_id, problem_id)
 );

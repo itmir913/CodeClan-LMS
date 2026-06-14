@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS class_lessons (
     id          INTEGER PRIMARY KEY,
     class_id    INTEGER NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
     lesson_id   INTEGER NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
-    order_no    INTEGER NOT NULL DEFAULT 0,
+    order_no    INTEGER NOT NULL DEFAULT 0 CHECK (order_no >= 0),
     is_released INTEGER NOT NULL DEFAULT 0 CHECK (is_released IN (0, 1)),
     released_at TEXT,
     UNIQUE (class_id, lesson_id)
