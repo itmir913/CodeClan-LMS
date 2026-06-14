@@ -317,7 +317,7 @@
                     {{ teacher.created_at.slice(0, 10) }}
                   </td>
                   <td class="px-5 py-3">
-                    <div class="flex gap-1">
+                    <div class="flex items-center gap-1">
                       <button
                         class="w-8 h-8 p-0 rounded-lg flex items-center justify-center"
                         style="background: transparent; border: 1px solid var(--color-border); color: var(--color-text-muted)"

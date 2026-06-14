@@ -53,7 +53,7 @@
             <label class="block mb-1 font-medium" style="color: var(--color-text-primary)">
               {{ $t('auth.displayName') }}
             </label>
-            <div class="flex gap-2">
+            <div class="flex items-center gap-2">
               <input
                 v-model="nameInput"
                 type="text"

@@ -44,7 +44,7 @@
                      color: var(--color-text-primary)"
             />
             <button type="button"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 flex"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center"
                     style="color: var(--color-text-muted)"
                     @click="showCurrent = !showCurrent"
                     :aria-label="$t('auth.togglePassword')">
@@ -72,7 +72,7 @@
                      color: var(--color-text-primary)"
             />
             <button type="button"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 flex"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center"
                     style="color: var(--color-text-muted)"
                     @click="showNew = !showNew"
                     :aria-label="$t('auth.togglePassword')">
@@ -100,7 +100,7 @@
                      color: var(--color-text-primary)"
             />
             <button type="button"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 flex"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center"
                     style="color: var(--color-text-muted)"
                     @click="showConfirm = !showConfirm"
                     :aria-label="$t('auth.togglePassword')">

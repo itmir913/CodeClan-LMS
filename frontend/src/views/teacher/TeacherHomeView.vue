@@ -122,12 +122,12 @@
           <span class="h-1 block shrink-0" :style="{ background: cardAccentColor(cls.id) }"></span>
 
           <div class="flex flex-col flex-1 p-5">
-            <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center justify-between gap-2">
               <div>
                 <h3 class="font-bold" style="color: var(--color-text-primary)">{{ cls.name }}</h3>
                 <p class="mt-1" style="color: var(--color-text-muted)">{{ cls.subject_name }}</p>
               </div>
-              <div class="flex gap-1 shrink-0">
+              <div class="flex items-center gap-1 shrink-0">
                 <button
                   class="w-8 h-8 p-0 rounded-lg flex items-center justify-center"
                   style="background: transparent; border: 1px solid var(--color-border); color: var(--color-text-muted)"
