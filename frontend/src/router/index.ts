@@ -28,6 +28,12 @@ const router = createRouter({
       meta: { requiresAuth: 'admin' },
     },
     {
+      path: '/classes/:id',
+      name: 'class-detail',
+      component: () => import('@/views/ClassDetailView.vue'),
+      meta: { requiresAuth: 'teacher' },
+    },
+    {
       path: '/student',
       name: 'student-home',
       component: () => import('@/views/StudentHomeView.vue'),
@@ -71,8 +77,12 @@ router.beforeEach(async (to) => {
   if (requiredRole === 'admin' || requiredRole === 'teacher') {
     try {
       const user = await api.auth.meTeacher()
-      // 역할 불일치 시 로그아웃 후 로그인 화면으로
-      if (user.role !== requiredRole) {
+      if (requiredRole === 'admin' && user.role !== 'admin') {
+        // admin 전용 페이지 — teacher는 접근 불가
+        await api.auth.logoutTeacher().catch(() => {})
+        return { name: 'login' }
+      } else if (requiredRole === 'teacher' && user.role !== 'teacher' && user.role !== 'admin') {
+        // teacher 페이지 — admin도 허용
         await api.auth.logoutTeacher().catch(() => {})
         return { name: 'login' }
       }

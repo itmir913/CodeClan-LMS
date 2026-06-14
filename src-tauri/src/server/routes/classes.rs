@@ -20,6 +20,18 @@ pub struct ClassResponse {
     pub created_at: String,
 }
 
+#[derive(Serialize)]
+pub struct ClassDetail {
+    pub id: i64,
+    pub name: String,
+    pub subject_id: i64,
+    pub subject_name: String,
+    pub teacher_id: i64,
+    pub teacher_name: String,
+    pub student_count: i64,
+    pub created_at: String,
+}
+
 #[derive(Deserialize)]
 pub struct ClassBody {
     pub name: String,
@@ -111,6 +123,53 @@ pub async fn list_classes(
         .collect();
 
     Ok(Json(classes))
+}
+
+/// GET /api/classes/:id
+pub async fn get_class(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(class_id): Path<i64>,
+) -> Result<Json<ClassDetail>, ApiError> {
+    let session = parse_session(&headers, &state.db).await?;
+    let teacher_id = session.teacher_id.ok_or(ApiError::Forbidden)?;
+
+    let role: String = sqlx::query_scalar("SELECT role FROM teachers WHERE id = ?")
+        .bind(teacher_id)
+        .fetch_optional(&state.db)
+        .await?
+        .ok_or(ApiError::NotFound)?;
+
+    check_class_access(teacher_id, class_id, &role, &state.db).await?;
+
+    use sqlx::Row as _;
+    let row = sqlx::query(
+        "SELECT c.id, c.name, c.subject_id, c.teacher_id, c.created_at, \
+         COALESCE(s.name, '') as subject_name, \
+         COALESCE(t.name, '') as teacher_name, \
+         COUNT(cs.student_id) as student_count \
+         FROM classes c \
+         LEFT JOIN subjects s ON s.id = c.subject_id \
+         LEFT JOIN teachers t ON t.id = c.teacher_id \
+         LEFT JOIN class_students cs ON cs.class_id = c.id \
+         WHERE c.id = ? \
+         GROUP BY c.id",
+    )
+    .bind(class_id)
+    .fetch_optional(&state.db)
+    .await?
+    .ok_or(ApiError::NotFound)?;
+
+    Ok(Json(ClassDetail {
+        id: row.get("id"),
+        name: row.get("name"),
+        subject_id: row.get("subject_id"),
+        subject_name: row.get("subject_name"),
+        teacher_id: row.get("teacher_id"),
+        teacher_name: row.get("teacher_name"),
+        student_count: row.get("student_count"),
+        created_at: row.get("created_at"),
+    }))
 }
 
 /// POST /api/classes

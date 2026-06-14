@@ -90,6 +90,39 @@ export interface AdminTeacher {
   created_at: string
 }
 
+export interface ClassDetail {
+  id: number
+  name: string
+  subject_id: number
+  subject_name: string
+  teacher_id: number
+  teacher_name: string
+  student_count: number
+  created_at: string
+}
+
+export interface StudentItem {
+  id: number
+  username: string
+  name: string
+  grade: number
+  class_no: number
+  number: number
+  password_reset_required: boolean
+}
+
+export interface AddStudentBody {
+  name: string
+  grade: number
+  class_no: number
+  number: number
+}
+
+export interface BulkResult {
+  inserted: number
+  skipped: number
+}
+
 // ── API object ────────────────────────────────────────────────
 
 export const api = {
@@ -125,11 +158,22 @@ export const api = {
   },
   classes: {
     list: () => request<ClassItem[]>('GET', '/classes'),
+    get: (id: number) => request<ClassDetail>('GET', `/classes/${id}`),
     create: (name: string, subject_id: number) =>
       request<{ id: number }>('POST', '/classes', { name, subject_id }),
     update: (id: number, name: string, subject_id: number) =>
       request<{ ok: boolean }>('PUT', `/classes/${id}`, { name, subject_id }),
     delete: (id: number) => request<{ ok: boolean }>('DELETE', `/classes/${id}`),
+  },
+  students: {
+    list: (classId: number) => request<StudentItem[]>('GET', `/classes/${classId}/students`),
+    add: (classId: number, data: AddStudentBody) =>
+      request<{ id: number }>('POST', `/classes/${classId}/students`, data),
+    bulkAdd: (classId: number, data: AddStudentBody[]) =>
+      request<BulkResult>('POST', `/classes/${classId}/students/bulk`, data),
+    delete: (id: number) => request<{ ok: boolean }>('DELETE', `/students/${id}`),
+    resetPassword: (id: number) =>
+      request<{ ok: boolean }>('POST', `/students/${id}/reset-password`),
   },
   admin: {
     listTeachers: () => request<AdminTeacher[]>('GET', '/admin/teachers'),

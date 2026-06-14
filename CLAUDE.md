@@ -177,8 +177,9 @@ src-tauri/
         mod.rs
         setup.rs          — GET /api/setup/status, POST /api/setup/complete
         auth.rs           — POST /api/auth/login/teacher|student, /logout, GET /me
-        classes.rs        — GET/POST /api/classes, PUT/DELETE /api/classes/:id
+        classes.rs        — GET/POST /api/classes, GET/PUT/DELETE /api/classes/:id
         admin.rs          — /api/admin/teachers, /api/admin/subjects (admin 전용)
+        students.rs       — /api/classes/:id/students (목록/추가/bulk), /api/students/:id (삭제/비밀번호초기화)
 
 frontend/
   package.json
@@ -196,15 +197,17 @@ frontend/
       auth.ts             — 교사/학생 세션, role, 학교 이름
       class.ts            — 수업 목록, 과목 목록, 수업 CRUD
       admin.ts            — 교사 계정 관리, 과목 관리 (admin 전용)
+      student.ts          — 학생 목록, 추가/삭제/비밀번호초기화
     views/
       SetupView.vue       — 초기 설정 (0장)
       LoginView.vue       — 교사/학생 탭 로그인 (role→라우팅)
       TeacherHomeView.vue — 교사 홈 (수업 카드 그리드, 수업 CRUD 모달)
-      AdminView.vue       — 관리자 홈 (교사 계정·과목 관리)
+      AdminView.vue       — 관리자 홈 (사이드바: 수업 전체/교사 관리/과목 관리)
+      ClassDetailView.vue — 수업 상세 (항상-다크 사이드바, 4탭: 학생/차시/수행평가/출석)
       StudentHomeView.vue — 학생 홈 (진행 중 세션 진입 또는 대기 화면)
     components/           — 공용 컴포넌트 (LanguageSelector.vue 등)
     locales/
-      ko/ en/             — setup, auth, common, errors, classes, admin, student
+      ko/ en/             — setup, auth, common, errors, classes, admin, student, students
 ```
 
 ### 라우트 구조
@@ -212,8 +215,9 @@ frontend/
 |------|-----|------|
 | `/setup` | SetupView | needs_setup |
 | `/login` | LoginView | 비로그인 |
-| `/teacher` | TeacherHomeView | requiresAuth: 'teacher' (또는 admin) |
+| `/teacher` | TeacherHomeView | requiresAuth: 'teacher' (admin도 허용) |
 | `/admin` | AdminView | requiresAuth: 'admin' |
+| `/classes/:id` | ClassDetailView | requiresAuth: 'teacher' (admin도 허용) |
 | `/student` | StudentHomeView | requiresAuth: 'student' |
 | `/student/change-password` | (인라인/모달) | requiresAuth: 'student' |
 

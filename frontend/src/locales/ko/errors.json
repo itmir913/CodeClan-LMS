@@ -21,5 +21,11 @@
   "ERR_LAST_ADMIN": "마지막 관리자는 삭제하거나 역할을 변경할 수 없습니다",
   "ERR_NAME_REQUIRED": "이름을 입력해주세요",
   "ERR_PASSWORD_MISMATCH": "새 비밀번호가 일치하지 않습니다",
+  "ERR_STUDENT_NAME_REQUIRED": "이름을 입력해주세요",
+  "ERR_STUDENT_ALREADY_EXISTS": "같은 학년/반/번호의 학생이 이미 존재합니다",
+  "ERR_STUDENT_GRADE_INVALID": "올바른 학년(1~6)을 입력해주세요",
+  "ERR_STUDENT_CLASS_NO_INVALID": "올바른 반(1~99)을 입력해주세요",
+  "ERR_STUDENT_NUMBER_INVALID": "올바른 번호(1~99)를 입력해주세요",
+  "ERR_BULK_EMPTY": "임포트할 학생 데이터가 없습니다",
   "ERR_UNKNOWN": "알 수 없는 오류가 발생했습니다"
 }

@@ -33,8 +33,18 @@ pub fn build_router(state: AppState) -> Router {
         .route("/classes", get(routes::classes::list_classes).post(routes::classes::create_class))
         .route(
             "/classes/:id",
-            put(routes::classes::update_class).delete(routes::classes::delete_class),
+            get(routes::classes::get_class)
+                .put(routes::classes::update_class)
+                .delete(routes::classes::delete_class),
         )
+        // Students
+        .route(
+            "/classes/:id/students",
+            get(routes::students::list_students).post(routes::students::add_student),
+        )
+        .route("/classes/:id/students/bulk", post(routes::students::bulk_add_students))
+        .route("/students/:id", delete(routes::students::delete_student))
+        .route("/students/:id/reset-password", post(routes::students::reset_student_password))
         // Admin — teachers
         .route(
             "/admin/teachers",

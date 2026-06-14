@@ -20,5 +20,15 @@
   "cancel": "취소",
   "save": "저장",
   "add": "추가",
-  "noSubjects": "과목이 없습니다. 관리자에게 과목 추가를 요청하세요."
+  "noSubjects": "과목이 없습니다. 관리자에게 과목 추가를 요청하세요.",
+  "backToHome": "수업 목록",
+  "allClasses": "수업 전체",
+  "teacherManage": "교사 관리",
+  "subjectManage": "과목 관리",
+  "tabStudents": "학생",
+  "tabLessons": "차시",
+  "tabAssessments": "수행평가",
+  "tabAttendance": "출석부",
+  "tabComingSoon": "준비 중입니다",
+  "noClassesAdmin": "등록된 수업이 없습니다"
 }

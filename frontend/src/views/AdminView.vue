@@ -1,10 +1,10 @@
 <template>
-  <div class="min-h-screen" style="background: var(--color-bg-primary)">
+  <div class="min-h-screen flex flex-col" style="background: var(--color-bg-primary)">
 
     <!-- Top Nav -->
-    <header class="sticky top-0 z-30 h-16 border-b"
+    <header class="sticky top-0 z-30 h-16 border-b flex-shrink-0"
             style="background: var(--color-bg-secondary); border-color: var(--color-border)">
-      <div class="h-full max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div class="h-full max-w-full flex items-center justify-between px-6">
 
         <div class="flex items-center gap-3">
           <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-white shrink-0"
@@ -55,180 +55,346 @@
       </div>
     </header>
 
-    <!-- Main -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-16 flex flex-col gap-10">
+    <!-- Body: Sidebar + Content -->
+    <div class="flex flex-1 min-h-0">
 
-      <!-- ── 교사 계정 섹션 ── -->
-      <section>
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="font-semibold tracking-widest uppercase"
-              style="color: var(--color-text-muted)">{{ $t('admin.teachers') }}</h2>
+      <!-- ── 사이드바 ── -->
+      <aside class="w-56 flex-shrink-0 border-r overflow-y-auto flex flex-col"
+             style="background: var(--color-bg-secondary); border-color: var(--color-border)">
+
+        <!-- 수업 전체 섹션 -->
+        <div class="p-3 pt-4">
           <button
-            class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium"
-            style="background: var(--color-accent); color: var(--color-accent-text); border: none"
-            @click="openAddTeacherModal"
+            class="flex items-center gap-2.5 w-full h-10 px-3 rounded-lg font-medium border-0 text-left"
+            :style="activeSection === 'classes'
+              ? { background: 'var(--color-info-bg)', color: 'var(--color-accent)', fontWeight: 600 }
+              : { background: 'transparent', color: 'var(--color-text-muted)' }"
+            @click="activeSection = 'classes'"
           >
-            <IconPlus :size="17" />
-            {{ $t('admin.addTeacher') }}
+            <IconLayoutGrid :size="17" />
+            {{ $t('classes.allClasses') }}
           </button>
         </div>
 
-        <!-- Loading -->
-        <div v-if="adminStore.loading"
-             class="flex items-center gap-3 py-8"
-             style="color: var(--color-text-muted)">
-          <IconLoader2 :size="20" class="spin" />
-          <span>{{ $t('common.loading') }}</span>
-        </div>
+        <div class="mx-3 mb-1" style="height: 1px; background: var(--color-border)"></div>
 
-        <!-- Error -->
-        <div v-else-if="adminStore.error"
-             class="flex items-center gap-3 rounded-xl border px-5 py-4"
-             style="background: var(--color-danger-bg); border-color: var(--color-danger-border); color: var(--color-danger)"
-             role="alert">
-          <IconAlertCircle :size="20" class="shrink-0" />
-          <span>{{ $t(`errors.${adminStore.error}`, $t('errors.ERR_UNKNOWN')) }}</span>
+        <!-- 교사·과목 관리 섹션 -->
+        <div class="p-3 flex flex-col gap-0.5">
           <button
-            class="ml-auto h-8 px-3 rounded-lg font-medium"
-            style="background: transparent; border: 1px solid var(--color-danger-border); color: var(--color-danger)"
-            @click="adminStore.fetchTeachers()"
-          >{{ $t('common.retry') }}</button>
+            class="flex items-center gap-2.5 w-full h-10 px-3 rounded-lg font-medium border-0 text-left"
+            :style="activeSection === 'teachers'
+              ? { background: 'var(--color-info-bg)', color: 'var(--color-accent)', fontWeight: 600 }
+              : { background: 'transparent', color: 'var(--color-text-muted)' }"
+            @click="activeSection = 'teachers'"
+          >
+            <IconUsers :size="17" />
+            {{ $t('classes.teacherManage') }}
+          </button>
+          <button
+            class="flex items-center gap-2.5 w-full h-10 px-3 rounded-lg font-medium border-0 text-left"
+            :style="activeSection === 'subjects'
+              ? { background: 'var(--color-info-bg)', color: 'var(--color-accent)', fontWeight: 600 }
+              : { background: 'transparent', color: 'var(--color-text-muted)' }"
+            @click="activeSection = 'subjects'"
+          >
+            <IconBook :size="17" />
+            {{ $t('classes.subjectManage') }}
+          </button>
         </div>
 
-        <!-- Empty -->
-        <div v-else-if="adminStore.teachers.length === 0"
-             class="py-8 text-center"
-             style="color: var(--color-text-muted)">
-          {{ $t('admin.noTeachers') }}
-        </div>
+        <!-- 수업 목록 (수업 전체 탭 선택 시) -->
+        <template v-if="activeSection === 'classes'">
+          <div class="mx-3" style="height: 1px; background: var(--color-border)"></div>
+          <div class="p-2 flex-1 overflow-y-auto">
+            <div v-if="classStore.loading"
+                 class="flex items-center gap-2 px-3 py-2"
+                 style="color: var(--color-text-muted)">
+              <IconLoader2 :size="16" class="spin" />
+            </div>
+            <div v-else-if="classStore.classes.length === 0"
+                 class="px-3 py-3"
+                 style="color: var(--color-text-muted)">
+              {{ $t('classes.noClassesAdmin') }}
+            </div>
+            <router-link
+              v-else
+              v-for="cls in classStore.classes"
+              :key="cls.id"
+              :to="`/classes/${cls.id}`"
+              class="flex flex-col px-3 py-2.5 rounded-lg no-underline"
+              style="color: var(--color-text-primary)"
+              active-class=""
+            >
+              <span class="font-medium leading-tight" style="font-size: 16px">{{ cls.name }}</span>
+              <span class="mt-0.5" style="font-size: 16px; color: var(--color-text-muted)">
+                {{ cls.subject_name }}
+              </span>
+            </router-link>
+          </div>
+        </template>
 
-        <!-- Table -->
-        <div v-else class="rounded-xl border overflow-hidden"
-             style="border-color: var(--color-border)">
-          <table class="w-full">
-            <thead>
-              <tr style="background: var(--color-bg-tertiary); border-bottom: 1px solid var(--color-border)">
-                <th class="px-5 py-3 text-left font-semibold" style="color: var(--color-text-muted)">
-                  {{ $t('admin.teacherName') }}
-                </th>
-                <th class="px-5 py-3 text-left font-semibold hidden sm:table-cell"
-                    style="color: var(--color-text-muted)">
-                  {{ $t('admin.teacherUsername') }}
-                </th>
-                <th class="px-5 py-3 text-left font-semibold" style="color: var(--color-text-muted)">
-                  {{ $t('admin.teacherRole') }}
-                </th>
-                <th class="px-5 py-3 text-left font-semibold hidden lg:table-cell"
-                    style="color: var(--color-text-muted)">
-                  {{ $t('admin.createdAt') }}
-                </th>
-                <th class="px-5 py-3 w-20"></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="teacher in adminStore.teachers"
-                :key="teacher.id"
-                class="border-t"
-                style="border-color: var(--color-border)"
-              >
-                <td class="px-5 py-3 font-medium" style="color: var(--color-text-primary)">
-                  {{ teacher.name }}
-                </td>
-                <td class="px-5 py-3 hidden sm:table-cell" style="color: var(--color-text-muted)">
-                  {{ teacher.username }}
-                </td>
-                <td class="px-5 py-3">
-                  <span
-                    class="inline-block rounded-full px-2.5 py-0.5 font-medium"
-                    :style="teacher.role === 'admin'
-                      ? { background: 'var(--color-info-bg)', color: 'var(--color-info)' }
-                      : { background: 'var(--color-bg-tertiary)', color: 'var(--color-text-muted)' }"
-                  >
-                    {{ teacher.role === 'admin' ? $t('admin.roleAdmin') : $t('admin.roleTeacher') }}
-                  </span>
-                </td>
-                <td class="px-5 py-3 hidden lg:table-cell" style="color: var(--color-text-muted)">
-                  {{ teacher.created_at.slice(0, 10) }}
-                </td>
-                <td class="px-5 py-3">
-                  <div class="flex gap-1">
-                    <button
-                      class="w-8 h-8 p-0 rounded-lg flex items-center justify-center"
-                      style="background: transparent; border: 1px solid var(--color-border); color: var(--color-text-muted)"
-                      @click="openEditTeacherModal(teacher)"
-                      :aria-label="$t('admin.editTeacher')"
+      </aside>
+
+      <!-- ── 메인 콘텐츠 ── -->
+      <main class="flex-1 overflow-y-auto px-6 py-6 pb-16">
+
+        <!-- 수업 전체 탭 -->
+        <template v-if="activeSection === 'classes'">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="font-semibold tracking-widest uppercase"
+                style="color: var(--color-text-muted)">{{ $t('classes.allClasses') }}</h2>
+          </div>
+
+          <div v-if="classStore.loading"
+               class="flex items-center gap-3 py-8"
+               style="color: var(--color-text-muted)">
+            <IconLoader2 :size="20" class="spin" />
+            <span>{{ $t('common.loading') }}</span>
+          </div>
+
+          <div v-else-if="classStore.error"
+               class="flex items-center gap-3 rounded-xl border px-5 py-4"
+               style="background: var(--color-danger-bg); border-color: var(--color-danger-border); color: var(--color-danger)"
+               role="alert">
+            <IconAlertCircle :size="20" class="shrink-0" />
+            <span>{{ $t(`errors.${classStore.error}`, $t('errors.ERR_UNKNOWN')) }}</span>
+          </div>
+
+          <div v-else-if="classStore.classes.length === 0"
+               class="py-8 text-center"
+               style="color: var(--color-text-muted)">
+            {{ $t('classes.noClassesAdmin') }}
+          </div>
+
+          <div v-else class="rounded-xl border overflow-hidden"
+               style="border-color: var(--color-border)">
+            <table class="w-full">
+              <thead>
+                <tr style="background: var(--color-bg-tertiary); border-bottom: 1px solid var(--color-border)">
+                  <th class="px-5 py-3 text-left font-semibold" style="color: var(--color-text-muted)">
+                    {{ $t('classes.className') }}
+                  </th>
+                  <th class="px-5 py-3 text-left font-semibold hidden sm:table-cell"
+                      style="color: var(--color-text-muted)">
+                    {{ $t('classes.subject') }}
+                  </th>
+                  <th class="px-5 py-3 text-left font-semibold hidden md:table-cell"
+                      style="color: var(--color-text-muted)">
+                    {{ $t('admin.teacherName') }}
+                  </th>
+                  <th class="px-5 py-3 text-left font-semibold"
+                      style="color: var(--color-text-muted)">
+                    {{ $t('classes.students') }}
+                  </th>
+                  <th class="px-5 py-3 w-16"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="cls in classStore.classes"
+                  :key="cls.id"
+                  class="border-t"
+                  style="border-color: var(--color-border)"
+                >
+                  <td class="px-5 py-3 font-medium" style="color: var(--color-text-primary)">
+                    {{ cls.name }}
+                  </td>
+                  <td class="px-5 py-3 hidden sm:table-cell" style="color: var(--color-text-muted)">
+                    {{ cls.subject_name }}
+                  </td>
+                  <td class="px-5 py-3 hidden md:table-cell" style="color: var(--color-text-muted)">
+                    {{ cls.teacher_id }}
+                  </td>
+                  <td class="px-5 py-3" style="color: var(--color-text-muted)">
+                    {{ $t('classes.students', { count: cls.student_count }) }}
+                  </td>
+                  <td class="px-5 py-3">
+                    <router-link
+                      :to="`/classes/${cls.id}`"
+                      class="w-8 h-8 rounded-lg flex items-center justify-center no-underline"
+                      style="border: 1px solid var(--color-border); color: var(--color-text-muted); background: transparent"
                     >
-                      <IconPencil :size="14" />
-                    </button>
+                      <IconChevronRight :size="14" />
+                    </router-link>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </template>
+
+        <!-- 교사 관리 탭 -->
+        <template v-else-if="activeSection === 'teachers'">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-semibold tracking-widest uppercase"
+                style="color: var(--color-text-muted)">{{ $t('admin.teachers') }}</h2>
+            <button
+              class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium"
+              style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+              @click="openAddTeacherModal"
+            >
+              <IconPlus :size="17" />
+              {{ $t('admin.addTeacher') }}
+            </button>
+          </div>
+
+          <!-- Loading -->
+          <div v-if="adminStore.loading"
+               class="flex items-center gap-3 py-8"
+               style="color: var(--color-text-muted)">
+            <IconLoader2 :size="20" class="spin" />
+            <span>{{ $t('common.loading') }}</span>
+          </div>
+
+          <!-- Error -->
+          <div v-else-if="adminStore.error"
+               class="flex items-center gap-3 rounded-xl border px-5 py-4"
+               style="background: var(--color-danger-bg); border-color: var(--color-danger-border); color: var(--color-danger)"
+               role="alert">
+            <IconAlertCircle :size="20" class="shrink-0" />
+            <span>{{ $t(`errors.${adminStore.error}`, $t('errors.ERR_UNKNOWN')) }}</span>
+            <button
+              class="ml-auto h-8 px-3 rounded-lg font-medium"
+              style="background: transparent; border: 1px solid var(--color-danger-border); color: var(--color-danger)"
+              @click="adminStore.fetchTeachers()"
+            >{{ $t('common.retry') }}</button>
+          </div>
+
+          <!-- Empty -->
+          <div v-else-if="adminStore.teachers.length === 0"
+               class="py-8 text-center"
+               style="color: var(--color-text-muted)">
+            {{ $t('admin.noTeachers') }}
+          </div>
+
+          <!-- Table -->
+          <div v-else class="rounded-xl border overflow-hidden"
+               style="border-color: var(--color-border)">
+            <table class="w-full">
+              <thead>
+                <tr style="background: var(--color-bg-tertiary); border-bottom: 1px solid var(--color-border)">
+                  <th class="px-5 py-3 text-left font-semibold" style="color: var(--color-text-muted)">
+                    {{ $t('admin.teacherName') }}
+                  </th>
+                  <th class="px-5 py-3 text-left font-semibold hidden sm:table-cell"
+                      style="color: var(--color-text-muted)">
+                    {{ $t('admin.teacherUsername') }}
+                  </th>
+                  <th class="px-5 py-3 text-left font-semibold" style="color: var(--color-text-muted)">
+                    {{ $t('admin.teacherRole') }}
+                  </th>
+                  <th class="px-5 py-3 text-left font-semibold hidden lg:table-cell"
+                      style="color: var(--color-text-muted)">
+                    {{ $t('admin.createdAt') }}
+                  </th>
+                  <th class="px-5 py-3 w-20"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="teacher in adminStore.teachers"
+                  :key="teacher.id"
+                  class="border-t"
+                  style="border-color: var(--color-border)"
+                >
+                  <td class="px-5 py-3 font-medium" style="color: var(--color-text-primary)">
+                    {{ teacher.name }}
+                  </td>
+                  <td class="px-5 py-3 hidden sm:table-cell" style="color: var(--color-text-muted)">
+                    {{ teacher.username }}
+                  </td>
+                  <td class="px-5 py-3">
+                    <span
+                      class="inline-block rounded-full px-2.5 py-0.5 font-medium"
+                      :style="teacher.role === 'admin'
+                        ? { background: 'var(--color-info-bg)', color: 'var(--color-info)' }
+                        : { background: 'var(--color-bg-tertiary)', color: 'var(--color-text-muted)' }"
+                    >
+                      {{ teacher.role === 'admin' ? $t('admin.roleAdmin') : $t('admin.roleTeacher') }}
+                    </span>
+                  </td>
+                  <td class="px-5 py-3 hidden lg:table-cell" style="color: var(--color-text-muted)">
+                    {{ teacher.created_at.slice(0, 10) }}
+                  </td>
+                  <td class="px-5 py-3">
+                    <div class="flex gap-1">
+                      <button
+                        class="w-8 h-8 p-0 rounded-lg flex items-center justify-center"
+                        style="background: transparent; border: 1px solid var(--color-border); color: var(--color-text-muted)"
+                        @click="openEditTeacherModal(teacher)"
+                        :aria-label="$t('admin.editTeacher')"
+                      >
+                        <IconPencil :size="14" />
+                      </button>
+                      <button
+                        class="w-8 h-8 p-0 rounded-lg flex items-center justify-center"
+                        style="background: transparent; border: 1px solid var(--color-border); color: var(--color-text-muted)"
+                        @click="openDeleteTeacherModal(teacher)"
+                        :aria-label="$t('admin.deleteTeacher')"
+                        :disabled="teacher.id === auth.teacher?.id"
+                      >
+                        <IconTrash :size="14" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </template>
+
+        <!-- 과목 관리 탭 -->
+        <template v-else-if="activeSection === 'subjects'">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-semibold tracking-widest uppercase"
+                style="color: var(--color-text-muted)">{{ $t('admin.subjects') }}</h2>
+            <button
+              class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium"
+              style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+              @click="openAddSubjectModal"
+            >
+              <IconPlus :size="17" />
+              {{ $t('admin.addSubject') }}
+            </button>
+          </div>
+
+          <div v-if="adminStore.subjects.length === 0"
+               class="py-8 text-center"
+               style="color: var(--color-text-muted)">
+            {{ $t('admin.noSubjects') }}
+          </div>
+
+          <div v-else class="rounded-xl border overflow-hidden"
+               style="border-color: var(--color-border)">
+            <table class="w-full">
+              <tbody>
+                <tr
+                  v-for="subject in adminStore.subjects"
+                  :key="subject.id"
+                  class="border-t first:border-t-0"
+                  style="border-color: var(--color-border)"
+                >
+                  <td class="px-5 py-3 font-medium" style="color: var(--color-text-primary)">
+                    {{ subject.name }}
+                  </td>
+                  <td class="px-5 py-3 w-16">
                     <button
                       class="w-8 h-8 p-0 rounded-lg flex items-center justify-center"
                       style="background: transparent; border: 1px solid var(--color-border); color: var(--color-text-muted)"
-                      @click="openDeleteTeacherModal(teacher)"
+                      @click="openDeleteSubjectModal(subject)"
                       :aria-label="$t('admin.deleteTeacher')"
-                      :disabled="teacher.id === auth.teacher?.id"
                     >
                       <IconTrash :size="14" />
                     </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </template>
 
-      <!-- ── 과목 관리 섹션 ── -->
-      <section>
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="font-semibold tracking-widest uppercase"
-              style="color: var(--color-text-muted)">{{ $t('admin.subjects') }}</h2>
-          <button
-            class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium"
-            style="background: var(--color-accent); color: var(--color-accent-text); border: none"
-            @click="openAddSubjectModal"
-          >
-            <IconPlus :size="17" />
-            {{ $t('admin.addSubject') }}
-          </button>
-        </div>
-
-        <div v-if="adminStore.subjects.length === 0"
-             class="py-8 text-center"
-             style="color: var(--color-text-muted)">
-          {{ $t('admin.noSubjects') }}
-        </div>
-
-        <div v-else class="rounded-xl border overflow-hidden"
-             style="border-color: var(--color-border)">
-          <table class="w-full">
-            <tbody>
-              <tr
-                v-for="subject in adminStore.subjects"
-                :key="subject.id"
-                class="border-t first:border-t-0"
-                style="border-color: var(--color-border)"
-              >
-                <td class="px-5 py-3 font-medium" style="color: var(--color-text-primary)">
-                  {{ subject.name }}
-                </td>
-                <td class="px-5 py-3 w-16">
-                  <button
-                    class="w-8 h-8 p-0 rounded-lg flex items-center justify-center"
-                    style="background: transparent; border: 1px solid var(--color-border); color: var(--color-text-muted)"
-                    @click="openDeleteSubjectModal(subject)"
-                    :aria-label="$t('admin.deleteTeacher')"
-                  >
-                    <IconTrash :size="14" />
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-    </main>
+      </main>
+    </div>
 
     <!-- ── Add Teacher Modal ── -->
     <Teleport to="body">
@@ -434,7 +600,7 @@
            style="background: rgba(0,0,0,0.45)">
         <div class="w-full max-w-sm rounded-xl p-6"
              style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
-          <h2 class="font-semibold mb-2" style="color: var(--color-text-primary)">{{ $t('admin.addSubject') }}</h2>
+          <h2 class="font-semibold mb-2" style="color: var(--color-text-primary)">{{ $t('admin.subjects') }}</h2>
           <p class="mb-1" style="color: var(--color-text-primary)">
             {{ $t('admin.deleteSubjectConfirm', { name: deleteSubjectTarget?.name }) }}
           </p>
@@ -473,10 +639,12 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import {
-  IconMoon, IconSun, IconPlus, IconLoader2, IconAlertCircle, IconPencil, IconTrash, IconSettings,
+  IconMoon, IconSun, IconPlus, IconLoader2, IconAlertCircle, IconPencil, IconTrash,
+  IconSettings, IconUsers, IconBook, IconLayoutGrid, IconChevronRight,
 } from '@tabler/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAdminStore } from '@/stores/admin'
+import { useClassStore } from '@/stores/class'
 import LanguageSelector from '@/components/LanguageSelector.vue'
 import SettingsModal from '@/components/SettingsModal.vue'
 import type { AdminTeacher, Subject } from '@/api/client'
@@ -485,10 +653,12 @@ const { t } = useI18n()
 const router = useRouter()
 const auth = useAuthStore()
 const adminStore = useAdminStore()
+const classStore = useClassStore()
 
 const isDark = ref(document.documentElement.getAttribute('data-theme') === 'dark')
 const isLoggingOut = ref(false)
 const showSettings = ref(false)
+const activeSection = ref<'classes' | 'teachers' | 'subjects'>('classes')
 
 // ── Modal visibility flags ─────────────────────────────────────
 const showAddTeacherModal = ref(false)
@@ -556,15 +726,19 @@ function closeModals() {
 }
 
 function openAddTeacherModal() { closeModals(); showAddTeacherModal.value = true }
-function openEditTeacherModal(t: AdminTeacher) {
+function openEditTeacherModal(teacher: AdminTeacher) {
   closeModals()
-  editTeacherTarget.value = t
-  editTeacherForm.value = { name: t.name, role: t.role, password: '' }
+  editTeacherTarget.value = teacher
+  editTeacherForm.value = { name: teacher.name, role: teacher.role, password: '' }
   showEditTeacherModal.value = true
 }
-function openDeleteTeacherModal(t: AdminTeacher) { closeModals(); deleteTeacherTarget.value = t; showDeleteTeacherModal.value = true }
+function openDeleteTeacherModal(teacher: AdminTeacher) {
+  closeModals(); deleteTeacherTarget.value = teacher; showDeleteTeacherModal.value = true
+}
 function openAddSubjectModal() { closeModals(); showAddSubjectModal.value = true }
-function openDeleteSubjectModal(s: Subject) { closeModals(); deleteSubjectTarget.value = s; showDeleteSubjectModal.value = true }
+function openDeleteSubjectModal(s: Subject) {
+  closeModals(); deleteSubjectTarget.value = s; showDeleteSubjectModal.value = true
+}
 
 function onKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') closeModals()
@@ -653,7 +827,11 @@ onMounted(async () => {
   if (!auth.teacher) {
     try { await auth.fetchTeacherMe() } catch { router.push('/login'); return }
   }
-  await Promise.all([adminStore.fetchTeachers(), adminStore.fetchSubjects()])
+  await Promise.all([
+    adminStore.fetchTeachers(),
+    adminStore.fetchSubjects(),
+    classStore.fetchClasses(),
+  ])
   document.addEventListener('keydown', onKeydown)
 })
 

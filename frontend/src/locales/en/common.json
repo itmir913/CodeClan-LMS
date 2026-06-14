@@ -8,5 +8,6 @@
   "saving": "Saving...",
   "cancel": "Cancel",
   "submit": "Submit",
-  "submitting": "Submitting..."
+  "submitting": "Submitting...",
+  "noResults": "No results found"
 }

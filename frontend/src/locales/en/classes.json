@@ -20,5 +20,15 @@
   "cancel": "Cancel",
   "save": "Save",
   "add": "Add",
-  "noSubjects": "No subjects available. Ask an admin to add subjects first."
+  "noSubjects": "No subjects available. Ask an admin to add subjects first.",
+  "backToHome": "Class list",
+  "allClasses": "All Classes",
+  "teacherManage": "Teacher Management",
+  "subjectManage": "Subject Management",
+  "tabStudents": "Students",
+  "tabLessons": "Lessons",
+  "tabAssessments": "Assessments",
+  "tabAttendance": "Attendance",
+  "tabComingSoon": "Coming soon",
+  "noClassesAdmin": "No classes registered"
 }
