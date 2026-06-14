@@ -85,12 +85,6 @@ CREATE TABLE IF NOT EXISTS problem_test_cases (
     UNIQUE (problem_id, number)
 );
 
--- ── 포트폴리오형 (추후 확장 예약) ────────────────────────────────────────────
-
-CREATE TABLE IF NOT EXISTS problem_portfolios (
-    problem_id INTEGER PRIMARY KEY REFERENCES problems(id) ON DELETE CASCADE
-);
-
 -- ── 차시-문항 배정 (M:N) ─────────────────────────────────────────────────────
 -- 같은 문항을 여러 차시에 배정 가능.
 -- order_no: 차시 내 문항 순서.
