@@ -139,7 +139,7 @@
       </aside>
 
       <!-- ── 메인 콘텐츠 ── -->
-      <main class="flex-1 overflow-y-auto px-6 pt-8 pb-16">
+      <main class="flex-1 overflow-y-auto px-6 pt-4 pb-16">
 
         <!-- 수업 전체 탭 -->
         <template v-if="activeSection === 'classes'">
