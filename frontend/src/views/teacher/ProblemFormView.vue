@@ -334,10 +334,11 @@
               {{ $t('problems.answerLabel') }}
             </label>
             <textarea
+              v-auto-resize
               v-model="formAnswer"
               :disabled="isSaving"
-              rows="4"
-              class="w-full rounded-xl px-4 py-3 border resize-y min-h-20 leading-relaxed"
+              rows="1"
+              class="tc-textarea w-full rounded-xl px-4 py-3 border leading-relaxed"
               style="background: var(--color-bg-primary); color: var(--color-text-primary); border-color: var(--color-border); font-family: var(--font-mono)"
               :placeholder="$t('problems.answerPlaceholder')"
             ></textarea>
