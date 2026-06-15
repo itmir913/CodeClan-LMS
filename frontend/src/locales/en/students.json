@@ -11,8 +11,6 @@
   "classNo": "Class",
   "number": "Number",
   "username": "Username",
-  "passwordResetRequired": "Reset required",
-  "passwordSet": "Set",
   "resetPassword": "Reset Password",
   "resetPasswordConfirm": "Reset password for \"{name}\"?",
   "resetPasswordConfirmHint": "The password will be reset to the student's username.",

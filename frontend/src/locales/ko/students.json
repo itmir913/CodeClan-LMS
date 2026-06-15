@@ -11,8 +11,6 @@
   "classNo": "반",
   "number": "번호",
   "username": "아이디",
-  "passwordResetRequired": "초기화 필요",
-  "passwordSet": "설정됨",
   "resetPassword": "비밀번호 초기화",
   "resetPasswordConfirm": "\"{name}\" 학생의 비밀번호를 초기화하겠습니까?",
   "resetPasswordConfirmHint": "비밀번호가 해당 학생의 아이디로 초기화됩니다.",
