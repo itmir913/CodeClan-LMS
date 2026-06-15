@@ -341,7 +341,7 @@
       v-model:show="showImportModal"
       :title="$t('students.importExcel')"
       template-filename="students_template"
-      :template-headers="['grade', 'class', 'number', 'name', 'username']"
+      :template-headers="studentTemplateHeaders"
       :template-sample="[['3', '1', '1', 'Hong Gildong', '30101'], ['3', '1', '2', 'Kim Cheolsu', '']]"
       :synonym-map="studentSynonymMap"
       :required-fields="['grade', 'class_no', 'number', 'name']"
@@ -527,6 +527,13 @@ const studentImportColumns = [
   { key: 'name', labelKey: 'students.name' },
   { key: 'username', labelKey: 'students.username' },
 ]
+const studentTemplateHeaders = computed(() => [
+  t('students.grade'),
+  t('students.classNo'),
+  t('students.number'),
+  t('students.name'),
+  t('students.username'),
+])
 
 async function handleImportStudents(rows: Record<string, string>[]) {
   const data = rows.map((r) => ({

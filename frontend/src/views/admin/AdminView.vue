@@ -640,7 +640,7 @@
       v-model:show="showImportTeachersModal"
       :title="$t('admin.importTeachers')"
       template-filename="teachers_template"
-      :template-headers="['name', 'username', 'password', 'role']"
+      :template-headers="teacherTemplateHeaders"
       :template-sample="[['Hong Gildong', 'teacher1', 'password1', 'teacher']]"
       :synonym-map="teacherSynonymMap"
       :required-fields="['name', 'username', 'password']"
@@ -653,7 +653,7 @@
       v-model:show="showImportSubjectsModal"
       :title="$t('admin.importSubjects')"
       template-filename="subjects_template"
-      :template-headers="['name']"
+      :template-headers="subjectTemplateHeaders"
       :template-sample="[['Programming'], ['Mathematics']]"
       :synonym-map="subjectSynonymMap"
       :required-fields="['name']"
@@ -665,7 +665,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import {
@@ -709,7 +709,7 @@ const teacherSynonymMap: SynonymMap = {
   role: ['role', '역할', '권한'],
 }
 const subjectSynonymMap: SynonymMap = {
-  name: ['name', 'subject', '과목명', '과목'],
+  name: ['name', 'subject', '과목명', '과목', '과목 이름', 'subject name'],
 }
 const teacherImportColumns = [
   { key: 'name', labelKey: 'admin.teacherName' },
@@ -720,6 +720,13 @@ const teacherImportColumns = [
 const subjectImportColumns = [
   { key: 'name', labelKey: 'admin.subjectName' },
 ]
+const teacherTemplateHeaders = computed(() => [
+  t('admin.teacherName'),
+  t('admin.teacherUsername'),
+  t('admin.teacherPassword'),
+  t('admin.teacherRole'),
+])
+const subjectTemplateHeaders = computed(() => [t('admin.subjectName')])
 
 // ── Teacher modal state ────────────────────────────────────────
 const editTeacherTarget = ref<AdminTeacher | null>(null)
