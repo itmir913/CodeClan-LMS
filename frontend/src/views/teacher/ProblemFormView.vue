@@ -585,7 +585,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { marked } from 'marked'
@@ -713,6 +713,11 @@ function typeBadgeStyle(slug: string): string {
   }
   return styles[slug] ?? 'background: var(--color-bg-secondary); color: var(--color-text-muted)'
 }
+
+// 선택 방식 전환 시 모든 정답 초기화
+watch(formAllowMultiple, () => {
+  formChoices.value.forEach((c) => { c.is_correct = false })
+})
 
 // ── MCQ 선지 조작 ─────────────────────────────────────────────────────────────
 
