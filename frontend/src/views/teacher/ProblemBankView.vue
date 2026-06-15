@@ -37,10 +37,14 @@
     </header>
 
     <!-- ── 툴바 ── -->
-    <div class="flex items-center gap-3 px-7 py-4 flex-wrap flex-shrink-0"
+    <div class="flex flex-col sm:flex-row sm:items-center gap-3 px-7 py-4 flex-shrink-0"
          style="background: var(--color-bg-primary); border-bottom: 1px solid var(--color-border)">
+
+      <!-- 1행(sm 이상): 검색 | 과목 드롭다운 | 유형 필터 | 문제 수 -->
+      <!-- 좁은 화면: 각 항목이 1열로 쌓임 -->
+
       <!-- 검색 -->
-      <div class="relative flex-1" style="min-width: 180px; max-width: 340px">
+      <div class="relative w-full sm:flex-1" style="min-width: 0; max-width: 340px">
         <IconSearch :size="16" class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
                     style="color: var(--color-text-tertiary)" />
         <input
@@ -51,6 +55,17 @@
           :placeholder="$t('problems.searchPlaceholder')"
         />
       </div>
+
+      <!-- 과목 드롭다운 -->
+      <select
+        v-model="selectedSubject"
+        class="w-full sm:w-auto h-10 px-3 rounded-xl border text-base flex-shrink-0"
+        style="background: var(--color-bg-secondary); color: var(--color-text-primary); border-color: var(--color-border)"
+      >
+        <option :value="null">{{ $t('problems.subjectAll') }}</option>
+        <option v-for="s in classStore.subjects" :key="s.id" :value="s.id">{{ s.name }}</option>
+      </select>
+
       <!-- 유형 필터 -->
       <div class="flex items-center gap-2 flex-wrap">
         <button
@@ -65,17 +80,9 @@
           {{ f.label }}
         </button>
       </div>
-      <!-- 과목 필터 -->
-      <select
-        v-model="selectedSubject"
-        class="h-10 px-3 rounded-xl border text-base"
-        style="background: var(--color-bg-secondary); color: var(--color-text-primary); border-color: var(--color-border)"
-      >
-        <option :value="null">{{ $t('problems.subjectAll') }}</option>
-        <option v-for="s in classStore.subjects" :key="s.id" :value="s.id">{{ s.name }}</option>
-      </select>
+
       <!-- 문제 수 -->
-      <span class="ml-auto font-medium" style="color: var(--color-text-tertiary); white-space: nowrap">
+      <span class="sm:ml-auto font-medium flex-shrink-0" style="color: var(--color-text-tertiary); white-space: nowrap">
         {{ $t('problems.problemCount', { count: filteredProblems.length }) }}
       </span>
     </div>
