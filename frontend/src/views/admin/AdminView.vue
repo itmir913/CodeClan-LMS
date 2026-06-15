@@ -164,7 +164,7 @@
                   </th>
                   <th class="px-5 py-3 text-left font-semibold hidden md:table-cell"
                       style="color: var(--color-text-muted)">
-                    {{ $t('admin.teacherName') }}
+                    {{ $t('classes.teacher') }}
                   </th>
                   <th class="px-5 py-3 text-left font-semibold"
                       style="color: var(--color-text-muted)">
@@ -187,7 +187,7 @@
                     {{ cls.subject_name }}
                   </td>
                   <td class="px-5 py-3 hidden md:table-cell" style="color: var(--color-text-muted)">
-                    {{ cls.teacher_id }}
+                    {{ cls.teacher_name }}
                   </td>
                   <td class="px-5 py-3" style="color: var(--color-text-muted)">
                     {{ $t('classes.students', { count: cls.student_count }) }}

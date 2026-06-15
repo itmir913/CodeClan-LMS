@@ -15,6 +15,7 @@ pub struct ClassResponse {
     pub subject_id: i64,
     pub subject_name: String,
     pub teacher_id: i64,
+    pub teacher_name: String,
     pub student_count: i64,
     pub has_active_session: bool,
     pub created_at: String,
@@ -81,12 +82,14 @@ pub async fn list_classes(
         sqlx::query(
             "SELECT c.id, c.name, c.subject_id, c.teacher_id, c.created_at, \
              COALESCE(s.name, '') as subject_name, \
+             COALESCE(t.name, '') as teacher_name, \
              COUNT(cs.student_id) as student_count \
              FROM classes c \
              LEFT JOIN subjects s ON s.id = c.subject_id \
+             LEFT JOIN teachers t ON t.id = c.teacher_id \
              LEFT JOIN class_students cs ON cs.class_id = c.id \
              GROUP BY c.id \
-             ORDER BY c.created_at DESC",
+             ORDER BY s.name ASC, c.name ASC",
         )
         .fetch_all(&state.db)
         .await?
@@ -94,9 +97,11 @@ pub async fn list_classes(
         sqlx::query(
             "SELECT c.id, c.name, c.subject_id, c.teacher_id, c.created_at, \
              COALESCE(s.name, '') as subject_name, \
+             COALESCE(t.name, '') as teacher_name, \
              COUNT(cs.student_id) as student_count \
              FROM classes c \
              LEFT JOIN subjects s ON s.id = c.subject_id \
+             LEFT JOIN teachers t ON t.id = c.teacher_id \
              LEFT JOIN class_students cs ON cs.class_id = c.id \
              WHERE c.teacher_id = ? \
              GROUP BY c.id \
@@ -116,6 +121,7 @@ pub async fn list_classes(
             subject_id: r.get("subject_id"),
             subject_name: r.get("subject_name"),
             teacher_id: r.get("teacher_id"),
+            teacher_name: r.get("teacher_name"),
             student_count: r.get("student_count"),
             has_active_session: false, // 단계 8에서 구현
             created_at: r.get("created_at"),

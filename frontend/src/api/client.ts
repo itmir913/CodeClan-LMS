@@ -77,6 +77,7 @@ export interface ClassItem {
   subject_id: number
   subject_name: string
   teacher_id: number
+  teacher_name: string
   student_count: number
   has_active_session: boolean
   created_at: string

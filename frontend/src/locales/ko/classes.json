@@ -11,6 +11,7 @@
   "subjectPlaceholder": "과목을 선택하세요",
   "students": "{count}명",
   "studentCount": "학생 수",
+  "teacher": "담당 교사",
   "sessionLive": "세션 진행 중",
   "adding": "추가 중...",
   "saving": "저장 중...",
