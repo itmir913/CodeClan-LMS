@@ -58,5 +58,7 @@
   "deleteConfirmHint": "Problems in use by lessons or assessments cannot be deleted.",
   "studentPreview": "Student Preview",
   "previewUpdates": "(updates as you type)",
-  "choicePlaceholder": "Enter choice text"
+  "choicePlaceholder": "Enter choice text",
+  "hidePreview": "Hide Preview",
+  "showPreview": "Show Preview"
 }

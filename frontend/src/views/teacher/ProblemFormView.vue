@@ -63,19 +63,32 @@
     </div>
 
     <!-- ── 본문: 좌(미리보기) + 우(폼), 소형화면은 1열 ── -->
-    <div v-else class="flex-1 flex flex-col lg:flex-row">
+    <div v-else class="flex-1 flex flex-col lg:flex-row overflow-hidden" :class="{ 'select-none': isDragging }">
 
       <!-- ══ 좌: 미리보기 패널 (모바일: 하단, 데스크톱: 좌측) ══ -->
       <aside
-        class="order-2 lg:order-1 flex-shrink-0 flex flex-col lg:w-96 xl:w-[420px]"
-        style="background: var(--color-bg-primary); border-top: 1px solid var(--color-border)"
+        v-show="previewOpen"
+        class="order-2 lg:order-1 flex-shrink-0 flex flex-col lg:overflow-y-auto"
+        :style="`background: var(--color-bg-primary); border-top: 1px solid var(--color-border); width: ${previewWidth}px`"
       >
         <!-- 패널 헤더 -->
-        <div class="flex items-center gap-2 px-5 py-4 flex-shrink-0"
+        <div class="flex items-center justify-between gap-3 px-5 py-4 flex-shrink-0"
              style="border-bottom: 1px solid var(--color-border)">
-          <IconEye :size="16" style="color: var(--color-accent)" />
-          <span class="font-semibold" style="color: var(--color-text-primary)">{{ $t('problems.studentPreview') }}</span>
-          <span class="ml-1" style="color: var(--color-text-tertiary)">{{ $t('problems.previewUpdates') }}</span>
+          <div class="flex items-center gap-2 min-w-0">
+            <IconEye :size="16" class="flex-shrink-0" style="color: var(--color-accent)" />
+            <div class="flex flex-col min-w-0">
+              <span class="font-semibold" style="color: var(--color-text-primary)">{{ $t('problems.studentPreview') }}</span>
+              <span style="color: var(--color-text-tertiary); font-size: 0.85rem">{{ $t('problems.previewUpdates') }}</span>
+            </div>
+          </div>
+          <button
+            class="flex-shrink-0 hidden lg:flex w-8 h-8 rounded-lg items-center justify-center transition-colors preview-toggle-btn"
+            style="color: var(--color-text-muted)"
+            :title="$t('problems.hidePreview')"
+            @click="previewOpen = false"
+          >
+            <IconLayoutSidebarLeftCollapse :size="18" />
+          </button>
         </div>
 
         <!-- 미리보기 콘텐츠 -->
@@ -189,11 +202,30 @@
         </div>
       </aside>
 
+      <!-- ══ 드래그 핸들 (데스크톱, 미리보기 열림 시) ══ -->
+      <div
+        v-show="previewOpen"
+        class="hidden lg:block order-2 flex-shrink-0 cursor-col-resize resize-handle"
+        :class="{ 'dragging': isDragging }"
+        @mousedown.prevent="startDrag"
+      ></div>
+
       <!-- ══ 우: 폼 영역 (모바일: 상단, 데스크톱: 우측) ══ -->
       <div
-        class="order-1 lg:order-2 flex-1 p-6 flex flex-col gap-5"
-        style="border-left: 1px solid var(--color-border)"
+        class="order-1 lg:order-2 flex-1 p-6 flex flex-col gap-5 overflow-y-auto"
       >
+
+        <!-- 미리보기 열기 버튼 (미리보기 닫힘 시, 데스크톱 전용) -->
+        <div v-if="!previewOpen" class="hidden lg:flex">
+          <button
+            class="flex items-center gap-2 h-9 px-3 rounded-lg border"
+            style="background: transparent; color: var(--color-text-muted); border-color: var(--color-border)"
+            @click="previewOpen = true"
+          >
+            <IconLayoutSidebarLeftExpand :size="16" />
+            <span>{{ $t('problems.showPreview') }}</span>
+          </button>
+        </div>
 
         <!-- 유형 선택 (편집 시 비활성) -->
         <div>
@@ -540,6 +572,7 @@ import { useI18n } from 'vue-i18n'
 import {
   IconArrowLeft, IconPlus, IconLoader2,
   IconAlertCircle, IconX, IconTrash, IconEye,
+  IconLayoutSidebarLeftCollapse, IconLayoutSidebarLeftExpand,
 } from '@tabler/icons-vue'
 import { useProblemStore } from '@/stores/problem'
 import { useClassStore } from '@/stores/class'
@@ -559,6 +592,32 @@ const editingId = computed(() => {
 // ── 로딩 상태 (편집 모드) ─────────────────────────────────────────────────────
 const isLoading = ref(false)
 const loadError = ref<string | null>(null)
+
+// ── 미리보기 패널 상태 ────────────────────────────────────────────────────────
+const previewOpen = ref(true)
+const previewWidth = ref(420)
+const isDragging = ref(false)
+
+function startDrag(e: MouseEvent) {
+  if (isDragging.value) return
+  isDragging.value = true
+  const startX = e.clientX
+  const startWidth = previewWidth.value
+
+  function onMouseMove(ev: MouseEvent) {
+    const delta = ev.clientX - startX
+    previewWidth.value = Math.max(180, Math.min(900, startWidth + delta))
+  }
+
+  function onMouseUp() {
+    isDragging.value = false
+    window.removeEventListener('mousemove', onMouseMove)
+    window.removeEventListener('mouseup', onMouseUp)
+  }
+
+  window.addEventListener('mousemove', onMouseMove)
+  window.addEventListener('mouseup', onMouseUp)
+}
 
 // ── 폼 상태 ──────────────────────────────────────────────────────────────────
 
@@ -771,5 +830,31 @@ onMounted(async () => {
 .add-item-btn:hover {
   border-color: var(--color-accent) !important;
   color: var(--color-accent) !important;
+}
+
+.preview-toggle-btn:hover {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary) !important;
+}
+
+.resize-handle {
+  width: 2px;
+  background: var(--color-border);
+  position: relative;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+/* 실제 클릭·드래그 가능 영역을 좌우 12px씩 확장 */
+.resize-handle::after {
+  content: '';
+  position: absolute;
+  inset: 0 -12px;
+  cursor: col-resize;
+}
+
+.resize-handle:hover,
+.resize-handle.dragging {
+  background: var(--color-accent);
 }
 </style>

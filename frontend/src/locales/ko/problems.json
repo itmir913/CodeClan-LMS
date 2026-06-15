@@ -58,5 +58,7 @@
   "deleteConfirmHint": "차시나 수행평가에서 사용 중인 문제는 삭제할 수 없습니다.",
   "studentPreview": "학생 미리보기",
   "previewUpdates": "(입력하는 대로 반영됩니다)",
-  "choicePlaceholder": "선지 내용을 입력하세요"
+  "choicePlaceholder": "선지 내용을 입력하세요",
+  "hidePreview": "미리보기 접기",
+  "showPreview": "미리보기 펼치기"
 }
