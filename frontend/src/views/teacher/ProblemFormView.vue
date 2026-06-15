@@ -612,6 +612,16 @@
                 class="hidden"
                 @change="importFromZip"
               />
+              <button
+                :disabled="isExportingZip || formTestCases.length === 0"
+                class="flex items-center gap-2 h-10 px-4 rounded-xl border font-medium transition-colors add-item-btn"
+                style="background: transparent; color: var(--color-text-tertiary); border: 1.5px dashed var(--color-border)"
+                @click="exportToZip"
+              >
+                <IconLoader2 v-if="isExportingZip" :size="15" class="spin" />
+                <IconDownload v-else :size="15" />
+                <span>{{ $t('problems.exportToZip') }}</span>
+              </button>
             </div>
           </div>
         </template>
@@ -633,7 +643,7 @@ import {
   IconArrowLeft, IconPlus, IconLoader2,
   IconAlertCircle, IconX, IconTrash, IconEye,
   IconChevronLeft, IconChevronRight, IconMoon, IconSun,
-  IconFileZip,
+  IconFileZip, IconDownload,
 } from '@tabler/icons-vue'
 import { useProblemStore } from '@/stores/problem'
 import { useClassStore } from '@/stores/class'
@@ -894,6 +904,34 @@ async function importFromZip(event: Event) {
   } finally {
     isImportingZip.value = false
     input.value = ''   // 같은 파일 재선택 허용
+  }
+}
+
+const isExportingZip = ref(false)
+
+async function exportToZip() {
+  if (isExportingZip.value || formTestCases.value.length === 0) return
+  isExportingZip.value = true
+  try {
+    const { default: JSZip } = await import('jszip')
+    const zip = new JSZip()
+
+    formTestCases.value.forEach((tc, i) => {
+      const n = i + 1
+      zip.file(`${n}.in`, tc.input)
+      zip.file(`${n}.out`, tc.expected_output)
+    })
+
+    const blob = await zip.generateAsync({ type: 'blob' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    const filename = formTitle.value.trim() || 'testcases'
+    a.href = url
+    a.download = `${filename}.zip`
+    a.click()
+    URL.revokeObjectURL(url)
+  } finally {
+    isExportingZip.value = false
   }
 }
 
