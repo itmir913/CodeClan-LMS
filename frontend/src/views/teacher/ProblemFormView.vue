@@ -52,7 +52,8 @@
     <!-- ── 에러 배너 ── -->
     <div v-if="formError"
          class="flex items-center gap-3 px-7 py-3 flex-shrink-0"
-         style="background: var(--color-danger-bg); color: var(--color-danger); border-bottom: 1px solid var(--color-danger-border)">
+         style="background: var(--color-danger-bg); color: var(--color-danger); border-bottom: 1px solid var(--color-danger-border)"
+         role="alert">
       <IconAlertCircle :size="18" class="shrink-0" />
       <span>{{ $t(`errors.${formError}`, $t('errors.ERR_UNKNOWN')) }}</span>
     </div>
@@ -65,7 +66,8 @@
     <!-- ── 로드 에러 ── -->
     <div v-else-if="loadError" class="flex-1 flex items-center justify-center p-8">
       <div class="flex items-center gap-3 p-5 rounded-2xl"
-           style="background: var(--color-danger-bg); color: var(--color-danger)">
+           style="background: var(--color-danger-bg); color: var(--color-danger)"
+           role="alert">
         <IconAlertCircle :size="22" />
         <span>{{ $t(`errors.${loadError}`, $t('errors.ERR_UNKNOWN')) }}</span>
       </div>

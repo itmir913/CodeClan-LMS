@@ -185,26 +185,26 @@
             <table class="w-full">
               <thead>
                 <tr style="background: var(--color-bg-tertiary); border-bottom: 1px solid var(--color-border)">
-                  <th class="px-5 py-3 text-left font-semibold w-12" style="color: var(--color-text-muted)">
+                  <th scope="col" class="px-5 py-3 text-left font-semibold w-12" style="color: var(--color-text-muted)">
                     {{ $t('students.seqNo') }}
                   </th>
-                  <th class="px-5 py-3 text-left font-semibold hidden sm:table-cell" style="color: var(--color-text-muted)">
+                  <th scope="col" class="px-5 py-3 text-left font-semibold hidden sm:table-cell" style="color: var(--color-text-muted)">
                     {{ $t('students.grade') }}
                   </th>
-                  <th class="px-5 py-3 text-left font-semibold hidden sm:table-cell" style="color: var(--color-text-muted)">
+                  <th scope="col" class="px-5 py-3 text-left font-semibold hidden sm:table-cell" style="color: var(--color-text-muted)">
                     {{ $t('students.classNo') }}
                   </th>
-                  <th class="px-5 py-3 text-left font-semibold hidden sm:table-cell" style="color: var(--color-text-muted)">
+                  <th scope="col" class="px-5 py-3 text-left font-semibold hidden sm:table-cell" style="color: var(--color-text-muted)">
                     {{ $t('students.number') }}
                   </th>
-                  <th class="px-5 py-3 text-left font-semibold" style="color: var(--color-text-muted)">
+                  <th scope="col" class="px-5 py-3 text-left font-semibold" style="color: var(--color-text-muted)">
                     {{ $t('students.name') }}
                   </th>
-                  <th class="px-5 py-3 text-left font-semibold hidden md:table-cell"
+                  <th scope="col" class="px-5 py-3 text-left font-semibold hidden md:table-cell"
                       style="color: var(--color-text-muted)">
                     {{ $t('students.username') }}
                   </th>
-                  <th class="px-5 py-3 w-24"></th>
+                  <th scope="col" class="px-5 py-3 w-24"></th>
                 </tr>
               </thead>
               <tbody>

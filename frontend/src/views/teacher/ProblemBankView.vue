@@ -82,7 +82,8 @@
       <!-- 에러 -->
       <div v-else-if="store.error"
            class="flex items-center gap-3 p-4 rounded-xl mb-4"
-           style="background: var(--color-danger-bg); color: var(--color-danger); border: 1px solid var(--color-danger-border)">
+           style="background: var(--color-danger-bg); color: var(--color-danger); border: 1px solid var(--color-danger-border)"
+           role="alert">
         <IconAlertCircle :size="20" class="shrink-0" />
         <span>{{ $t(`errors.${store.error}`, $t('errors.ERR_UNKNOWN')) }}</span>
       </div>
@@ -179,7 +180,8 @@
         <p style="color: var(--color-text-tertiary)">{{ $t('problems.deleteConfirmHint') }}</p>
         <div v-if="deleteError"
              class="flex items-center gap-2 p-3 rounded-lg"
-             style="background: var(--color-danger-bg); color: var(--color-danger)">
+             style="background: var(--color-danger-bg); color: var(--color-danger)"
+             role="alert">
           <IconAlertCircle :size="16" class="shrink-0" />
           <span>{{ $t(`errors.${deleteError}`, $t('errors.ERR_UNKNOWN')) }}</span>
         </div>

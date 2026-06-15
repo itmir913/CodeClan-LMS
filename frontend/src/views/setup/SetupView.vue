@@ -27,7 +27,8 @@
 
       <!-- 오류 배너 -->
       <div v-if="errorMsg" class="mb-6 rounded-lg px-4 py-3 flex items-start gap-3"
-           style="background: var(--color-danger-bg); border: 1px solid var(--color-danger-border)">
+           style="background: var(--color-danger-bg); border: 1px solid var(--color-danger-border)"
+           role="alert">
         <IconAlertCircle :size="20" class="mt-0.5 shrink-0" style="color: var(--color-danger)" />
         <span style="color: var(--color-danger)">{{ errorMsg }}</span>
       </div>

@@ -155,22 +155,22 @@
             <table class="w-full">
               <thead>
                 <tr style="background: var(--color-bg-tertiary); border-bottom: 1px solid var(--color-border)">
-                  <th class="px-5 py-3 text-left font-semibold" style="color: var(--color-text-muted)">
+                  <th scope="col" class="px-5 py-3 text-left font-semibold" style="color: var(--color-text-muted)">
                     {{ $t('classes.className') }}
                   </th>
-                  <th class="px-5 py-3 text-left font-semibold hidden sm:table-cell"
+                  <th scope="col" class="px-5 py-3 text-left font-semibold hidden sm:table-cell"
                       style="color: var(--color-text-muted)">
                     {{ $t('classes.subject') }}
                   </th>
-                  <th class="px-5 py-3 text-left font-semibold hidden md:table-cell"
+                  <th scope="col" class="px-5 py-3 text-left font-semibold hidden md:table-cell"
                       style="color: var(--color-text-muted)">
                     {{ $t('classes.teacher') }}
                   </th>
-                  <th class="px-5 py-3 text-left font-semibold"
+                  <th scope="col" class="px-5 py-3 text-left font-semibold"
                       style="color: var(--color-text-muted)">
                     {{ $t('classes.studentCount') }}
                   </th>
-                  <th class="px-5 py-3 w-16"></th>
+                  <th scope="col" class="px-5 py-3 w-16"></th>
                 </tr>
               </thead>
               <tbody>
@@ -267,21 +267,21 @@
             <table class="w-full">
               <thead>
                 <tr style="background: var(--color-bg-tertiary); border-bottom: 1px solid var(--color-border)">
-                  <th class="px-5 py-3 text-left font-semibold" style="color: var(--color-text-muted)">
+                  <th scope="col" class="px-5 py-3 text-left font-semibold" style="color: var(--color-text-muted)">
                     {{ $t('admin.teacherName') }}
                   </th>
-                  <th class="px-5 py-3 text-left font-semibold hidden sm:table-cell"
+                  <th scope="col" class="px-5 py-3 text-left font-semibold hidden sm:table-cell"
                       style="color: var(--color-text-muted)">
                     {{ $t('admin.teacherUsername') }}
                   </th>
-                  <th class="px-5 py-3 text-left font-semibold" style="color: var(--color-text-muted)">
+                  <th scope="col" class="px-5 py-3 text-left font-semibold" style="color: var(--color-text-muted)">
                     {{ $t('admin.teacherRole') }}
                   </th>
-                  <th class="px-5 py-3 text-left font-semibold hidden lg:table-cell"
+                  <th scope="col" class="px-5 py-3 text-left font-semibold hidden lg:table-cell"
                       style="color: var(--color-text-muted)">
                     {{ $t('admin.createdAt') }}
                   </th>
-                  <th class="px-5 py-3 w-20"></th>
+                  <th scope="col" class="px-5 py-3 w-20"></th>
                 </tr>
               </thead>
               <tbody>
