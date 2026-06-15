@@ -105,7 +105,7 @@ pub async fn list_classes(
              LEFT JOIN class_students cs ON cs.class_id = c.id \
              WHERE c.teacher_id = ? \
              GROUP BY c.id \
-             ORDER BY c.created_at DESC",
+             ORDER BY s.name ASC, c.name ASC",
         )
         .bind(teacher_id)
         .fetch_all(&state.db)

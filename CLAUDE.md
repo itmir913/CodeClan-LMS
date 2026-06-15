@@ -238,7 +238,7 @@ frontend/
 ### 핵심 테이블 변경 이력 (구 → 신)
 | 구 | 신 | 비고 |
 |----|----|----|
-| `divisions` | `classes` | `subject`, `grade`, `class_no` 필드 추가 |
+| `divisions` | `classes` | `subject_id` 필드 추가 |
 | `teacher_divisions` | `teacher_classes` | FK `class_id` |
 | `students.division_id` | `students.class_id` | |
 | `lesson_releases` | (폐지) | `lessons.is_released` + `lessons.class_id`로 대체 |
