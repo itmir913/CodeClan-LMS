@@ -9,5 +9,12 @@
   "cancel": "취소",
   "submit": "제출",
   "submitting": "제출 중...",
-  "noResults": "검색 결과가 없습니다"
+  "noResults": "검색 결과가 없습니다",
+  "downloadTemplate": "양식 다운로드",
+  "dropOrClick": "파일을 끌어다 놓거나 클릭하여 선택하세요",
+  "fileFormats": ".xlsx, .csv 파일 지원",
+  "rowsDetected": "{count}건 인식됨",
+  "moreRows": "건 더 있음",
+  "importing": "가져오는 중...",
+  "importAction": "가져오기"
 }

@@ -9,5 +9,12 @@
   "cancel": "Cancel",
   "submit": "Submit",
   "submitting": "Submitting...",
-  "noResults": "No results found"
+  "noResults": "No results found",
+  "downloadTemplate": "Download Template",
+  "dropOrClick": "Drop file here or click to browse",
+  "fileFormats": "Supports .xlsx and .csv",
+  "rowsDetected": "{count} rows detected",
+  "moreRows": " more rows",
+  "importing": "Importing...",
+  "importAction": "Import"
 }

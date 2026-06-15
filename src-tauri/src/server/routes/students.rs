@@ -263,6 +263,74 @@ pub async fn bulk_add_students(
     Ok(Json(json!({ "inserted": inserted, "skipped": skipped })))
 }
 
+// ── Import (strict rollback on any error) ────────────────────────────────────
+
+#[derive(Deserialize)]
+pub struct ImportStudentRow {
+    pub grade: i64,
+    pub class_no: i64,
+    pub number: i64,
+    pub name: String,
+    pub username: Option<String>,
+}
+
+/// POST /api/classes/:id/students/import
+pub async fn import_students(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(class_id): Path<i64>,
+    Json(body): Json<Vec<ImportStudentRow>>,
+) -> Result<Json<Value>, ApiError> {
+    let session = parse_session(&headers, &state.db).await?;
+    let teacher_id = session.teacher_id.ok_or(ApiError::Forbidden)?;
+    require_class_access(teacher_id, class_id, &state.db).await?;
+
+    if body.is_empty() {
+        return Err(ApiError::BadRequest("ERR_IMPORT_EMPTY".into()));
+    }
+
+    let mut tx = state.db.begin().await?;
+
+    for item in &body {
+        if item.name.trim().is_empty() {
+            return Err(ApiError::BadRequest("ERR_IMPORT_ROW_INVALID".into()));
+        }
+        let username = match &item.username {
+            Some(u) if !u.trim().is_empty() => u.trim().to_string(),
+            _ => format!("{}{:02}{:02}", item.grade, item.class_no, item.number),
+        };
+
+        let result = sqlx::query(
+            "INSERT INTO students (username, name, grade, class_no, number) VALUES (?, ?, ?, ?, ?)",
+        )
+        .bind(&username)
+        .bind(item.name.trim())
+        .bind(item.grade)
+        .bind(item.class_no)
+        .bind(item.number)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| {
+            if let sqlx::Error::Database(ref db_err) = e {
+                if db_err.message().contains("UNIQUE constraint failed") {
+                    return ApiError::BadRequest("ERR_IMPORT_DUPLICATE".into());
+                }
+            }
+            ApiError::Database(e)
+        })?;
+
+        let student_id = result.last_insert_rowid();
+        sqlx::query("INSERT INTO class_students (class_id, student_id) VALUES (?, ?)")
+            .bind(class_id)
+            .bind(student_id)
+            .execute(&mut *tx)
+            .await?;
+    }
+
+    tx.commit().await?;
+    Ok(Json(json!({ "imported": body.len() })))
+}
+
 /// DELETE /api/students/:id
 pub async fn delete_student(
     State(state): State<AppState>,

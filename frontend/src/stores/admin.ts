@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { api, type AdminTeacher, type Subject } from '@/api/client'
+import { api, type AdminTeacher, type Subject, type ImportTeacherRow, type ImportSubjectRow } from '@/api/client'
 import { useAuthStore } from '@/stores/auth'
 
 export const useAdminStore = defineStore('admin', () => {
@@ -62,6 +62,16 @@ export const useAdminStore = defineStore('admin', () => {
     await fetchSubjects()
   }
 
+  async function importTeachers(data: ImportTeacherRow[]) {
+    await api.admin.importTeachers(data)
+    await fetchTeachers()
+  }
+
+  async function importSubjects(data: ImportSubjectRow[]) {
+    await api.admin.importSubjects(data)
+    await fetchSubjects()
+  }
+
   return {
     teachers,
     subjects,
@@ -74,5 +84,7 @@ export const useAdminStore = defineStore('admin', () => {
     deleteTeacher,
     createSubject,
     deleteSubject,
+    importTeachers,
+    importSubjects,
   }
 })

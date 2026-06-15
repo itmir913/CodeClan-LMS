@@ -123,6 +123,29 @@ export interface BulkResult {
   skipped: number
 }
 
+export interface ImportResult {
+  imported: number
+}
+
+export interface ImportTeacherRow {
+  username: string
+  name: string
+  password: string
+  role?: string
+}
+
+export interface ImportSubjectRow {
+  name: string
+}
+
+export interface ImportStudentRow {
+  grade: number
+  class_no: number
+  number: number
+  name: string
+  username?: string
+}
+
 export interface ProblemListItem {
   id: number
   type: string
@@ -255,6 +278,8 @@ export const api = {
       request<{ id: number }>('POST', `/classes/${classId}/students`, data),
     bulkAdd: (classId: number, data: AddStudentBody[]) =>
       request<BulkResult>('POST', `/classes/${classId}/students/bulk`, data),
+    importStudents: (classId: number, data: ImportStudentRow[]) =>
+      request<ImportResult>('POST', `/classes/${classId}/students/import`, data),
     delete: (id: number) => request<{ ok: boolean }>('DELETE', `/students/${id}`),
     resetPassword: (id: number) =>
       request<{ ok: boolean }>('POST', `/students/${id}/reset-password`),
@@ -269,6 +294,10 @@ export const api = {
     createSubject: (name: string) =>
       request<{ id: number }>('POST', '/admin/subjects', { name }),
     deleteSubject: (id: number) => request<{ ok: boolean }>('DELETE', `/admin/subjects/${id}`),
+    importTeachers: (data: ImportTeacherRow[]) =>
+      request<ImportResult>('POST', '/admin/teachers/import', data),
+    importSubjects: (data: ImportSubjectRow[]) =>
+      request<ImportResult>('POST', '/admin/subjects/import', data),
   },
   problems: {
     list: (type?: string) =>

@@ -212,14 +212,24 @@
           <div class="flex items-center justify-between mb-6 min-h-9">
             <h2 class="font-semibold tracking-widest uppercase"
                 style="color: var(--color-text-muted)">{{ $t('admin.teachers') }}</h2>
-            <button
-              class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium"
-              style="background: var(--color-accent); color: var(--color-accent-text); border: none"
-              @click="openAddTeacherModal"
-            >
-              <IconPlus :size="17" />
-              {{ $t('admin.addTeacher') }}
-            </button>
+            <div class="flex items-center gap-2">
+              <button
+                class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium"
+                style="border: 1px solid var(--color-border); color: var(--color-text-primary); background: var(--color-bg-secondary)"
+                @click="showImportTeachersModal = true"
+              >
+                <IconUpload :size="17" />
+                {{ $t('admin.importTeachers') }}
+              </button>
+              <button
+                class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium"
+                style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+                @click="openAddTeacherModal"
+              >
+                <IconPlus :size="17" />
+                {{ $t('admin.addTeacher') }}
+              </button>
+            </div>
           </div>
 
           <!-- Loading -->
@@ -332,14 +342,24 @@
           <div class="flex items-center justify-between mb-6 min-h-9">
             <h2 class="font-semibold tracking-widest uppercase"
                 style="color: var(--color-text-muted)">{{ $t('admin.subjects') }}</h2>
-            <button
-              class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium"
-              style="background: var(--color-accent); color: var(--color-accent-text); border: none"
-              @click="openAddSubjectModal"
-            >
-              <IconPlus :size="17" />
-              {{ $t('admin.addSubject') }}
-            </button>
+            <div class="flex items-center gap-2">
+              <button
+                class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium"
+                style="border: 1px solid var(--color-border); color: var(--color-text-primary); background: var(--color-bg-secondary)"
+                @click="showImportSubjectsModal = true"
+              >
+                <IconUpload :size="17" />
+                {{ $t('admin.importSubjects') }}
+              </button>
+              <button
+                class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium"
+                style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+                @click="openAddSubjectModal"
+              >
+                <IconPlus :size="17" />
+                {{ $t('admin.addSubject') }}
+              </button>
+            </div>
           </div>
 
           <div v-if="adminStore.subjects.length === 0"
@@ -615,6 +635,32 @@
 
     <SettingsModal v-model="showSettings" />
 
+    <!-- ── Import Teachers Modal ── -->
+    <ImportModal
+      v-model:show="showImportTeachersModal"
+      :title="$t('admin.importTeachers')"
+      template-filename="teachers_template"
+      :template-headers="['name', 'username', 'password', 'role']"
+      :template-sample="[['Hong Gildong', 'teacher1', 'password1', 'teacher']]"
+      :synonym-map="teacherSynonymMap"
+      :required-fields="['name', 'username', 'password']"
+      :columns="teacherImportColumns"
+      :on-import="handleImportTeachers"
+    />
+
+    <!-- ── Import Subjects Modal ── -->
+    <ImportModal
+      v-model:show="showImportSubjectsModal"
+      :title="$t('admin.importSubjects')"
+      template-filename="subjects_template"
+      :template-headers="['name']"
+      :template-sample="[['Programming'], ['Mathematics']]"
+      :synonym-map="subjectSynonymMap"
+      :required-fields="['name']"
+      :columns="subjectImportColumns"
+      :on-import="handleImportSubjects"
+    />
+
   </div>
 </template>
 
@@ -623,7 +669,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import {
-  IconMoon, IconSun, IconPlus, IconLoader2, IconAlertCircle, IconPencil, IconTrash,
+  IconMoon, IconSun, IconPlus, IconUpload, IconLoader2, IconAlertCircle, IconPencil, IconTrash,
   IconSettings, IconUsers, IconBook, IconLayoutGrid, IconChevronRight, IconBooks,
 } from '@tabler/icons-vue'
 import { useAuthStore } from '@/stores/auth'
@@ -631,7 +677,9 @@ import { useAdminStore } from '@/stores/admin'
 import { useClassStore } from '@/stores/class'
 import LanguageSelector from '@/components/LanguageSelector.vue'
 import SettingsModal from '@/components/SettingsModal.vue'
+import ImportModal from '@/components/ImportModal.vue'
 import type { AdminTeacher, Subject } from '@/api/client'
+import type { SynonymMap } from '@/utils/excelImport'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -650,6 +698,28 @@ const showEditTeacherModal = ref(false)
 const showDeleteTeacherModal = ref(false)
 const showAddSubjectModal = ref(false)
 const showDeleteSubjectModal = ref(false)
+const showImportTeachersModal = ref(false)
+const showImportSubjectsModal = ref(false)
+
+// ── Import config ──────────────────────────────────────────────
+const teacherSynonymMap: SynonymMap = {
+  name: ['name', '이름', '성명'],
+  username: ['username', 'id', '아이디'],
+  password: ['password', 'pw', '비밀번호', '패스워드'],
+  role: ['role', '역할', '권한'],
+}
+const subjectSynonymMap: SynonymMap = {
+  name: ['name', 'subject', '과목명', '과목'],
+}
+const teacherImportColumns = [
+  { key: 'name', labelKey: 'admin.teacherName' },
+  { key: 'username', labelKey: 'admin.teacherUsername' },
+  { key: 'password', labelKey: 'admin.teacherPassword' },
+  { key: 'role', labelKey: 'admin.teacherRole' },
+]
+const subjectImportColumns = [
+  { key: 'name', labelKey: 'admin.subjectName' },
+]
 
 // ── Teacher modal state ────────────────────────────────────────
 const editTeacherTarget = ref<AdminTeacher | null>(null)
@@ -696,6 +766,8 @@ function closeModals() {
   showDeleteTeacherModal.value = false
   showAddSubjectModal.value = false
   showDeleteSubjectModal.value = false
+  showImportTeachersModal.value = false
+  showImportSubjectsModal.value = false
   editTeacherTarget.value = null
   deleteTeacherTarget.value = null
   deleteSubjectTarget.value = null
@@ -773,6 +845,22 @@ async function onDeleteTeacherConfirm() {
   } finally {
     isDeletingTeacher.value = false
   }
+}
+
+// ── Import handlers ────────────────────────────────────────────
+async function handleImportTeachers(rows: Record<string, string>[]) {
+  const data = rows.map((r) => ({
+    name: r.name,
+    username: r.username,
+    password: r.password,
+    role: r.role || undefined,
+  }))
+  await adminStore.importTeachers(data)
+}
+
+async function handleImportSubjects(rows: Record<string, string>[]) {
+  const data = rows.map((r) => ({ name: r.name }))
+  await adminStore.importSubjects(data)
 }
 
 // ── Subject actions ────────────────────────────────────────────

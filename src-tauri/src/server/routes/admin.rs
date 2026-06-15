@@ -323,6 +323,107 @@ pub async fn update_teacher(
     Ok(Json(json!({ "ok": true })))
 }
 
+// ── Bulk Import ───────────────────────────────────────────────────────────────
+
+#[derive(Deserialize)]
+pub struct ImportTeacherRow {
+    pub username: String,
+    pub name: String,
+    pub password: String,
+    pub role: Option<String>,
+}
+
+/// POST /api/admin/teachers/import
+pub async fn import_teachers(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<Vec<ImportTeacherRow>>,
+) -> Result<Json<Value>, ApiError> {
+    let session = parse_session(&headers, &state.db).await?;
+    let teacher_id = session.teacher_id.ok_or(ApiError::Forbidden)?;
+    require_admin(teacher_id, &state.db).await?;
+
+    if body.is_empty() {
+        return Err(ApiError::BadRequest("ERR_IMPORT_EMPTY".into()));
+    }
+
+    let mut tx = state.db.begin().await?;
+
+    for item in &body {
+        if item.username.trim().is_empty() || item.name.trim().is_empty() {
+            return Err(ApiError::BadRequest("ERR_IMPORT_ROW_INVALID".into()));
+        }
+        if item.password.len() < 8 {
+            return Err(ApiError::BadRequest("ERR_IMPORT_PASSWORD_TOO_SHORT".into()));
+        }
+        let role = if item.role.as_deref() == Some("admin") { "admin" } else { "teacher" };
+        let salt = SaltString::generate(&mut OsRng);
+        let hash = Argon2::default()
+            .hash_password(item.password.as_bytes(), &salt)
+            .map_err(|e| ApiError::Internal(format!("argon2: {e}")))?
+            .to_string();
+
+        sqlx::query(
+            "INSERT INTO teachers (username, name, password_hash, role) VALUES (?, ?, ?, ?)",
+        )
+        .bind(item.username.trim())
+        .bind(item.name.trim())
+        .bind(&hash)
+        .bind(role)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| {
+            if let sqlx::Error::Database(ref db_err) = e {
+                if db_err.message().contains("UNIQUE constraint failed") {
+                    return ApiError::BadRequest("ERR_IMPORT_DUPLICATE".into());
+                }
+            }
+            ApiError::Database(e)
+        })?;
+    }
+
+    tx.commit().await?;
+    Ok(Json(json!({ "imported": body.len() })))
+}
+
+/// POST /api/admin/subjects/import
+pub async fn import_subjects(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<Vec<SubjectBody>>,
+) -> Result<Json<Value>, ApiError> {
+    let session = parse_session(&headers, &state.db).await?;
+    let teacher_id = session.teacher_id.ok_or(ApiError::Forbidden)?;
+    require_admin(teacher_id, &state.db).await?;
+
+    if body.is_empty() {
+        return Err(ApiError::BadRequest("ERR_IMPORT_EMPTY".into()));
+    }
+
+    let mut tx = state.db.begin().await?;
+
+    for item in &body {
+        if item.name.trim().is_empty() {
+            return Err(ApiError::BadRequest("ERR_IMPORT_ROW_INVALID".into()));
+        }
+        sqlx::query("INSERT INTO subjects (name) VALUES (?)")
+            .bind(item.name.trim())
+            .execute(&mut *tx)
+            .await
+            .map_err(|e| {
+                if let sqlx::Error::Database(ref db_err) = e {
+                    if db_err.message().contains("UNIQUE constraint failed") {
+                        return ApiError::BadRequest("ERR_IMPORT_DUPLICATE".into());
+                    }
+                }
+                ApiError::Database(e)
+            })?;
+    }
+
+    tx.commit().await?;
+    Ok(Json(json!({ "imported": body.len() })))
+}
+
 /// DELETE /api/admin/teachers/:id
 pub async fn delete_teacher(
     State(state): State<AppState>,

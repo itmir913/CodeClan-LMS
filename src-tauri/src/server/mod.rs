@@ -43,6 +43,7 @@ pub fn build_router(state: AppState) -> Router {
             get(routes::students::list_students).post(routes::students::add_student),
         )
         .route("/classes/:id/students/bulk", post(routes::students::bulk_add_students))
+        .route("/classes/:id/students/import", post(routes::students::import_students))
         .route("/students/:id", delete(routes::students::delete_student))
         .route("/students/:id/reset-password", post(routes::students::reset_student_password))
         // Admin — teachers
@@ -54,9 +55,11 @@ pub fn build_router(state: AppState) -> Router {
             "/admin/teachers/:id",
             put(routes::admin::update_teacher).delete(routes::admin::delete_teacher),
         )
+        .route("/admin/teachers/import", post(routes::admin::import_teachers))
         // Admin — subjects
         .route("/admin/subjects", post(routes::admin::create_subject))
         .route("/admin/subjects/:id", delete(routes::admin::delete_subject))
+        .route("/admin/subjects/import", post(routes::admin::import_subjects))
         // Problems
         .route("/problems", get(routes::problems::list_problems).post(routes::problems::create_problem))
         .route(

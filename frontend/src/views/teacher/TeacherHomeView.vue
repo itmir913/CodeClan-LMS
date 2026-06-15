@@ -542,7 +542,6 @@ onUnmounted(() => {
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 .class-card:hover {
-  transform: translateY(-3px);
   box-shadow: 0 14px 28px -16px rgba(15, 23, 42, 0.35);
   border-color: var(--color-border-strong);
 }

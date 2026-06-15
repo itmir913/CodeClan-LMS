@@ -126,14 +126,14 @@
                 <IconUserPlus :size="15" />
                 {{ $t('students.addStudent') }}
               </button>
-              <!-- CSV 임포트 -->
+              <!-- 엑셀 임포트 -->
               <button
                 class="h-9 px-4 rounded-lg flex items-center gap-1.5 font-semibold"
                 style="background: var(--color-accent); color: var(--color-accent-text); border: none"
-                @click="openImportModal"
+                @click="showImportModal = true"
               >
                 <IconUpload :size="15" />
-                {{ $t('students.importCSV') }}
+                {{ $t('students.importExcel') }}
               </button>
             </div>
           </div>
@@ -336,91 +336,18 @@
       </div>
     </Teleport>
 
-    <!-- ── CSV 임포트 모달 ── -->
-    <Teleport to="body">
-      <div v-if="showImportModal"
-           class="fixed inset-0 z-50 flex items-center justify-center px-4"
-           style="background: rgba(0,0,0,0.45)">
-        <div class="w-full max-w-lg rounded-xl p-6"
-             style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
-          <h2 class="font-semibold mb-2" style="color: var(--color-text-primary)">
-            {{ $t('students.importTitle') }}
-          </h2>
-          <p class="mb-4" style="color: var(--color-text-muted)">{{ $t('students.importHint') }}</p>
-
-          <div class="flex flex-col gap-3">
-            <label class="font-medium" style="color: var(--color-text-primary)">
-              {{ $t('students.pasteCSV') }}
-            </label>
-            <textarea
-              v-model="importText"
-              rows="7"
-              :placeholder="$t('students.pasteCSVPlaceholder')"
-              :disabled="isImporting"
-              class="w-full px-4 py-3 rounded-lg border outline-none resize-none"
-              style="background: var(--color-bg-primary); border-color: var(--color-border); color: var(--color-text-primary); font-family: monospace"
-            ></textarea>
-          </div>
-
-          <!-- 미리보기 -->
-          <div v-if="importPreview.length > 0" class="mt-4">
-            <p class="font-medium mb-2" style="color: var(--color-text-primary)">
-              {{ $t('students.importPreviewTitle') }} ({{ importPreview.length }}명)
-            </p>
-            <div class="rounded-lg border overflow-hidden" style="border-color: var(--color-border); max-height: 160px; overflow-y: auto">
-              <table class="w-full">
-                <thead>
-                  <tr style="background: var(--color-bg-tertiary)">
-                    <th class="px-3 py-2 text-left font-semibold" style="color: var(--color-text-muted)">{{ $t('students.number') }}</th>
-                    <th class="px-3 py-2 text-left font-semibold" style="color: var(--color-text-muted)">{{ $t('students.name') }}</th>
-                    <th class="px-3 py-2 text-left font-semibold" style="color: var(--color-text-muted)">{{ $t('students.grade') }}</th>
-                    <th class="px-3 py-2 text-left font-semibold" style="color: var(--color-text-muted)">{{ $t('students.classNo') }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(row, i) in importPreview.slice(0, 10)" :key="i" class="border-t"
-                      style="border-color: var(--color-border)">
-                    <td class="px-3 py-2" style="color: var(--color-text-muted)">{{ row.number }}</td>
-                    <td class="px-3 py-2" style="color: var(--color-text-primary)">{{ row.name }}</td>
-                    <td class="px-3 py-2" style="color: var(--color-text-muted)">{{ row.grade }}</td>
-                    <td class="px-3 py-2" style="color: var(--color-text-muted)">{{ row.class_no }}</td>
-                  </tr>
-                  <tr v-if="importPreview.length > 10">
-                    <td colspan="4" class="px-3 py-2 text-center" style="color: var(--color-text-muted)">
-                      ... 외 {{ importPreview.length - 10 }}명
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div v-if="importError"
-               class="mt-4 flex items-center gap-2 rounded-lg border px-4 py-3"
-               style="background: var(--color-danger-bg); border-color: var(--color-danger-border); color: var(--color-danger)"
-               role="alert">
-            <IconAlertCircle :size="18" class="shrink-0" />
-            <span>{{ importError }}</span>
-          </div>
-
-          <div class="flex justify-end gap-3 mt-5">
-            <button type="button" class="h-10 px-5 rounded-lg font-medium"
-                    style="border: 1px solid var(--color-border); color: var(--color-text-primary); background: transparent"
-                    @click="closeModals">{{ $t('students.cancel') }}</button>
-            <button
-              :disabled="isImporting || importPreview.length === 0"
-              class="h-10 px-5 rounded-lg font-medium flex items-center gap-2"
-              style="background: var(--color-accent); color: var(--color-accent-text); border: none"
-              :class="(isImporting || importPreview.length === 0) ? 'opacity-60 cursor-not-allowed' : ''"
-              @click="onImportConfirm"
-            >
-              <IconLoader2 v-if="isImporting" :size="17" class="spin" />
-              {{ isImporting ? $t('students.importing') : $t('students.importConfirm') }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </Teleport>
+    <!-- ── 엑셀 임포트 모달 ── -->
+    <ImportModal
+      v-model:show="showImportModal"
+      :title="$t('students.importExcel')"
+      template-filename="students_template"
+      :template-headers="['grade', 'class', 'number', 'name', 'username']"
+      :template-sample="[['3', '1', '1', 'Hong Gildong', '30101'], ['3', '1', '2', 'Kim Cheolsu', '']]"
+      :synonym-map="studentSynonymMap"
+      :required-fields="['grade', 'class_no', 'number', 'name']"
+      :columns="studentImportColumns"
+      :on-import="handleImportStudents"
+    />
 
     <!-- ── 비밀번호 초기화 확인 모달 ── -->
     <Teleport to="body">
@@ -518,6 +445,8 @@ import { useAuthStore } from '@/stores/auth'
 import { useStudentStore } from '@/stores/student'
 import { api, type ClassDetail, type StudentItem, type AddStudentBody } from '@/api/client'
 import LanguageSelector from '@/components/LanguageSelector.vue'
+import ImportModal from '@/components/ImportModal.vue'
+import type { SynonymMap } from '@/utils/excelImport'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -580,87 +509,34 @@ async function onAddSubmit() {
   }
 }
 
-// ── CSV 임포트 모달 ───────────────────────────────────
+// ── 엑셀 임포트 모달 ─────────────────────────────────
 const showImportModal = ref(false)
-const importText = ref('')
-const isImporting = ref(false)
-const importError = ref<string | null>(null)
 
-// 열 이름 매핑 사전 (CLAUDE.md 기준)
-const COL_MAP: Record<string, string> = {
-  번호: 'number', 학번: 'number', no: 'number', number: 'number', student_no: 'number',
-  이름: 'name', 성명: 'name', 학생명: 'name', name: 'name', student_name: 'name',
-  학년: 'grade', grade: 'grade', year: 'grade',
-  반: 'class_no', 학반: 'class_no', class: 'class_no', division: 'class_no',
+const studentSynonymMap: SynonymMap = {
+  grade: ['grade', '학년', 'year'],
+  class_no: ['class', 'class_no', '반', '학반', 'division'],
+  number: ['number', 'no', '번호', 'student_no'],
+  name: ['name', '이름', '성명', '학생명', 'student_name'],
+  username: ['username', 'student_id', '학번', 'id', '아이디'],
 }
 
-const importPreview = computed<AddStudentBody[]>(() => {
-  const text = importText.value.trim()
-  if (!text) return []
-  try {
-    return parseCSV(text)
-  } catch {
-    return []
-  }
-})
+const studentImportColumns = [
+  { key: 'grade', labelKey: 'students.grade' },
+  { key: 'class_no', labelKey: 'students.classNo' },
+  { key: 'number', labelKey: 'students.number' },
+  { key: 'name', labelKey: 'students.name' },
+  { key: 'username', labelKey: 'students.username' },
+]
 
-function parseCSV(text: string): AddStudentBody[] {
-  const lines = text.split('\n').map((l) => l.trim()).filter(Boolean)
-  if (lines.length < 2) return []
-
-  const header = lines[0].split(',').map((h) => h.trim().toLowerCase())
-  const colIdx: Record<string, number> = {}
-
-  header.forEach((h, i) => {
-    const mapped = COL_MAP[h]
-    if (mapped) colIdx[mapped] = i
-  })
-
-  const required = ['number', 'name', 'grade', 'class_no']
-  if (!required.every((k) => k in colIdx)) return []
-
-  const result: AddStudentBody[] = []
-  for (let i = 1; i < lines.length; i++) {
-    const cols = lines[i].split(',').map((c) => c.trim())
-    const name = cols[colIdx['name']]
-    const number = parseInt(cols[colIdx['number']], 10)
-    const grade = parseInt(cols[colIdx['grade']], 10)
-    const class_no = parseInt(cols[colIdx['class_no']], 10)
-    if (!name || isNaN(number) || isNaN(grade) || isNaN(class_no)) continue
-    result.push({ name, number, grade, class_no })
-  }
-  return result
-}
-
-function openImportModal() {
-  closeModals()
-  importText.value = ''
-  importError.value = null
-  showImportModal.value = true
-}
-
-async function onImportConfirm() {
-  if (isImporting.value) return
-  const data = importPreview.value
-  if (data.length === 0) {
-    importError.value = t('students.importNoData')
-    return
-  }
-  importError.value = null
-  isImporting.value = true
-  try {
-    const result = await studentStore.bulkAddStudents(classId.value, data)
-    closeModals()
-    // 결과 알림 (에러 없으면 조용히 성공)
-    if (result.skipped > 0) {
-      // 스킵 정보는 조용히 처리 (필요시 toast 추가 가능)
-    }
-  } catch (e) {
-    const code = e instanceof Error ? e.message : 'ERR_UNKNOWN'
-    importError.value = t(`errors.${code}`, t('errors.ERR_UNKNOWN'))
-  } finally {
-    isImporting.value = false
-  }
+async function handleImportStudents(rows: Record<string, string>[]) {
+  const data = rows.map((r) => ({
+    grade: parseInt(r.grade, 10),
+    class_no: parseInt(r.class_no, 10),
+    number: parseInt(r.number, 10),
+    name: r.name,
+    username: r.username || undefined,
+  }))
+  await studentStore.importStudents(classId.value, data)
 }
 
 // ── 비밀번호 초기화 모달 ──────────────────────────────
@@ -726,7 +602,6 @@ function closeModals() {
   resetTarget.value = null
   deleteTarget.value = null
   addError.value = null
-  importError.value = null
   resetError.value = null
   deleteError.value = null
 }
