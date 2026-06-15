@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS problem_types (
 
 CREATE TABLE IF NOT EXISTS problems (
     id          INTEGER PRIMARY KEY,
+    uuid        TEXT NOT NULL UNIQUE,
     type_id     INTEGER NOT NULL REFERENCES problem_types(id),
     created_by  INTEGER REFERENCES teachers(id) ON DELETE SET NULL,
     subject_id  INTEGER REFERENCES subjects(id),
@@ -106,6 +107,7 @@ INSERT OR IGNORE INTO problem_types (id, slug) VALUES
 
 -- ── 인덱스 ────────────────────────────────────────────────────────────────────
 
+CREATE UNIQUE INDEX IF NOT EXISTS idx_problems_uuid       ON problems(uuid);
 CREATE INDEX IF NOT EXISTS idx_problems_type        ON problems(type_id);
 CREATE INDEX IF NOT EXISTS idx_problems_subject     ON problems(subject_id);
 CREATE INDEX IF NOT EXISTS idx_problems_created_by  ON problems(created_by);

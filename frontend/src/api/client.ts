@@ -154,6 +154,7 @@ export interface ImportStudentRow {
 
 export interface ProblemListItem {
   id: number
+  uuid: string
   type: string
   title: string
   subject_id: number | null
@@ -180,6 +181,7 @@ export interface ProblemTestCase {
 
 export interface ProblemDetail {
   id: number
+  uuid: string
   type: string
   title: string
   description: string

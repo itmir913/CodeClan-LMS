@@ -88,6 +88,7 @@ fn default_show_io() -> bool {
 #[derive(Serialize)]
 pub struct ProblemListItem {
     pub id: i64,
+    pub uuid: String,
     #[serde(rename = "type")]
     pub type_slug: String,
     pub title: String,
@@ -118,6 +119,7 @@ pub struct TestCaseDetail {
 #[derive(Serialize)]
 pub struct ProblemDetail {
     pub id: i64,
+    pub uuid: String,
     #[serde(rename = "type")]
     pub type_slug: String,
     pub title: String,
@@ -250,7 +252,7 @@ pub async fn list_problems(
 
     let rows = if let Some(ref slug) = params.type_slug {
         sqlx::query(
-            "SELECT p.id, pt.slug AS type_slug, p.title, p.subject_id, \
+            "SELECT p.id, p.uuid, pt.slug AS type_slug, p.title, p.subject_id, \
                     s.name AS subject_name, p.is_draft, p.created_at \
              FROM problems p \
              JOIN problem_types pt ON pt.id = p.type_id \
@@ -263,7 +265,7 @@ pub async fn list_problems(
         .await?
     } else {
         sqlx::query(
-            "SELECT p.id, pt.slug AS type_slug, p.title, p.subject_id, \
+            "SELECT p.id, p.uuid, pt.slug AS type_slug, p.title, p.subject_id, \
                     s.name AS subject_name, p.is_draft, p.created_at \
              FROM problems p \
              JOIN problem_types pt ON pt.id = p.type_id \
@@ -278,6 +280,7 @@ pub async fn list_problems(
         rows.iter()
             .map(|r| ProblemListItem {
                 id: r.get("id"),
+                uuid: r.get("uuid"),
                 type_slug: r.get("type_slug"),
                 title: r.get("title"),
                 subject_id: r.get("subject_id"),
@@ -301,7 +304,7 @@ pub async fn get_problem(
     use sqlx::Row as _;
 
     let row = sqlx::query(
-        "SELECT p.id, pt.slug AS type_slug, p.title, p.description, p.comment, \
+        "SELECT p.id, p.uuid, pt.slug AS type_slug, p.title, p.description, p.comment, \
                 p.subject_id, s.name AS subject_name, p.is_draft, p.created_at \
          FROM problems p \
          JOIN problem_types pt ON pt.id = p.type_id \
@@ -317,6 +320,7 @@ pub async fn get_problem(
 
     let mut detail = ProblemDetail {
         id: row.get("id"),
+        uuid: row.get("uuid"),
         type_slug: type_slug.clone(),
         title: row.get("title"),
         description: row.get("description"),
@@ -439,12 +443,14 @@ pub async fn create_problem(
     validate_body(&body)?;
 
     let type_id = type_id_from_slug(&body.type_slug, &state.db).await?;
+    let problem_uuid = uuid::Uuid::new_v4().to_string();
     let mut tx = state.db.begin().await?;
 
     let problem_id: i64 = sqlx::query(
-        "INSERT INTO problems (type_id, created_by, subject_id, title, description, comment, is_draft) \
-         VALUES (?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO problems (uuid, type_id, created_by, subject_id, title, description, comment, is_draft) \
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
     )
+    .bind(&problem_uuid)
     .bind(type_id)
     .bind(teacher_id)
     .bind(body.subject_id)
