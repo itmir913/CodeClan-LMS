@@ -36,7 +36,7 @@
         <button
           v-for="tab in tabs"
           :key="tab.key"
-          class="flex items-center gap-3 h-11 px-3 rounded-lg border-0 w-full text-left"
+          class="flex items-center justify-start gap-3 h-11 px-3 rounded-lg border-0 w-full"
           :style="activeTab === tab.key
             ? { boxShadow: 'inset 3px 0 0 #93c5fd', background: 'rgba(147,197,253,.1)', color: '#f8fafc', fontWeight: 600 }
             : { background: 'transparent', color: '#64748b' }"

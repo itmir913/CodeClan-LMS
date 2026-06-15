@@ -65,7 +65,7 @@
         <!-- 수업 전체 섹션 -->
         <div class="p-3 pt-4">
           <button
-            class="flex items-center gap-2.5 w-full h-10 px-3 rounded-lg font-medium border-0 text-left"
+            class="flex items-center justify-start gap-2.5 w-full h-10 px-3 rounded-lg font-medium border-0"
             :style="activeSection === 'classes'
               ? { background: 'var(--color-info-bg)', color: 'var(--color-accent)', fontWeight: 600 }
               : { background: 'transparent', color: 'var(--color-text-muted)' }"
@@ -81,7 +81,7 @@
         <!-- 교사·과목 관리 섹션 -->
         <div class="p-3 flex flex-col gap-0.5">
           <button
-            class="flex items-center gap-2.5 w-full h-10 px-3 rounded-lg font-medium border-0 text-left"
+            class="flex items-center justify-start gap-2.5 w-full h-10 px-3 rounded-lg font-medium border-0"
             :style="activeSection === 'teachers'
               ? { background: 'var(--color-info-bg)', color: 'var(--color-accent)', fontWeight: 600 }
               : { background: 'transparent', color: 'var(--color-text-muted)' }"
@@ -91,7 +91,7 @@
             {{ $t('classes.teacherManage') }}
           </button>
           <button
-            class="flex items-center gap-2.5 w-full h-10 px-3 rounded-lg font-medium border-0 text-left"
+            class="flex items-center justify-start gap-2.5 w-full h-10 px-3 rounded-lg font-medium border-0"
             :style="activeSection === 'subjects'
               ? { background: 'var(--color-info-bg)', color: 'var(--color-accent)', fontWeight: 600 }
               : { background: 'transparent', color: 'var(--color-text-muted)' }"
@@ -102,45 +102,15 @@
           </button>
         </div>
 
-        <!-- 수업 목록 (수업 전체 탭 선택 시) -->
-        <template v-if="activeSection === 'classes'">
-          <div class="mx-3" style="height: 1px; background: var(--color-border)"></div>
-          <div class="p-2 flex-1 overflow-y-auto">
-            <div v-if="classStore.loading"
-                 class="flex items-center gap-2 px-3 py-2"
-                 style="color: var(--color-text-muted)">
-              <IconLoader2 :size="16" class="spin" />
-            </div>
-            <div v-else-if="classStore.classes.length === 0"
-                 class="px-3 py-3"
-                 style="color: var(--color-text-muted)">
-              {{ $t('classes.noClassesAdmin') }}
-            </div>
-            <router-link
-              v-else
-              v-for="cls in classStore.classes"
-              :key="cls.id"
-              :to="`/classes/${cls.id}`"
-              class="flex flex-col px-3 py-2.5 rounded-lg no-underline"
-              style="color: var(--color-text-primary)"
-              active-class=""
-            >
-              <span class="font-medium leading-tight" style="font-size: 16px">{{ cls.name }}</span>
-              <span class="mt-0.5" style="font-size: 16px; color: var(--color-text-muted)">
-                {{ cls.subject_name }}
-              </span>
-            </router-link>
-          </div>
-        </template>
 
       </aside>
 
       <!-- ── 메인 콘텐츠 ── -->
-      <main class="flex-1 overflow-y-auto px-6 py-6 pb-16">
+      <main class="flex-1 overflow-y-auto px-6 pt-8 pb-16">
 
         <!-- 수업 전체 탭 -->
         <template v-if="activeSection === 'classes'">
-          <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center justify-between mb-6 min-h-9">
             <h2 class="font-semibold tracking-widest uppercase"
                 style="color: var(--color-text-muted)">{{ $t('classes.allClasses') }}</h2>
           </div>
@@ -225,7 +195,7 @@
 
         <!-- 교사 관리 탭 -->
         <template v-else-if="activeSection === 'teachers'">
-          <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center justify-between mb-6 min-h-9">
             <h2 class="font-semibold tracking-widest uppercase"
                 style="color: var(--color-text-muted)">{{ $t('admin.teachers') }}</h2>
             <button
@@ -345,7 +315,7 @@
 
         <!-- 과목 관리 탭 -->
         <template v-else-if="activeSection === 'subjects'">
-          <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center justify-between mb-6 min-h-9">
             <h2 class="font-semibold tracking-widest uppercase"
                 style="color: var(--color-text-muted)">{{ $t('admin.subjects') }}</h2>
             <button

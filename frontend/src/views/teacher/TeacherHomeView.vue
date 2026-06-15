@@ -116,8 +116,9 @@
         <article
           v-for="cls in classStore.classes"
           :key="cls.id"
-          class="class-card rounded-xl border flex flex-col overflow-hidden"
+          class="class-card rounded-xl border flex flex-col overflow-hidden cursor-pointer"
           style="background: var(--color-bg-secondary); border-color: var(--color-border); box-shadow: var(--shadow-card)"
+          @click="router.push(`/classes/${cls.id}`)"
         >
           <span class="h-1 block shrink-0" :style="{ background: cardAccentColor(cls.id) }"></span>
 
@@ -131,7 +132,7 @@
                 <button
                   class="w-8 h-8 p-0 rounded-lg flex items-center justify-center"
                   style="background: transparent; border: 1px solid var(--color-border); color: var(--color-text-muted)"
-                  @click="openEditModal(cls)"
+                  @click.stop="openEditModal(cls)"
                   :aria-label="$t('classes.editClass')"
                 >
                   <IconPencil :size="15" />
@@ -139,7 +140,7 @@
                 <button
                   class="w-8 h-8 p-0 rounded-lg flex items-center justify-center"
                   style="background: transparent; border: 1px solid var(--color-border); color: var(--color-text-muted)"
-                  @click="openDeleteModal(cls)"
+                  @click.stop="openDeleteModal(cls)"
                   :aria-label="$t('classes.deleteClass')"
                 >
                   <IconTrash :size="15" />
