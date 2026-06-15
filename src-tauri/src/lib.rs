@@ -4,6 +4,7 @@ pub mod server;
 
 use server::state::AppState;
 use tauri::{
+    menu::{Menu, MenuItem},
     tray::{TrayIconBuilder, TrayIconEvent},
     Manager, WindowEvent,
 };
@@ -36,8 +37,25 @@ pub fn run() {
                     .expect("Axum server failed");
             });
 
+            let menu_open = MenuItem::with_id(app, "open", "열기", true, None::<&str>)?;
+            let menu_quit = MenuItem::with_id(app, "quit", "LMS 종료", true, None::<&str>)?;
+            let tray_menu = Menu::with_items(app, &[&menu_open, &menu_quit])?;
+
             let tray_result = TrayIconBuilder::new()
                 .tooltip("CodeClan LMS")
+                .menu(&tray_menu)
+                .on_menu_event(|app, event| match event.id.as_ref() {
+                    "open" => {
+                        if let Some(window) = app.get_webview_window("main") {
+                            let _ = window.show();
+                            let _ = window.set_focus();
+                        }
+                    }
+                    "quit" => {
+                        app.exit(0);
+                    }
+                    _ => {}
+                })
                 .on_tray_icon_event(|tray, event| {
                     if let TrayIconEvent::DoubleClick { .. } = event {
                         let app = tray.app_handle();
