@@ -559,10 +559,15 @@ pub async fn set_locale(
 ) -> Result<Json<Value>, ApiError> {
     let session = parse_session(&headers, &state.db).await?;
 
-    let locale = body.locale.trim().to_string();
-    if locale.is_empty() {
+    let raw_locale = body.locale.trim().to_string();
+    let locale = if raw_locale.is_empty()
+        || raw_locale.len() > 10
+        || !raw_locale.chars().all(|c| c.is_ascii_alphanumeric() || c == '-')
+    {
         return Err(ApiError::BadRequest("ERR_INVALID_LOCALE".into()));
-    }
+    } else {
+        raw_locale
+    };
 
     let mut tx = state.db.begin().await?;
     if let Some(teacher_id) = session.teacher_id {

@@ -38,8 +38,8 @@ pub fn run() {
                     .expect("Axum server failed");
             });
 
-            let menu_open = MenuItem::with_id(app, "open", "열기", true, None::<&str>)?;
-            let menu_quit = MenuItem::with_id(app, "quit", "LMS 종료", true, None::<&str>)?;
+            let menu_open = MenuItem::with_id(app, "open", "Open", true, None::<&str>)?;
+            let menu_quit = MenuItem::with_id(app, "quit", "Quit LMS", true, None::<&str>)?;
             let tray_menu = Menu::with_items(app, &[&menu_open, &menu_quit])?;
 
             let tray_result = TrayIconBuilder::new()
