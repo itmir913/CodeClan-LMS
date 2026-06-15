@@ -22,9 +22,11 @@ const enModules = import.meta.glob<{ default: Record<string, string> }>(
   { eager: true },
 )
 
+const savedLocale = localStorage.getItem('cc_locale') ?? 'ko'
+
 export const i18n = createI18n({
   legacy: false,
-  locale: 'ko',
+  locale: savedLocale,
   fallbackLocale: 'ko',
   messages: {
     ko: buildMessages(koModules as LocaleModules),

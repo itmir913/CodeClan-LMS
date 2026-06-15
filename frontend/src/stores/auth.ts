@@ -17,6 +17,7 @@ export const useAuthStore = defineStore('auth', () => {
   function applyLocale(locale: string) {
     if (locale) {
       i18n.global.locale.value = locale as 'ko' | 'en'
+      localStorage.setItem('cc_locale', locale)
     }
   }
 
