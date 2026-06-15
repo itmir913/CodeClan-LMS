@@ -146,6 +146,7 @@ async function onSubmit() {
 - **모달 외부 클릭 닫기**: `@click.self`로 모달 바깥 클릭 시 닫히도록 구현 금지. 모달은 ESC 키로만 닫힌다.
 - **버튼 가드 누락**: 비동기 액션 핸들러 첫 줄에 `if (isSubmitting.value) return` 없이 구현 금지. `:disabled` 바인딩만으로는 중복 실행을 완전히 막을 수 없다.
 - **`style=""` 속성에 CSS 변수 외 값 작성**: `style="padding: 0"`, `style="border-radius: 8px"`, `style="display: flex"` 등 Tailwind 클래스로 표현 가능한 값을 inline으로 작성 금지. CSS 변수(`var(--xxx)`)를 값으로 쓰는 경우만 `style=""` 허용.
+- **Tailwind 임의값(`[...]`) 사용 금지**: `w-[420px]`, `h-[32px]`, `mt-[13px]` 등 대괄호로 임의 픽셀값을 지정하는 Tailwind 클래스 사용 금지. 표준 Tailwind 스케일 클래스(`w-96`, `h-10`, `mt-3` 등)를 사용할 것. CSS 변수 참조(`w-[var(--x)]`)는 예외적으로 허용.
 - **전역 폼 스타일을 `@layer base` 밖에 선언**: `base.css`에 `button {}`, `input {}` 등을 unlayered로 작성하면 Tailwind 유틸리티 클래스 전체가 무력화된다. 반드시 `@layer base { }` 안에 선언할 것.
 
 ---

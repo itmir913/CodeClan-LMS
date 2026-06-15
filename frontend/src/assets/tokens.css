@@ -59,6 +59,29 @@
   --color-card-accent-3: #d97706;
   --color-card-accent-4: #0891b2;
   --color-card-accent-5: #dc2626;
+
+  /* Fonts */
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Code syntax highlight (hljs — GitHub Light) */
+  --hljs-fg:          #24292e;
+  --hljs-bg:          #ffffff;
+  --hljs-keyword:     #d73a49;
+  --hljs-entity:      #6f42c1;
+  --hljs-constant:    #005cc5;
+  --hljs-string:      #032f62;
+  --hljs-variable:    #e36209;
+  --hljs-comment:     #6a737d;
+  --hljs-tag:         #22863a;
+  --hljs-subst:       #24292e;
+  --hljs-heading:     #005cc5;
+  --hljs-bullet:      #735c0f;
+  --hljs-markup-em:   #24292e;
+  --hljs-markup-bold: #24292e;
+  --hljs-add-fg:      #22863a;
+  --hljs-add-bg:      #f0fff4;
+  --hljs-del-fg:      #b31d28;
+  --hljs-del-bg:      #ffeef0;
 }
 
 /* ── Design Tokens — Dark ────────────────────────────────────────────────── */
@@ -110,4 +133,24 @@
   --color-card-accent-3: #f59e0b;
   --color-card-accent-4: #06b6d4;
   --color-card-accent-5: #f87171;
+
+  /* Code syntax highlight (hljs — GitHub Dark) */
+  --hljs-fg:          #c9d1d9;
+  --hljs-bg:          #0d1117;
+  --hljs-keyword:     #ff7b72;
+  --hljs-entity:      #d2a8ff;
+  --hljs-constant:    #79c0ff;
+  --hljs-string:      #a5d6ff;
+  --hljs-variable:    #ffa657;
+  --hljs-comment:     #8b949e;
+  --hljs-tag:         #7ee787;
+  --hljs-subst:       #c9d1d9;
+  --hljs-heading:     #1f6feb;
+  --hljs-bullet:      #f2cc60;
+  --hljs-markup-em:   #c9d1d9;
+  --hljs-markup-bold: #c9d1d9;
+  --hljs-add-fg:      #aff5b4;
+  --hljs-add-bg:      #033a16;
+  --hljs-del-fg:      #ffdcd7;
+  --hljs-del-bg:      #67060c;
 }

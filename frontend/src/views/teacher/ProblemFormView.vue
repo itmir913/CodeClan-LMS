@@ -117,13 +117,13 @@
 
             <!-- 단답형 -->
             <template v-if="formType === 'short_answer'">
-              <input
-                type="text"
+              <textarea
                 disabled
-                class="w-full h-11 rounded-xl px-4 border"
-                style="background: var(--color-bg-primary); color: var(--color-text-tertiary); border-color: var(--color-border)"
+                rows="3"
+                class="w-full rounded-xl px-4 py-3 border resize-none"
+                style="background: var(--color-bg-primary); color: var(--color-text-tertiary); border-color: var(--color-border); font-family: var(--font-mono); line-height: 1.6"
                 :placeholder="$t('problems.answerPlaceholder')"
-              />
+              ></textarea>
             </template>
 
             <!-- 객관식 -->
@@ -315,14 +315,14 @@
             <label class="block font-semibold mb-2" style="color: var(--color-text-primary)">
               {{ $t('problems.answerLabel') }}
             </label>
-            <input
+            <textarea
               v-model="formAnswer"
               :disabled="isSaving"
-              type="text"
-              class="w-full h-11 rounded-xl px-4 border"
-              style="background: var(--color-bg-primary); color: var(--color-text-primary); border-color: var(--color-border)"
+              rows="4"
+              class="w-full rounded-xl px-4 py-3 border resize-y"
+              style="background: var(--color-bg-primary); color: var(--color-text-primary); border-color: var(--color-border); font-family: var(--font-mono); line-height: 1.6; min-height: 88px"
               :placeholder="$t('problems.answerPlaceholder')"
-            />
+            ></textarea>
           </div>
           <label class="flex items-center gap-3 cursor-pointer">
             <input
@@ -588,8 +588,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { marked } from 'marked'
-import DOMPurify from 'dompurify'
+import { renderMarkdown } from '@/utils/markdown'
 import {
   IconArrowLeft, IconPlus, IconLoader2,
   IconAlertCircle, IconX, IconTrash, IconEye,
@@ -691,7 +690,7 @@ const sampleTestCases = computed(() =>
 
 const renderedDescription = computed(() => {
   if (!formDescription.value) return ''
-  return DOMPurify.sanitize(marked.parse(formDescription.value) as string)
+  return renderMarkdown(formDescription.value)
 })
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -926,7 +925,7 @@ onMounted(async () => {
   margin-bottom: 0.2em;
 }
 .preview-markdown :deep(code) {
-  font-family: 'Pretendard Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 0.9em;
   padding: 0.1em 0.4em;
   border-radius: 4px;
@@ -935,18 +934,16 @@ onMounted(async () => {
   border: 1px solid var(--color-border);
 }
 .preview-markdown :deep(pre) {
-  background: var(--color-bg-primary);
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  padding: 0.75em 1em;
-  overflow-x: auto;
+  overflow: hidden;
   margin: 0 0 0.6em;
 }
-.preview-markdown :deep(pre code) {
-  background: none;
+/* hljs가 pre code의 배경·색상·padding을 담당 — 추가 속성만 여기서 지정 */
+.preview-markdown :deep(pre code.hljs) {
+  border-radius: 0;
   border: none;
-  padding: 0;
-  color: var(--color-text-primary);
+  font-family: var(--font-mono);
   font-size: 0.9em;
 }
 .preview-markdown :deep(blockquote) {
