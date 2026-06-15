@@ -1089,11 +1089,6 @@ onMounted(async () => {
           is_sample: tc.is_sample,
           explanation: tc.explanation,
         }))
-        await nextTick()
-        document.querySelectorAll<HTMLTextAreaElement>('.tc-textarea').forEach((el) => {
-          el.style.height = 'auto'
-          el.style.height = `${el.scrollHeight}px`
-        })
       }
     } catch (e) {
       loadError.value = e instanceof Error ? e.message : 'ERR_UNKNOWN'
@@ -1103,6 +1098,10 @@ onMounted(async () => {
   }
 
   await nextTick()
+  document.querySelectorAll<HTMLTextAreaElement>('textarea').forEach((el) => {
+    el.style.height = 'auto'
+    el.style.height = `${el.scrollHeight}px`
+  })
   initDone.value = true
 })
 </script>
