@@ -370,7 +370,7 @@
             <span>{{ $t('common.loading') }}</span>
           </div>
 
-          <div v-else class="max-w-lg flex flex-col gap-6">
+          <div v-else class="flex flex-col gap-6">
 
             <div v-if="appSettingsError"
                  class="flex items-center gap-2 rounded-xl border px-5 py-4"
