@@ -3,7 +3,7 @@
     <div
       v-if="show"
       class="fixed inset-0 z-50 flex items-center justify-center px-4"
-      style="background: rgba(0,0,0,0.45)"
+      style="background: var(--color-modal-overlay)"
     >
       <div
         class="w-full max-w-2xl rounded-xl p-6"

@@ -28,7 +28,7 @@
           <IconSun v-else :size="18" />
         </button>
         <button class="flex items-center gap-2 h-9 px-4 rounded-lg font-semibold"
-                style="background: var(--color-accent); color: #fff; border: none"
+                style="background: var(--color-accent); color: var(--color-accent-text); border: none"
                 @click="openCreate">
           <IconPlus :size="16" />
           <span>{{ $t('problems.newProblem') }}</span>
@@ -164,7 +164,7 @@
     <!-- ══ 삭제 확인 모달 ══ -->
     <div v-if="deleteTarget"
          class="fixed inset-0 z-50 flex items-center justify-center p-4"
-         style="background: rgba(0,0,0,0.5)">
+         style="background: var(--color-modal-overlay)">
       <div class="w-full max-w-md rounded-2xl p-7 flex flex-col gap-5"
            style="background: var(--color-bg-primary)">
         <div class="flex items-center gap-3">
@@ -195,7 +195,7 @@
           <button
             :disabled="isDeleting"
             class="h-10 px-5 rounded-xl font-semibold"
-            style="background: var(--color-danger); color: #fff; border: none"
+            style="background: var(--color-danger); color: var(--color-accent-text); border: none"
             @click="doDelete"
           >
             <IconLoader2 v-if="isDeleting" :size="15" class="spin inline-block mr-1" />

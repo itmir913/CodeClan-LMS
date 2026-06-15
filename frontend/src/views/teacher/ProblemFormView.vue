@@ -40,7 +40,7 @@
         <button
           :disabled="isSaving || isLoading"
           class="h-9 px-5 rounded-lg font-semibold"
-          style="background: var(--color-accent); color: #fff; border: none"
+          style="background: var(--color-accent); color: var(--color-accent-text); border: none"
           @click="submitForm(false)"
         >
           <IconLoader2 v-if="isSaving && !savingAsDraft" :size="15" class="spin inline-block mr-1" />
@@ -263,7 +263,7 @@
               :disabled="!!editingId"
               class="h-9 px-4 rounded-lg font-medium transition-colors border"
               :style="formType === pt.value
-                ? 'border-width: 2px; border-color: var(--color-accent); background: rgba(37,99,235,0.08); color: var(--color-accent); font-weight: 600'
+                ? 'border-width: 2px; border-color: var(--color-accent); background: var(--color-accent-subtle); color: var(--color-accent); font-weight: 600'
                 : 'border-color: var(--color-border); background: var(--color-bg-primary); color: var(--color-text-muted)'"
               @click="formType = pt.value as TypeSlug"
             >

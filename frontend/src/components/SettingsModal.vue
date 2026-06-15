@@ -3,7 +3,7 @@
     <div
       v-if="modelValue"
       class="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style="background: rgba(0,0,0,0.45)"
+      style="background: var(--color-modal-overlay)"
       role="dialog"
       aria-modal="true"
     >

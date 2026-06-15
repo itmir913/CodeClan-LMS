@@ -1,15 +1,15 @@
 <template>
   <div class="flex h-screen overflow-hidden" style="background: var(--color-bg-primary)">
 
-    <!-- ── 좌측 사이드바 (항상 다크) ── -->
+    <!-- ── 좌측 사이드바 ── -->
     <aside class="w-60 flex-shrink-0 flex flex-col overflow-y-auto"
-           style="background: #0f172a; border-right: 1px solid #1e293b">
+           style="background: var(--color-bg-secondary); border-right: 1px solid var(--color-border)">
 
       <!-- 상단: 뒤로 가기 + 수업명 -->
       <div class="px-4 pt-5 pb-0">
         <button
           class="flex items-center gap-2 h-9 px-2 rounded-lg border-0"
-          style="background: transparent; color: #64748b"
+          style="background: transparent; color: var(--color-text-muted)"
           @click="goBack"
         >
           <IconArrowLeft :size="16" />
@@ -17,19 +17,19 @@
         </button>
         <div class="mt-4 pb-5">
           <div v-if="classLoading" class="h-5 w-32 rounded animate-pulse"
-               style="background: #1e293b"></div>
+               style="background: var(--color-bg-tertiary)"></div>
           <template v-else>
-            <div class="font-bold leading-snug" style="font-size: 17px; color: #f1f5f9; letter-spacing: -0.01em">
+            <div class="text-lg font-bold leading-snug" style="color: var(--color-text-primary); letter-spacing: -0.01em">
               {{ classDetail?.name }}
             </div>
-            <div class="mt-1" style="font-size: 16px; color: #64748b">
+            <div class="mt-1 text-base" style="color: var(--color-text-muted)">
               {{ classDetail?.subject_name }}
             </div>
           </template>
         </div>
       </div>
 
-      <div style="height: 1px; background: #1e293b; margin: 0 16px"></div>
+      <div class="h-px mx-4" style="background: var(--color-border)"></div>
 
       <!-- 탭 네비게이션 -->
       <nav class="px-2.5 pt-3 flex flex-col gap-0.5">
@@ -38,8 +38,8 @@
           :key="tab.key"
           class="flex items-center justify-start gap-3 h-11 px-3 rounded-lg border-0 w-full"
           :style="activeTab === tab.key
-            ? { boxShadow: 'inset 3px 0 0 #93c5fd', background: 'rgba(147,197,253,.1)', color: '#f8fafc', fontWeight: 600 }
-            : { background: 'transparent', color: '#64748b' }"
+            ? { boxShadow: 'inset 3px 0 0 var(--color-accent)', background: 'var(--color-info-bg)', color: 'var(--color-accent)', fontWeight: 600 }
+            : { background: 'transparent', color: 'var(--color-text-muted)' }"
           @click="activeTab = tab.key"
         >
           <component :is="tab.icon" :size="18" />
@@ -50,16 +50,15 @@
       <div class="flex-1"></div>
 
       <!-- 하단: 프로필 -->
-      <div style="height: 1px; background: #1e293b; margin: 0 16px 12px"></div>
+      <div class="h-px mx-4 mb-3" style="background: var(--color-border)"></div>
       <div class="px-2.5 pb-5">
         <div class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg"
-             style="color: #b8c5d3">
-          <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold flex-shrink-0"
-               style="background: rgba(37,99,235,.4); color: #93c5fd; font-size: 16px">
+             style="color: var(--color-text-muted)">
+          <div class="w-9 h-9 text-base rounded-full flex items-center justify-center font-bold flex-shrink-0"
+               style="background: var(--color-info-bg); color: var(--color-accent)">
             {{ auth.teacher?.name?.charAt(0) ?? '?' }}
           </div>
-          <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap"
-                style="font-size: 16px">
+          <span class="text-base flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
             {{ $t('auth.teacherGreeting', { name: auth.teacher?.name }) }}
           </span>
         </div>
@@ -72,7 +71,7 @@
       <!-- 상단 바 -->
       <header class="h-16 flex-shrink-0 flex items-center justify-between px-6 border-b"
               style="background: var(--color-bg-secondary); border-color: var(--color-border)">
-        <span class="font-semibold" style="font-size: 18px; color: var(--color-text-primary)">
+        <span class="text-lg font-semibold" style="color: var(--color-text-primary)">
           {{ classDetail?.name ?? '' }}
         </span>
         <div class="flex items-center gap-2">
@@ -168,7 +167,7 @@
                  style="background: var(--color-info-bg); color: var(--color-accent)">
               <IconUsers :size="28" />
             </div>
-            <p class="font-semibold mb-2" style="font-size: 18px; color: var(--color-text-primary)">
+            <p class="text-lg font-semibold mb-2" style="color: var(--color-text-primary)">
               {{ $t('students.noStudents') }}
             </p>
             <p style="color: var(--color-text-muted)">{{ $t('students.noStudentsHint') }}</p>
@@ -264,7 +263,7 @@
           <div class="flex flex-col items-center justify-center py-32"
                style="color: var(--color-text-muted)">
             <IconTool :size="40" class="mb-4 opacity-40" />
-            <p class="font-semibold" style="font-size: 18px; color: var(--color-text-primary)">
+            <p class="text-lg font-semibold" style="color: var(--color-text-primary)">
               {{ $t('classes.tabComingSoon') }}
             </p>
           </div>
@@ -277,7 +276,7 @@
     <Teleport to="body">
       <div v-if="showAddModal"
            class="fixed inset-0 z-50 flex items-center justify-center px-4"
-           style="background: rgba(0,0,0,0.45)">
+           style="background: var(--color-modal-overlay)">
         <div class="w-full max-w-sm rounded-xl p-6"
              style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-5" style="color: var(--color-text-primary)">
@@ -351,7 +350,7 @@
     <Teleport to="body">
       <div v-if="showResetModal"
            class="fixed inset-0 z-50 flex items-center justify-center px-4"
-           style="background: rgba(0,0,0,0.45)">
+           style="background: var(--color-modal-overlay)">
         <div class="w-full max-w-sm rounded-xl p-6"
              style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-2" style="color: var(--color-text-primary)">
@@ -391,7 +390,7 @@
     <Teleport to="body">
       <div v-if="showDeleteModal"
            class="fixed inset-0 z-50 flex items-center justify-center px-4"
-           style="background: rgba(0,0,0,0.45)">
+           style="background: var(--color-modal-overlay)">
         <div class="w-full max-w-sm rounded-xl p-6"
              style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-2" style="color: var(--color-text-primary)">
@@ -416,7 +415,7 @@
                     @click="closeModals" :disabled="isDeleting">{{ $t('students.cancel') }}</button>
             <button :disabled="isDeleting"
                     class="h-10 px-5 rounded-lg font-medium flex items-center gap-2"
-                    style="background: var(--color-danger); color: #fff; border: none"
+                    style="background: var(--color-danger); color: var(--color-accent-text); border: none"
                     :class="isDeleting ? 'opacity-60 cursor-not-allowed' : ''"
                     @click="onDeleteConfirm">
               <IconLoader2 v-if="isDeleting" :size="17" class="spin" />

@@ -404,7 +404,7 @@
     <Teleport to="body">
       <div v-if="showAddTeacherModal"
            class="fixed inset-0 z-50 flex items-center justify-center px-4"
-           style="background: rgba(0,0,0,0.45)">
+           style="background: var(--color-modal-overlay)">
         <div class="w-full max-w-md rounded-xl p-6"
              style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-5" style="color: var(--color-text-primary)">
@@ -466,7 +466,7 @@
     <Teleport to="body">
       <div v-if="showEditTeacherModal"
            class="fixed inset-0 z-50 flex items-center justify-center px-4"
-           style="background: rgba(0,0,0,0.45)">
+           style="background: var(--color-modal-overlay)">
         <div class="w-full max-w-md rounded-xl p-6"
              style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-5" style="color: var(--color-text-primary)">
@@ -525,7 +525,7 @@
     <Teleport to="body">
       <div v-if="showDeleteTeacherModal"
            class="fixed inset-0 z-50 flex items-center justify-center px-4"
-           style="background: rgba(0,0,0,0.45)">
+           style="background: var(--color-modal-overlay)">
         <div class="w-full max-w-sm rounded-xl p-6"
              style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-2" style="color: var(--color-text-primary)">{{ $t('admin.deleteTeacher') }}</h2>
@@ -546,7 +546,7 @@
                     @click="closeModals" :disabled="isDeletingTeacher">{{ $t('admin.cancel') }}</button>
             <button :disabled="isDeletingTeacher"
                     class="h-10 px-5 rounded-lg font-medium flex items-center gap-2"
-                    style="background: var(--color-danger); color: #fff; border: none"
+                    style="background: var(--color-danger); color: var(--color-accent-text); border: none"
                     :class="isDeletingTeacher ? 'opacity-60 cursor-not-allowed' : ''"
                     @click="onDeleteTeacherConfirm">
               <IconLoader2 v-if="isDeletingTeacher" :size="17" class="spin" />
@@ -561,7 +561,7 @@
     <Teleport to="body">
       <div v-if="showAddSubjectModal"
            class="fixed inset-0 z-50 flex items-center justify-center px-4"
-           style="background: rgba(0,0,0,0.45)">
+           style="background: var(--color-modal-overlay)">
         <div class="w-full max-w-sm rounded-xl p-6"
              style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-5" style="color: var(--color-text-primary)">{{ $t('admin.addSubject') }}</h2>
@@ -601,7 +601,7 @@
     <Teleport to="body">
       <div v-if="showDeleteSubjectModal"
            class="fixed inset-0 z-50 flex items-center justify-center px-4"
-           style="background: rgba(0,0,0,0.45)">
+           style="background: var(--color-modal-overlay)">
         <div class="w-full max-w-sm rounded-xl p-6"
              style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-2" style="color: var(--color-text-primary)">{{ $t('admin.subjects') }}</h2>
@@ -622,7 +622,7 @@
                     @click="closeModals" :disabled="isDeletingSubject">{{ $t('admin.cancel') }}</button>
             <button :disabled="isDeletingSubject"
                     class="h-10 px-5 rounded-lg font-medium flex items-center gap-2"
-                    style="background: var(--color-danger); color: #fff; border: none"
+                    style="background: var(--color-danger); color: var(--color-accent-text); border: none"
                     :class="isDeletingSubject ? 'opacity-60 cursor-not-allowed' : ''"
                     @click="onDeleteSubjectConfirm">
               <IconLoader2 v-if="isDeletingSubject" :size="17" class="spin" />
