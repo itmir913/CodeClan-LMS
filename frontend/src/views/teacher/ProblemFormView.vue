@@ -548,21 +548,23 @@
               <div
                 v-for="(tc, idx) in formTestCases"
                 :key="idx"
-                class="grid gap-3 items-center"
+                class="grid gap-3 items-start"
                 style="grid-template-columns: 1fr 1fr 80px 36px"
               >
-                <input
+                <textarea
+                  v-auto-resize
                   v-model="tc.input"
                   :disabled="isSaving"
-                  type="text"
-                  class="h-11 rounded-xl px-3 border font-mono"
+                  rows="1"
+                  class="tc-textarea rounded-xl px-3 py-2 border font-mono"
                   style="background: var(--color-bg-primary); color: var(--color-text-primary); border-color: var(--color-border)"
                 />
-                <input
+                <textarea
+                  v-auto-resize
                   v-model="tc.expected_output"
                   :disabled="isSaving"
-                  type="text"
-                  class="h-11 rounded-xl px-3 border font-mono"
+                  rows="1"
+                  class="tc-textarea rounded-xl px-3 py-2 border font-mono"
                   style="background: var(--color-bg-primary); color: var(--color-text-primary); border-color: var(--color-border)"
                 />
                 <div class="flex justify-center">
@@ -603,7 +605,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { renderMarkdown } from '@/utils/markdown'
@@ -627,6 +629,18 @@ const isDark = ref(document.documentElement.getAttribute('data-theme') === 'dark
 function toggleTheme() {
   isDark.value = !isDark.value
   document.documentElement.setAttribute('data-theme', isDark.value ? 'dark' : 'light')
+}
+
+// ── auto-resize textarea directive ───────────────────────────────────────────
+const vAutoResize = {
+  mounted(el: HTMLTextAreaElement) {
+    const resize = () => {
+      el.style.height = 'auto'
+      el.style.height = `${el.scrollHeight}px`
+    }
+    el.addEventListener('input', resize)
+    resize()
+  },
 }
 
 const editingId = computed(() => {
@@ -879,6 +893,11 @@ onMounted(async () => {
           is_sample: tc.is_sample,
           explanation: tc.explanation,
         }))
+        await nextTick()
+        document.querySelectorAll<HTMLTextAreaElement>('.tc-textarea').forEach((el) => {
+          el.style.height = 'auto'
+          el.style.height = `${el.scrollHeight}px`
+        })
       }
     } catch (e) {
       loadError.value = e instanceof Error ? e.message : 'ERR_UNKNOWN'
@@ -898,6 +917,13 @@ onMounted(async () => {
 .preview-toggle-btn:hover {
   background: var(--color-bg-secondary);
   color: var(--color-text-primary) !important;
+}
+
+.tc-textarea {
+  resize: none;
+  overflow: hidden;
+  line-height: 1.6;
+  min-height: 2.75rem;
 }
 
 .resize-handle {
