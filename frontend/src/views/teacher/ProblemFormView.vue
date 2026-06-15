@@ -635,8 +635,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { useRouter, useRoute, onBeforeRouteLeave } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { renderMarkdown } from '@/utils/markdown'
 import {
@@ -713,6 +713,30 @@ function startDrag(e: MouseEvent) {
   window.addEventListener('mouseup', onMouseUp)
 }
 
+// ── 이탈 방지 ─────────────────────────────────────────────────────────────────
+
+const isDirty = ref(false)
+const initDone = ref(false)
+
+function handleBeforeUnload(e: BeforeUnloadEvent) {
+  if (isDirty.value) {
+    e.preventDefault()
+    e.returnValue = ''
+  }
+}
+
+onBeforeRouteLeave((_to, _from, next) => {
+  if (isDirty.value) {
+    const ok = window.confirm(t('problems.leaveConfirm'))
+    if (!ok) { next(false); return }
+  }
+  next()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('beforeunload', handleBeforeUnload)
+})
+
 // ── 폼 상태 ──────────────────────────────────────────────────────────────────
 
 const TYPE_SLUGS = ['short_answer', 'multiple_choice', 'code_submit'] as const
@@ -751,6 +775,29 @@ const formTestCases = ref<TestCaseInput[]>([])
 // ── computed ──────────────────────────────────────────────────────────────────
 
 const subjects = computed(() => classStore.subjects)
+
+const formSnapshot = computed(() => JSON.stringify({
+  type: formType.value,
+  title: formTitle.value,
+  description: formDescription.value,
+  comment: formComment.value,
+  subjectId: formSubjectId.value,
+  answer: formAnswer.value,
+  caseSensitive: formCaseSensitive.value,
+  allowMultiple: formAllowMultiple.value,
+  choices: formChoices.value,
+  inputFormat: formInputFormat.value,
+  outputFormat: formOutputFormat.value,
+  constraints: formConstraints.value,
+  timeLimitMs: formTimeLimitMs.value,
+  memoryLimitMb: formMemoryLimitMb.value,
+  showIoOnFail: formShowIoOnFail.value,
+  testCases: formTestCases.value,
+}))
+
+watch(formSnapshot, () => {
+  if (initDone.value) isDirty.value = true
+})
 
 const problemTypes = computed(() => [
   { value: 'multiple_choice', label: t('problems.type_multiple_choice') },
@@ -982,6 +1029,7 @@ async function submitForm(asDraft: boolean) {
     } else {
       await store.createProblem(body)
     }
+    isDirty.value = false
     router.push({ name: 'problem-bank' })
   } catch (e) {
     formError.value = e instanceof Error ? e.message : 'ERR_UNKNOWN'
@@ -999,6 +1047,7 @@ function goBack() {
 // ── 초기화 ────────────────────────────────────────────────────────────────────
 
 onMounted(async () => {
+  window.addEventListener('beforeunload', handleBeforeUnload)
   await classStore.fetchSubjects()
 
   if (editingId.value !== null) {
@@ -1052,6 +1101,9 @@ onMounted(async () => {
       isLoading.value = false
     }
   }
+
+  await nextTick()
+  initDone.value = true
 })
 </script>
 

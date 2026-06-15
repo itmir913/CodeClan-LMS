@@ -63,5 +63,6 @@
   "previewUpdates": "(입력하는 대로 반영됩니다)",
   "choicePlaceholder": "선지 내용을 입력하세요",
   "hidePreview": "미리보기 접기",
-  "showPreview": "미리보기 펼치기"
+  "showPreview": "미리보기 펼치기",
+  "leaveConfirm": "저장하지 않고 나가겠습니까? 작성 중인 내용이 사라집니다."
 }

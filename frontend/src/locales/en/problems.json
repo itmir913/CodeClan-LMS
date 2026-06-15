@@ -63,5 +63,6 @@
   "previewUpdates": "(updates as you type)",
   "choicePlaceholder": "Enter choice text",
   "hidePreview": "Hide Preview",
-  "showPreview": "Show Preview"
+  "showPreview": "Show Preview",
+  "leaveConfirm": "Leave without saving? Your changes will be lost."
 }
