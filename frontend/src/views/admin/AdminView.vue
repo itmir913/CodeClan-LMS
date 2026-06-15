@@ -102,6 +102,20 @@
           </button>
         </div>
 
+        <div class="mx-3 mt-1" style="height: 1px; background: var(--color-border)"></div>
+
+        <!-- 문제 은행 -->
+        <div class="p-3">
+          <router-link
+            to="/problem-bank"
+            class="flex items-center justify-start gap-2.5 w-full h-10 px-3 rounded-lg font-medium no-underline"
+            style="color: var(--color-text-muted)"
+            active-class=""
+          >
+            <IconBooks :size="17" />
+            {{ $t('problems.title') }}
+          </router-link>
+        </div>
 
       </aside>
 
@@ -610,7 +624,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import {
   IconMoon, IconSun, IconPlus, IconLoader2, IconAlertCircle, IconPencil, IconTrash,
-  IconSettings, IconUsers, IconBook, IconLayoutGrid, IconChevronRight,
+  IconSettings, IconUsers, IconBook, IconLayoutGrid, IconChevronRight, IconBooks,
 } from '@tabler/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAdminStore } from '@/stores/admin'

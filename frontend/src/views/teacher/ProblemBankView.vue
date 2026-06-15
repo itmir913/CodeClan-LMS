@@ -9,7 +9,7 @@
                 style="background: transparent; color: var(--color-text-muted); border-color: var(--color-border)"
                 @click="goBack">
           <IconArrowLeft :size="15" />
-          <span>{{ $t('problems.myClasses') }}</span>
+          <span>{{ auth.teacher?.role === 'admin' ? $t('admin.adminBadge') : $t('problems.myClasses') }}</span>
         </button>
         <div class="w-px h-5" style="background: var(--color-border)"></div>
         <div class="flex items-center gap-2">
@@ -621,12 +621,14 @@ import {
 } from '@tabler/icons-vue'
 import { useProblemStore } from '@/stores/problem'
 import { useClassStore } from '@/stores/class'
+import { useAuthStore } from '@/stores/auth'
 import type { ProblemListItem, ChoiceInput, TestCaseInput } from '@/api/client'
 
 const router = useRouter()
 const { t } = useI18n()
 const store = useProblemStore()
 const classStore = useClassStore()
+const auth = useAuthStore()
 
 // ── 목록 상태 ────────────────────────────────────────────────────────────────
 
@@ -918,7 +920,7 @@ async function doDelete() {
 // ── 네비게이션 ───────────────────────────────────────────────────────────────
 
 function goBack() {
-  router.push('/teacher')
+  router.push(auth.teacher?.role === 'admin' ? '/admin' : '/teacher')
 }
 
 // ── ESC 키 ───────────────────────────────────────────────────────────────────
