@@ -4,7 +4,7 @@
     <!-- 상단 네비게이션 -->
     <header class="sticky top-0 z-10 h-16 border-b"
             style="background: var(--color-bg-secondary); border-color: var(--color-border)">
-      <div class="max-w-4xl mx-auto h-full flex items-center justify-between px-4">
+      <div class="h-full max-w-full flex items-center justify-between px-6">
 
         <div class="flex items-center gap-3">
           <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-white shrink-0"

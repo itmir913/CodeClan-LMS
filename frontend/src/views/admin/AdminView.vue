@@ -65,14 +65,14 @@
         <!-- 수업 전체 섹션 -->
         <div class="p-3 pt-4">
           <button
-            class="flex items-center justify-start gap-2.5 w-full h-10 px-3 rounded-lg font-medium border-0"
+            class="flex items-center gap-2.5 w-full min-h-10 py-2 px-3 rounded-lg font-medium border-0 leading-tight"
             :style="activeSection === 'classes'
               ? { background: 'var(--color-info-bg)', color: 'var(--color-accent)', fontWeight: 600 }
               : { background: 'transparent', color: 'var(--color-text-muted)' }"
             @click="activeSection = 'classes'"
           >
-            <IconLayoutGrid :size="17" />
-            {{ $t('classes.allClasses') }}
+            <IconLayoutGrid :size="17" class="shrink-0" />
+            <span class="flex-1 text-center">{{ $t('classes.allClasses') }}</span>
           </button>
         </div>
 
@@ -81,24 +81,24 @@
         <!-- 교사·과목 관리 섹션 -->
         <div class="p-3 flex flex-col gap-0.5">
           <button
-            class="flex items-center justify-start gap-2.5 w-full h-10 px-3 rounded-lg font-medium border-0"
+            class="flex items-center gap-2.5 w-full min-h-10 py-2 px-3 rounded-lg font-medium border-0 leading-tight"
             :style="activeSection === 'teachers'
               ? { background: 'var(--color-info-bg)', color: 'var(--color-accent)', fontWeight: 600 }
               : { background: 'transparent', color: 'var(--color-text-muted)' }"
             @click="activeSection = 'teachers'"
           >
-            <IconUsers :size="17" />
-            {{ $t('classes.teacherManage') }}
+            <IconUsers :size="17" class="shrink-0" />
+            <span class="flex-1 text-center">{{ $t('classes.teacherManage') }}</span>
           </button>
           <button
-            class="flex items-center justify-start gap-2.5 w-full h-10 px-3 rounded-lg font-medium border-0"
+            class="flex items-center gap-2.5 w-full min-h-10 py-2 px-3 rounded-lg font-medium border-0 leading-tight"
             :style="activeSection === 'subjects'
               ? { background: 'var(--color-info-bg)', color: 'var(--color-accent)', fontWeight: 600 }
               : { background: 'transparent', color: 'var(--color-text-muted)' }"
             @click="activeSection = 'subjects'"
           >
-            <IconBook :size="17" />
-            {{ $t('classes.subjectManage') }}
+            <IconBook :size="17" class="shrink-0" />
+            <span class="flex-1 text-center">{{ $t('classes.subjectManage') }}</span>
           </button>
         </div>
 
@@ -108,12 +108,12 @@
         <div class="p-3">
           <router-link
             to="/problem-bank"
-            class="flex items-center justify-start gap-2.5 w-full h-10 px-3 rounded-lg font-medium no-underline"
+            class="flex items-center gap-2.5 w-full min-h-10 py-2 px-3 rounded-lg font-medium no-underline leading-tight"
             style="color: var(--color-text-muted)"
             active-class=""
           >
-            <IconBooks :size="17" />
-            {{ $t('problems.title') }}
+            <IconBooks :size="17" class="shrink-0" />
+            <span class="flex-1 text-center">{{ $t('problems.title') }}</span>
           </router-link>
         </div>
 

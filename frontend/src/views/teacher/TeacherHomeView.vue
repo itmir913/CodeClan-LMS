@@ -4,7 +4,7 @@
     <!-- Top Nav -->
     <header class="sticky top-0 z-30 h-16 border-b"
             style="background: var(--color-bg-secondary); border-color: var(--color-border)">
-      <div class="h-full max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div class="h-full max-w-full flex items-center justify-between px-6">
 
         <div class="flex items-center gap-3">
           <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-white shrink-0"

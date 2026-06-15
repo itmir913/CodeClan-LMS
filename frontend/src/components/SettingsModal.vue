@@ -72,9 +72,10 @@
                 {{ isSavingName ? $t('common.saving') : $t('common.save') }}
               </button>
             </div>
-          </section>
 
-          <hr style="border-color: var(--color-border)" />
+            <hr class="mt-6" style="border-color: var(--color-border)" />
+
+          </section>
 
           <!-- ── 비밀번호 변경 (공통) ── -->
           <section>
@@ -99,37 +100,73 @@
                 <label class="block mb-1 font-medium" style="color: var(--color-text-primary)">
                   {{ $t('auth.currentPassword') }}
                 </label>
-                <input
-                  v-model="pwCurrent"
-                  type="password"
-                  class="rounded-lg"
-                  :disabled="isSavingPw"
-                />
+                <div class="relative">
+                  <input
+                    v-model="pwCurrent"
+                    :type="showPwCurrent ? 'text' : 'password'"
+                    class="w-full pr-12 rounded-lg password-input"
+                    :disabled="isSavingPw"
+                  />
+                  <button
+                    type="button"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 border-0 bg-transparent flex items-center justify-center cursor-pointer"
+                    style="color: var(--color-text-muted)"
+                    @click="showPwCurrent = !showPwCurrent"
+                    :aria-label="$t('auth.togglePassword')"
+                  >
+                    <IconEye v-if="!showPwCurrent" :size="20" />
+                    <IconEyeOff v-else :size="20" />
+                  </button>
+                </div>
               </div>
               <div>
                 <label class="block mb-1 font-medium" style="color: var(--color-text-primary)">
                   {{ $t('auth.newPassword') }}
                 </label>
-                <input
-                  v-model="pwNew"
-                  type="password"
-                  class="rounded-lg"
-                  :placeholder="$t('auth.newPasswordPlaceholder')"
-                  :disabled="isSavingPw"
-                />
+                <div class="relative">
+                  <input
+                    v-model="pwNew"
+                    :type="showPwNew ? 'text' : 'password'"
+                    class="w-full pr-12 rounded-lg password-input"
+                    :placeholder="$t('auth.newPasswordPlaceholder')"
+                    :disabled="isSavingPw"
+                  />
+                  <button
+                    type="button"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 border-0 bg-transparent flex items-center justify-center cursor-pointer"
+                    style="color: var(--color-text-muted)"
+                    @click="showPwNew = !showPwNew"
+                    :aria-label="$t('auth.togglePassword')"
+                  >
+                    <IconEye v-if="!showPwNew" :size="20" />
+                    <IconEyeOff v-else :size="20" />
+                  </button>
+                </div>
               </div>
               <div>
                 <label class="block mb-1 font-medium" style="color: var(--color-text-primary)">
                   {{ $t('auth.confirmNewPassword') }}
                 </label>
-                <input
-                  v-model="pwConfirm"
-                  type="password"
-                  class="rounded-lg"
-                  :placeholder="$t('auth.confirmNewPasswordPlaceholder')"
-                  :disabled="isSavingPw"
-                  @keydown.enter="onSavePw"
-                />
+                <div class="relative">
+                  <input
+                    v-model="pwConfirm"
+                    :type="showPwConfirm ? 'text' : 'password'"
+                    class="w-full pr-12 rounded-lg password-input"
+                    :placeholder="$t('auth.confirmNewPasswordPlaceholder')"
+                    :disabled="isSavingPw"
+                    @keydown.enter="onSavePw"
+                  />
+                  <button
+                    type="button"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 border-0 bg-transparent flex items-center justify-center cursor-pointer"
+                    style="color: var(--color-text-muted)"
+                    @click="showPwConfirm = !showPwConfirm"
+                    :aria-label="$t('auth.togglePassword')"
+                  >
+                    <IconEye v-if="!showPwConfirm" :size="20" />
+                    <IconEyeOff v-else :size="20" />
+                  </button>
+                </div>
               </div>
               <button
                 class="h-10 px-4 rounded-lg font-medium flex items-center justify-center gap-2 w-full"
@@ -152,7 +189,7 @@
 <script setup lang="ts">
 import { ref, watch, computed, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { IconX, IconLoader2 } from '@tabler/icons-vue'
+import { IconX, IconLoader2, IconEye, IconEyeOff } from '@tabler/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 
 const props = defineProps<{ modelValue: boolean }>()
@@ -201,6 +238,9 @@ const pwConfirm = ref('')
 const pwError = ref<string | null>(null)
 const pwSuccess = ref<string | null>(null)
 const isSavingPw = ref(false)
+const showPwCurrent = ref(false)
+const showPwNew = ref(false)
+const showPwConfirm = ref(false)
 
 async function onSavePw() {
   if (isSavingPw.value) return
@@ -245,8 +285,22 @@ watch(
       pwConfirm.value = ''
       pwError.value = null
       pwSuccess.value = null
+      showPwCurrent.value = false
+      showPwNew.value = false
+      showPwConfirm.value = false
       nextTick(() => panelRef.value?.focus())
     }
   },
 )
 </script>
+
+<style scoped>
+.password-input::-ms-reveal,
+.password-input::-ms-clear {
+  display: none;
+}
+.password-input::-webkit-contacts-auto-fill-button,
+.password-input::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+}
+</style>
