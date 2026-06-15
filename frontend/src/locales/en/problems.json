@@ -53,6 +53,8 @@
   "expectedOutput": "Expected Output (stdout)",
   "isSample": "Sample Case",
   "addTestCase": "Add Test Case",
+  "importFromZip": "Import Test Case from ZIP",
+  "importFromZipNoPairs": "No input/output pairs found in ZIP",
   "deleteConfirmTitle": "Delete Problem",
   "deleteConfirm": "Delete problem \"{title}\"?",
   "deleteConfirmHint": "Problems in use by lessons or assessments cannot be deleted.",

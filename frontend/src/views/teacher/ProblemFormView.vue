@@ -586,14 +586,33 @@
               </div>
             </div>
 
-            <button
-              class="flex items-center gap-2 h-10 px-4 rounded-xl border font-medium transition-colors add-item-btn"
-              style="background: transparent; color: var(--color-text-tertiary); border: 1.5px dashed var(--color-border)"
-              @click="addTestCase"
-            >
-              <IconPlus :size="15" />
-              <span>{{ $t('problems.addTestCase') }}</span>
-            </button>
+            <div class="flex items-center gap-2">
+              <button
+                class="flex items-center gap-2 h-10 px-4 rounded-xl border font-medium transition-colors add-item-btn"
+                style="background: transparent; color: var(--color-text-tertiary); border: 1.5px dashed var(--color-border)"
+                @click="addTestCase"
+              >
+                <IconPlus :size="15" />
+                <span>{{ $t('problems.addTestCase') }}</span>
+              </button>
+              <button
+                :disabled="isImportingZip"
+                class="flex items-center gap-2 h-10 px-4 rounded-xl border font-medium transition-colors add-item-btn"
+                style="background: transparent; color: var(--color-text-tertiary); border: 1.5px dashed var(--color-border)"
+                @click="zipFileInput?.click()"
+              >
+                <IconLoader2 v-if="isImportingZip" :size="15" class="spin" />
+                <IconFileZip v-else :size="15" />
+                <span>{{ $t('problems.importFromZip') }}</span>
+              </button>
+              <input
+                ref="zipFileInput"
+                type="file"
+                accept=".zip"
+                class="hidden"
+                @change="importFromZip"
+              />
+            </div>
           </div>
         </template>
 
@@ -614,6 +633,7 @@ import {
   IconArrowLeft, IconPlus, IconLoader2,
   IconAlertCircle, IconX, IconTrash, IconEye,
   IconChevronLeft, IconChevronRight, IconMoon, IconSun,
+  IconFileZip,
 } from '@tabler/icons-vue'
 import { useProblemStore } from '@/stores/problem'
 import { useClassStore } from '@/stores/class'
@@ -787,12 +807,100 @@ function removeChoice(idx: number) {
 
 // ── 테스트케이스 조작 ─────────────────────────────────────────────────────────
 
+const zipFileInput = ref<HTMLInputElement | null>(null)
+const isImportingZip = ref(false)
+
 function addTestCase() {
   formTestCases.value.push({ input: '', expected_output: '', is_sample: false, explanation: '' })
 }
 
 function removeTestCase(idx: number) {
   formTestCases.value.splice(idx, 1)
+}
+
+async function importFromZip(event: Event) {
+  if (isImportingZip.value) return
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+
+  isImportingZip.value = true
+  formError.value = null
+  try {
+    const { default: JSZip } = await import('jszip')
+    const zip = await JSZip.loadAsync(file)
+
+    // 파일 목록에서 .in / .out / .ans 쌍 수집
+    // key: lowercase basePath (확장자 제외, 경로 포함)
+    // value: { inPath, outPath } — 원본 대소문자 경로 보존
+    const map = new Map<string, { inPath?: string; outPath?: string }>()
+
+    for (const path of Object.keys(zip.files)) {
+      if (zip.files[path].dir) continue
+      const lower = path.toLowerCase()
+
+      if (lower.endsWith('.in')) {
+        const base = lower.slice(0, -3)
+        const entry = map.get(base) ?? {}
+        entry.inPath = path
+        map.set(base, entry)
+      } else if (lower.endsWith('.out')) {
+        const base = lower.slice(0, -4)
+        const entry = map.get(base) ?? {}
+        entry.outPath = path          // .out 우선
+        map.set(base, entry)
+      } else if (lower.endsWith('.ans')) {
+        const base = lower.slice(0, -4)
+        const entry = map.get(base) ?? {}
+        if (!entry.outPath) entry.outPath = path  // .out 없을 때만 .ans 사용
+        map.set(base, entry)
+      }
+    }
+
+    // 쌍이 완성된 항목만 추출 후 숫자 순 정렬
+    const pairs = Array.from(map.entries())
+      .filter(([, p]) => p.inPath && p.outPath)
+      .sort(([a], [b]) => {
+        const numA = extractBasenameNumber(a)
+        const numB = extractBasenameNumber(b)
+        if (numA !== null && numB !== null) return numA - numB
+        return a.localeCompare(b)
+      })
+
+    if (pairs.length === 0) {
+      formError.value = 'ERR_ZIP_NO_PAIRS'
+      return
+    }
+
+    for (const [, p] of pairs) {
+      const inputText = await zip.files[p.inPath!].async('string')
+      const outputText = await zip.files[p.outPath!].async('string')
+      formTestCases.value.push({
+        input: inputText,
+        expected_output: outputText,
+        is_sample: false,
+        explanation: '',
+      })
+    }
+
+    // 추가된 textarea들 높이 재계산
+    await nextTick()
+    document.querySelectorAll<HTMLTextAreaElement>('.tc-textarea').forEach((el) => {
+      el.style.height = 'auto'
+      el.style.height = `${el.scrollHeight}px`
+    })
+  } catch {
+    formError.value = 'ERR_ZIP_INVALID'
+  } finally {
+    isImportingZip.value = false
+    input.value = ''   // 같은 파일 재선택 허용
+  }
+}
+
+function extractBasenameNumber(path: string): number | null {
+  const name = path.split('/').pop() ?? path
+  const m = name.match(/(\d+)/)
+  return m ? parseInt(m[1], 10) : null
 }
 
 // ── 저장 ─────────────────────────────────────────────────────────────────────

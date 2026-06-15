@@ -39,5 +39,7 @@
   "ERR_PROBLEM_CHOICES_MIN": "At least 2 choices are required",
   "ERR_PROBLEM_IN_USE": "This problem is used in a lesson or assessment and cannot be deleted",
   "ERR_PROBLEM_TYPE_MISMATCH": "Problem type cannot be changed after creation",
+  "ERR_ZIP_INVALID": "Could not read the ZIP file",
+  "ERR_ZIP_NO_PAIRS": "No .in/.out(.ans) pairs found in ZIP",
   "ERR_UNKNOWN": "An unknown error occurred"
 }
