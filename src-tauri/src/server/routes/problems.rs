@@ -166,13 +166,11 @@ async fn read_tc_content(path: &std::path::Path) -> String {
     tokio::fs::read_to_string(path).await.unwrap_or_default()
 }
 
-async fn write_tc_files(
-    data_dir: &PathBuf,
-    problem_id: i64,
+async fn write_tc_files_to_dir(
+    dir: &std::path::Path,
     test_cases: &[TestCaseInput],
 ) -> Result<(), ApiError> {
-    let dir = problem_dir(data_dir, problem_id);
-    tokio::fs::create_dir_all(&dir)
+    tokio::fs::create_dir_all(dir)
         .await
         .map_err(|e| ApiError::Internal(format!("tc dir create: {e}")))?;
     for (i, tc) in test_cases.iter().enumerate() {
@@ -185,6 +183,15 @@ async fn write_tc_files(
             .map_err(|e| ApiError::Internal(format!("tc write: {e}")))?;
     }
     Ok(())
+}
+
+async fn write_tc_files(
+    data_dir: &PathBuf,
+    problem_id: i64,
+    test_cases: &[TestCaseInput],
+) -> Result<(), ApiError> {
+    let dir = problem_dir(data_dir, problem_id);
+    write_tc_files_to_dir(&dir, test_cases).await
 }
 
 async fn delete_tc_dir(data_dir: &PathBuf, problem_id: i64) -> Result<(), ApiError> {
@@ -463,13 +470,15 @@ pub async fn create_problem(
     .last_insert_rowid();
 
     insert_type_specific(&body, problem_id, &mut tx).await?;
-    tx.commit().await?;
 
+    // TC 파일을 커밋 전에 먼저 저장 — 실패 시 tx rollback으로 DB 불일치 없음
     if body.type_slug == "code_submit" {
         if let Some(tcs) = &body.test_cases {
             write_tc_files(&state.data_dir, problem_id, tcs).await?;
         }
     }
+
+    tx.commit().await?;
 
     Ok(Json(json!({ "id": problem_id })))
 }
@@ -514,12 +523,41 @@ pub async fn update_problem(
     .await?;
 
     update_type_specific(&body, problem_id, &mut tx).await?;
-    tx.commit().await?;
 
-    if body.type_slug == "code_submit" {
-        delete_tc_dir(&state.data_dir, problem_id).await?;
+    // 코딩형: 커밋 전에 새 TC 파일을 임시 경로에 먼저 저장
+    let pending = if body.type_slug == "code_submit" {
+        let pd = state.data_dir.join("problems").join(format!("{problem_id}_pending"));
+        if pd.exists() {
+            tokio::fs::remove_dir_all(&pd).await.ok();
+        }
         if let Some(tcs) = &body.test_cases {
-            write_tc_files(&state.data_dir, problem_id, tcs).await?;
+            write_tc_files_to_dir(&pd, tcs).await?;
+        }
+        Some(pd)
+    } else {
+        None
+    };
+
+    if let Err(e) = tx.commit().await {
+        // 커밋 실패 시 임시 디렉토리 정리
+        if let Some(ref pd) = pending {
+            tokio::fs::remove_dir_all(pd).await.ok();
+        }
+        return Err(ApiError::Database(e));
+    }
+
+    // 커밋 성공 후 기존 TC 디렉토리를 교체
+    if let Some(pd) = pending {
+        let actual = problem_dir(&state.data_dir, problem_id);
+        if actual.exists() {
+            if let Err(e) = tokio::fs::remove_dir_all(&actual).await {
+                tracing::warn!("TC dir remove failed after commit: {e}");
+            }
+        }
+        if pd.exists() {
+            if let Err(e) = tokio::fs::rename(&pd, &actual).await {
+                tracing::warn!("TC dir rename failed after commit: {e}");
+            }
         }
     }
 
@@ -546,12 +584,17 @@ pub async fn delete_problem(
     .await?;
     let type_slug = type_slug.ok_or(ApiError::NotFound)?;
 
-    let in_use: Option<i64> =
+    let in_lesson: Option<i64> =
         sqlx::query_scalar("SELECT 1 FROM lesson_problems WHERE problem_id = ? LIMIT 1")
             .bind(problem_id)
             .fetch_optional(&mut *tx)
             .await?;
-    if in_use.is_some() {
+    let in_assessment: Option<i64> =
+        sqlx::query_scalar("SELECT 1 FROM assessment_problems WHERE problem_id = ? LIMIT 1")
+            .bind(problem_id)
+            .fetch_optional(&mut *tx)
+            .await?;
+    if in_lesson.is_some() || in_assessment.is_some() {
         return Err(ApiError::BadRequest("ERR_PROBLEM_IN_USE".into()));
     }
 
