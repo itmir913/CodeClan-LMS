@@ -127,9 +127,31 @@
           <span>{{ $t(`errors.${importError}`, $t('errors.ERR_UNKNOWN')) }}</span>
         </div>
 
+        <!-- Import result (skip summary) -->
+        <div v-if="importResult" class="mt-4 rounded-lg border px-4 py-3 flex flex-col gap-2">
+          <div
+            class="flex items-center gap-2"
+            style="color: var(--color-success)"
+          >
+            <IconCheck :size="18" class="shrink-0" />
+            <span>{{ $t('common.importAdded', { count: importResult.imported }) }}</span>
+          </div>
+          <div
+            v-if="importResult.skipped > 0"
+            class="flex flex-col gap-1"
+            style="color: var(--color-text-muted)"
+          >
+            <span>{{ $t('common.importSkipped', { count: importResult.skipped }) }}</span>
+            <span class="font-mono" style="color: var(--color-text-tertiary)">
+              {{ importResult.skipped_items.join(', ') }}
+            </span>
+          </div>
+        </div>
+
         <!-- Actions -->
         <div class="flex justify-end gap-3 mt-5">
           <button
+            v-if="!importResult"
             type="button"
             class="h-10 px-5 rounded-lg font-medium"
             style="border: 1px solid var(--color-border); color: var(--color-text-primary); background: transparent"
@@ -138,6 +160,7 @@
             {{ $t('common.cancel') }}
           </button>
           <button
+            v-if="!importResult"
             :disabled="isImporting || parsedRows.length === 0"
             class="h-10 px-5 rounded-lg font-medium flex items-center gap-2"
             style="background: var(--color-accent); color: var(--color-accent-text); border: none"
@@ -146,6 +169,15 @@
           >
             <IconLoader2 v-if="isImporting" :size="17" class="spin" />
             {{ isImporting ? $t('common.importing') : $t('common.importAction') }}
+          </button>
+          <button
+            v-if="importResult"
+            type="button"
+            class="h-10 px-5 rounded-lg font-medium"
+            style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+            @click="emit('update:show', false)"
+          >
+            {{ $t('common.close') }}
           </button>
         </div>
       </div>
@@ -165,6 +197,12 @@ interface Column {
   display?: (row: Record<string, string>) => string
 }
 
+interface ImportResultSummary {
+  imported: number
+  skipped: number
+  skipped_items: string[]
+}
+
 const props = defineProps<{
   show: boolean
   title: string
@@ -174,7 +212,7 @@ const props = defineProps<{
   synonymMap: SynonymMap
   requiredFields: string[]
   columns: Column[]
-  onImport: (rows: Record<string, string>[]) => Promise<void>
+  onImport: (rows: Record<string, string>[]) => Promise<ImportResultSummary | void>
 }>()
 
 const emit = defineEmits<{
@@ -187,6 +225,7 @@ const downloadDone = ref(false)
 const parsedRows = ref<Record<string, string>[]>([])
 const parseError = ref<string | null>(null)
 const importError = ref<string | null>(null)
+const importResult = ref<ImportResultSummary | null>(null)
 const isImporting = ref(false)
 const isDragging = ref(false)
 
@@ -198,6 +237,7 @@ watch(
       parsedRows.value = []
       parseError.value = null
       importError.value = null
+      importResult.value = null
       isImporting.value = false
       isDragging.value = false
       downloadDone.value = false
@@ -241,8 +281,12 @@ async function onImportClick() {
   isImporting.value = true
   importError.value = null
   try {
-    await props.onImport(parsedRows.value)
-    emit('update:show', false)
+    const result = await props.onImport(parsedRows.value)
+    if (result && result.skipped > 0) {
+      importResult.value = result
+    } else {
+      emit('update:show', false)
+    }
   } catch (e) {
     importError.value = e instanceof Error ? e.message : 'ERR_UNKNOWN'
   } finally {

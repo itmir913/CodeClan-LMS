@@ -1001,12 +1001,12 @@ async function handleImportTeachers(rows: Record<string, string>[]) {
     password: r.password,
     role: r.role || undefined,
   }))
-  await adminStore.importTeachers(data)
+  return await adminStore.importTeachers(data)
 }
 
 async function handleImportSubjects(rows: Record<string, string>[]) {
   const data = rows.map((r) => ({ name: r.name }))
-  await adminStore.importSubjects(data)
+  return await adminStore.importSubjects(data)
 }
 
 // ── Subject actions ────────────────────────────────────────────

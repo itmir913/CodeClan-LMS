@@ -126,6 +126,8 @@ export interface BulkResult {
 
 export interface ImportResult {
   imported: number
+  skipped: number
+  skipped_items: string[]
 }
 
 export interface ImportTeacherRow {

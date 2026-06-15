@@ -15,5 +15,8 @@
   "moreRows": " more rows",
   "importing": "Importing...",
   "importAction": "Import",
+  "importAdded": "{count} added",
+  "importSkipped": "{count} already exist, skipped",
+  "close": "Close",
   "auto": "auto"
 }

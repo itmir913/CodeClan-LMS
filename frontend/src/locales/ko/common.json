@@ -15,5 +15,8 @@
   "moreRows": "건 더 있음",
   "importing": "가져오는 중...",
   "importAction": "가져오기",
+  "importAdded": "{count}개 추가됨",
+  "importSkipped": "{count}개는 이미 존재하여 건너뜀",
+  "close": "닫기",
   "auto": "자동"
 }

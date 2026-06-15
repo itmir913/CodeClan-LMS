@@ -440,14 +440,7 @@ pub async fn import_teachers(
         return Err(ApiError::BadRequest("ERR_IMPORT_EMPTY".into()));
     }
 
-    // 검증 및 해싱을 트랜잭션 밖에서 미리 수행
-    struct PreparedTeacher {
-        username: String,
-        name: String,
-        hash: String,
-        role: &'static str,
-    }
-    let mut prepared: Vec<PreparedTeacher> = Vec::with_capacity(body.len());
+    // 전체 행 유효성 검사 (tx 밖)
     for item in &body {
         if item.username.trim().is_empty() || item.name.trim().is_empty() {
             return Err(ApiError::BadRequest("ERR_IMPORT_ROW_INVALID".into()));
@@ -455,38 +448,68 @@ pub async fn import_teachers(
         if item.password.len() < 8 {
             return Err(ApiError::BadRequest("ERR_IMPORT_PASSWORD_TOO_SHORT".into()));
         }
+    }
+
+    // username 중복 확인 (tx 밖, &state.db로 별도 커넥션)
+    let mut skipped_items: Vec<String> = Vec::new();
+    let mut new_items: Vec<&ImportTeacherRow> = Vec::new();
+    for item in &body {
+        let exists: Option<i64> =
+            sqlx::query_scalar("SELECT id FROM teachers WHERE username = ?")
+                .bind(item.username.trim())
+                .fetch_optional(&state.db)
+                .await?;
+        if exists.is_some() {
+            skipped_items.push(item.username.trim().to_string());
+        } else {
+            new_items.push(item);
+        }
+    }
+
+    // 신규 교사만 해싱 (tx 밖)
+    struct PreparedTeacher {
+        username: String,
+        name: String,
+        hash: String,
+        role: &'static str,
+    }
+    let mut prepared: Vec<PreparedTeacher> = Vec::with_capacity(new_items.len());
+    for item in &new_items {
         let role = if item.role.as_deref() == Some("admin") { "admin" } else { "teacher" };
         let salt = SaltString::generate(&mut OsRng);
         let hash = Argon2::default()
             .hash_password(item.password.as_bytes(), &salt)
             .map_err(|e| ApiError::Internal(format!("argon2: {e}")))?
             .to_string();
-        prepared.push(PreparedTeacher { username: item.username.trim().to_string(), name: item.name.trim().to_string(), hash, role });
+        prepared.push(PreparedTeacher {
+            username: item.username.trim().to_string(),
+            name: item.name.trim().to_string(),
+            hash,
+            role,
+        });
     }
 
-    let mut tx = state.db.begin().await?;
-    for p in &prepared {
-        sqlx::query(
-            "INSERT INTO teachers (username, name, password_hash, role) VALUES (?, ?, ?, ?)",
-        )
-        .bind(&p.username)
-        .bind(&p.name)
-        .bind(&p.hash)
-        .bind(p.role)
-        .execute(&mut *tx)
-        .await
-        .map_err(|e| {
-            if let sqlx::Error::Database(ref db_err) = e {
-                if db_err.message().contains("UNIQUE constraint failed") {
-                    return ApiError::BadRequest("ERR_IMPORT_DUPLICATE".into());
-                }
-            }
-            ApiError::Database(e)
-        })?;
+    if !prepared.is_empty() {
+        let mut tx = state.db.begin().await?;
+        for p in &prepared {
+            sqlx::query(
+                "INSERT INTO teachers (username, name, password_hash, role) VALUES (?, ?, ?, ?)",
+            )
+            .bind(&p.username)
+            .bind(&p.name)
+            .bind(&p.hash)
+            .bind(p.role)
+            .execute(&mut *tx)
+            .await?;
+        }
+        tx.commit().await?;
     }
 
-    tx.commit().await?;
-    Ok(Json(json!({ "imported": prepared.len() })))
+    Ok(Json(json!({
+        "imported": prepared.len(),
+        "skipped": skipped_items.len(),
+        "skipped_items": skipped_items
+    })))
 }
 
 /// POST /api/admin/subjects/import
@@ -503,28 +526,34 @@ pub async fn import_subjects(
         return Err(ApiError::BadRequest("ERR_IMPORT_EMPTY".into()));
     }
 
-    let mut tx = state.db.begin().await?;
-
     for item in &body {
         if item.name.trim().is_empty() {
             return Err(ApiError::BadRequest("ERR_IMPORT_ROW_INVALID".into()));
         }
-        sqlx::query("INSERT INTO subjects (name) VALUES (?)")
+    }
+
+    let mut tx = state.db.begin().await?;
+    let mut imported: usize = 0;
+    let mut skipped_items: Vec<String> = Vec::new();
+
+    for item in &body {
+        let result = sqlx::query("INSERT OR IGNORE INTO subjects (name) VALUES (?)")
             .bind(item.name.trim())
             .execute(&mut *tx)
-            .await
-            .map_err(|e| {
-                if let sqlx::Error::Database(ref db_err) = e {
-                    if db_err.message().contains("UNIQUE constraint failed") {
-                        return ApiError::BadRequest("ERR_IMPORT_DUPLICATE".into());
-                    }
-                }
-                ApiError::Database(e)
-            })?;
+            .await?;
+        if result.rows_affected() == 0 {
+            skipped_items.push(item.name.trim().to_string());
+        } else {
+            imported += 1;
+        }
     }
 
     tx.commit().await?;
-    Ok(Json(json!({ "imported": body.len() })))
+    Ok(Json(json!({
+        "imported": imported,
+        "skipped": skipped_items.len(),
+        "skipped_items": skipped_items
+    })))
 }
 
 /// DELETE /api/admin/teachers/:id
