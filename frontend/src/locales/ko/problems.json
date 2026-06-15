@@ -31,6 +31,7 @@
   "commentPlaceholder": "교사에게만 보이는 메모",
   "subject": "과목",
   "subjectNone": "과목 없음",
+  "subjectAll": "모든 과목",
   "answerLabel": "정답",
   "answerPlaceholder": "정답을 입력하세요",
   "caseSensitive": "대소문자 구분",

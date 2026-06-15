@@ -31,6 +31,7 @@
   "commentPlaceholder": "Private note visible only to you",
   "subject": "Subject",
   "subjectNone": "No Subject",
+  "subjectAll": "All Subjects",
   "answerLabel": "Answer",
   "answerPlaceholder": "Enter the correct answer",
   "caseSensitive": "Case Sensitive",

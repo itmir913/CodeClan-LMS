@@ -65,6 +65,15 @@
           {{ f.label }}
         </button>
       </div>
+      <!-- 과목 필터 -->
+      <select
+        v-model="selectedSubject"
+        class="h-10 px-3 rounded-xl border text-base"
+        style="background: var(--color-bg-secondary); color: var(--color-text-primary); border-color: var(--color-border)"
+      >
+        <option :value="null">{{ $t('problems.subjectAll') }}</option>
+        <option v-for="s in classStore.subjects" :key="s.id" :value="s.id">{{ s.name }}</option>
+      </select>
       <!-- 문제 수 -->
       <span class="ml-auto font-medium" style="color: var(--color-text-tertiary); white-space: nowrap">
         {{ $t('problems.problemCount', { count: filteredProblems.length }) }}
@@ -240,6 +249,7 @@ function toggleTheme() {
 
 const searchQuery = ref('')
 const activeFilter = ref('all')
+const selectedSubject = ref<number | null>(null)
 
 const typeFilters = computed(() => [
   { value: 'all', label: t('problems.all') },
@@ -252,6 +262,9 @@ const filteredProblems = computed(() => {
   let list = store.problems
   if (activeFilter.value !== 'all') {
     list = list.filter((p) => p.type === activeFilter.value)
+  }
+  if (selectedSubject.value !== null) {
+    list = list.filter((p) => p.subject_id === selectedSubject.value)
   }
   const q = searchQuery.value.trim().toLowerCase()
   if (q) {
