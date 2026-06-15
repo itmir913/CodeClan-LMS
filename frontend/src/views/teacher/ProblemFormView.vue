@@ -80,12 +80,12 @@
     </div>
 
     <!-- ── 본문: 좌(미리보기) + 우(폼), 소형화면은 1열 ── -->
-    <div v-else class="flex-1 flex flex-col lg:flex-row overflow-hidden" :class="{ 'select-none': isDragging }">
+    <div v-else class="flex-1 flex flex-col lg:flex-row" :class="{ 'select-none': isDragging }">
 
       <!-- ══ 좌: 미리보기 패널 (모바일: 하단, 데스크톱: 좌측) ══ -->
       <aside
         v-show="previewOpen"
-        class="order-2 lg:order-1 flex-shrink-0 flex flex-col lg:overflow-y-auto"
+        class="order-2 lg:order-1 flex-shrink-0 flex flex-col lg:sticky lg:top-0 lg:self-start lg:max-h-screen lg:overflow-y-auto"
         :style="`background: var(--color-bg-primary); border-top: 1px solid var(--color-border); width: ${previewWidth}px`"
       >
         <!-- 패널 헤더 -->
@@ -229,6 +229,7 @@
       <!-- ══ 우: 폼 영역 (모바일: 상단, 데스크톱: 우측) ══ -->
       <div
         class="order-1 lg:order-2 flex-1 p-6 flex flex-col gap-5 overflow-y-auto"
+        style="border-top: 1px solid var(--color-border);"
       >
 
         <!-- 미리보기 열기 버튼 (미리보기 닫힘 시, 데스크톱 전용) -->
