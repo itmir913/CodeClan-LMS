@@ -208,7 +208,7 @@ pub async fn logout_teacher(
 pub async fn me_teacher(
     State(state): State<AppState>,
     headers: HeaderMap,
-) -> Result<Json<TeacherUser>, ApiError> {
+) -> Result<Json<TeacherLoginResponse>, ApiError> {
     let session = parse_session(&headers, &state.db).await?;
     let teacher_id = session.teacher_id.ok_or(ApiError::Forbidden)?;
 
@@ -221,12 +221,27 @@ pub async fn me_teacher(
     .ok_or(ApiError::NotFound)?;
 
     use sqlx::Row as _;
-    Ok(Json(TeacherUser {
+    let user = TeacherUser {
         id: row.get("id"),
         username: row.get("username"),
         name: row.get("name"),
         role: row.get("role"),
-    }))
+    };
+
+    let locale = sqlx::query_scalar::<_, String>(
+        "SELECT value FROM teacher_settings WHERE teacher_id = ? AND key = 'locale'",
+    )
+    .bind(teacher_id)
+    .fetch_optional(&state.db)
+    .await?
+    .unwrap_or_default();
+    let locale = if locale.is_empty() {
+        get_default_locale(&state.db).await
+    } else {
+        locale
+    };
+
+    Ok(Json(TeacherLoginResponse { user, locale }))
 }
 
 // ── Teacher update name ───────────────────────────────────────────────────────
@@ -486,7 +501,7 @@ pub async fn logout_student(
 pub async fn me_student(
     State(state): State<AppState>,
     headers: HeaderMap,
-) -> Result<Json<StudentUser>, ApiError> {
+) -> Result<Json<StudentLoginResponse>, ApiError> {
     let session = parse_session(&headers, &state.db).await?;
     let student_id = session.student_id.ok_or(ApiError::Forbidden)?;
 
@@ -500,7 +515,7 @@ pub async fn me_student(
     .ok_or(ApiError::NotFound)?;
 
     use sqlx::Row as _;
-    Ok(Json(StudentUser {
+    let user = StudentUser {
         id: row.get("id"),
         username: row.get("username"),
         name: row.get("name"),
@@ -511,7 +526,69 @@ pub async fn me_student(
             let v: i64 = row.get("password_reset_required");
             v == 1
         },
-    }))
+    };
+
+    let locale = sqlx::query_scalar::<_, String>(
+        "SELECT value FROM student_settings WHERE student_id = ? AND key = 'locale'",
+    )
+    .bind(student_id)
+    .fetch_optional(&state.db)
+    .await?
+    .unwrap_or_default();
+    let locale = if locale.is_empty() {
+        get_default_locale(&state.db).await
+    } else {
+        locale
+    };
+
+    Ok(Json(StudentLoginResponse { user, locale }))
+}
+
+// ── Settings: locale ─────────────────────────────────────────────────────────
+
+#[derive(Deserialize)]
+pub struct SetLocaleRequest {
+    pub locale: String,
+}
+
+/// PUT /api/settings/locale
+pub async fn set_locale(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<SetLocaleRequest>,
+) -> Result<Json<Value>, ApiError> {
+    let session = parse_session(&headers, &state.db).await?;
+
+    let locale = body.locale.trim().to_string();
+    if locale.is_empty() {
+        return Err(ApiError::BadRequest("ERR_INVALID_LOCALE".into()));
+    }
+
+    let mut tx = state.db.begin().await?;
+    if let Some(teacher_id) = session.teacher_id {
+        sqlx::query(
+            "INSERT INTO teacher_settings (teacher_id, key, value) VALUES (?, 'locale', ?) \
+             ON CONFLICT (teacher_id, key) DO UPDATE SET value = excluded.value",
+        )
+        .bind(teacher_id)
+        .bind(&locale)
+        .execute(&mut *tx)
+        .await?;
+    } else if let Some(student_id) = session.student_id {
+        sqlx::query(
+            "INSERT INTO student_settings (student_id, key, value) VALUES (?, 'locale', ?) \
+             ON CONFLICT (student_id, key) DO UPDATE SET value = excluded.value",
+        )
+        .bind(student_id)
+        .bind(&locale)
+        .execute(&mut *tx)
+        .await?;
+    } else {
+        return Err(ApiError::Unauthorized);
+    }
+    tx.commit().await?;
+
+    Ok(Json(json!({ "ok": true })))
 }
 
 // ── Student change password ───────────────────────────────────────────────────

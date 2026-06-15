@@ -27,6 +27,8 @@ pub fn build_router(state: AppState) -> Router {
         .route("/auth/logout/student", post(routes::auth::logout_student))
         .route("/auth/student/me", get(routes::auth::me_student))
         .route("/auth/student/change-password", post(routes::auth::change_password_student))
+        // Settings
+        .route("/settings/locale", put(routes::auth::set_locale))
         // Subjects (교사·admin 공용 조회)
         .route("/subjects", get(routes::admin::list_subjects))
         // Classes

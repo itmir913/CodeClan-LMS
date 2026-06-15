@@ -242,12 +242,12 @@ export const api = {
     loginTeacher: (username: string, password: string) =>
       request<TeacherLoginResponse>('POST', '/auth/login/teacher', { username, password }),
     logoutTeacher: () => request<{ ok: boolean }>('POST', '/auth/logout'),
-    meTeacher: () => request<TeacherUser>('GET', '/auth/me'),
+    meTeacher: () => request<TeacherLoginResponse>('GET', '/auth/me'),
     schoolName: () => request<SchoolNameResponse>('GET', '/auth/school-name'),
     loginStudent: (username: string, password: string) =>
       request<StudentLoginResponse>('POST', '/auth/login/student', { username, password }),
     logoutStudent: () => request<{ ok: boolean }>('POST', '/auth/logout/student'),
-    meStudent: () => request<StudentUser>('GET', '/auth/student/me'),
+    meStudent: () => request<StudentLoginResponse>('GET', '/auth/student/me'),
     updateTeacherName: (name: string) =>
       request<{ ok: boolean }>('PUT', '/auth/me', { name }),
     changePasswordTeacher: (currentPassword: string, newPassword: string) =>
@@ -299,6 +299,10 @@ export const api = {
       request<ImportResult>('POST', '/admin/teachers/import', data),
     importSubjects: (data: ImportSubjectRow[]) =>
       request<ImportResult>('POST', '/admin/subjects/import', data),
+  },
+  settings: {
+    setLocale: (locale: string) =>
+      request<{ ok: boolean }>('PUT', '/settings/locale', { locale }),
   },
   problems: {
     list: (type?: string) =>

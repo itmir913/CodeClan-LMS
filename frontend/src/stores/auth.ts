@@ -55,7 +55,9 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function fetchTeacherMe() {
-    teacher.value = await api.auth.meTeacher()
+    const res = await api.auth.meTeacher()
+    teacher.value = res.user
+    applyLocale(res.locale)
   }
 
   async function loginStudent(username: string, password: string) {
@@ -71,7 +73,18 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function fetchStudentMe() {
-    student.value = await api.auth.meStudent()
+    const res = await api.auth.meStudent()
+    student.value = res.user
+    applyLocale(res.locale)
+  }
+
+  async function setLocale(locale: string) {
+    applyLocale(locale)
+    try {
+      await api.settings.setLocale(locale)
+    } catch {
+      // 네트워크 실패 시 메모리에는 적용된 상태로 유지
+    }
   }
 
   async function updateTeacherName(name: string) {
@@ -107,6 +120,7 @@ export const useAuthStore = defineStore('auth', () => {
     loginStudent,
     logoutStudent,
     fetchStudentMe,
+    setLocale,
     updateTeacherName,
     changePasswordTeacher,
     changePasswordStudent,

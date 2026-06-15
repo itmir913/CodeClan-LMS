@@ -42,8 +42,10 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { IconLanguage, IconChevronDown } from '@tabler/icons-vue'
+import { useAuthStore } from '@/stores/auth'
 
 const { locale } = useI18n()
+const auth = useAuthStore()
 
 const open = ref(false)
 const containerRef = ref<HTMLElement | null>(null)
@@ -58,7 +60,7 @@ const currentLabel = computed(() =>
 )
 
 function select(code: string) {
-  locale.value = code
+  auth.setLocale(code)
   open.value = false
 }
 

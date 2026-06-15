@@ -94,19 +94,21 @@ router.beforeEach(async (to) => {
 
   if (requiredRole === 'admin' || requiredRole === 'teacher') {
     try {
-      const user = await api.auth.meTeacher()
+      const res = await api.auth.meTeacher()
+      i18n.global.locale.value = res.locale as 'ko' | 'en'
       // admin이 /teacher 홈에 오면 /admin으로 (공유 페이지인 classes, problem-bank는 그대로 허용)
-      if (to.name === 'teacher-home' && user.role === 'admin') {
+      if (to.name === 'teacher-home' && res.user.role === 'admin') {
         return { name: 'admin-home' }
       }
       // teacher(non-admin)가 admin 전용 페이지에 오면 /teacher로
-      if (requiredRole === 'admin' && user.role !== 'admin') {
+      if (requiredRole === 'admin' && res.user.role !== 'admin') {
         return { name: 'teacher-home' }
       }
     } catch {
       // 교사 세션 없음 — 학생 세션이면 student 홈으로
       try {
-        await api.auth.meStudent()
+        const res = await api.auth.meStudent()
+        i18n.global.locale.value = res.locale as 'ko' | 'en'
         return { name: 'student-home' }
       } catch {
         return { name: 'login' }
@@ -116,12 +118,14 @@ router.beforeEach(async (to) => {
 
   if (requiredRole === 'student') {
     try {
-      await api.auth.meStudent()
+      const res = await api.auth.meStudent()
+      i18n.global.locale.value = res.locale as 'ko' | 'en'
     } catch {
       // 학생 세션 없음 — 교사/관리자 세션이면 해당 홈으로
       try {
-        const user = await api.auth.meTeacher()
-        return user.role === 'admin' ? { name: 'admin-home' } : { name: 'teacher-home' }
+        const res = await api.auth.meTeacher()
+        i18n.global.locale.value = res.locale as 'ko' | 'en'
+        return res.user.role === 'admin' ? { name: 'admin-home' } : { name: 'teacher-home' }
       } catch {
         return { name: 'login' }
       }
