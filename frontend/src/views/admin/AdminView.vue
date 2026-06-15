@@ -168,7 +168,7 @@
                   </th>
                   <th class="px-5 py-3 text-left font-semibold"
                       style="color: var(--color-text-muted)">
-                    {{ $t('classes.students') }}
+                    {{ $t('classes.studentCount') }}
                   </th>
                   <th class="px-5 py-3 w-16"></th>
                 </tr>

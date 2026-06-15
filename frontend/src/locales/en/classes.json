@@ -10,6 +10,7 @@
   "subject": "Subject",
   "subjectPlaceholder": "Select a subject",
   "students": "{count} students",
+  "studentCount": "Students",
   "sessionLive": "Session live",
   "adding": "Adding...",
   "saving": "Saving...",
