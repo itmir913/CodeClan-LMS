@@ -9,6 +9,7 @@ use std::path::PathBuf;
 
 use crate::{
     error::ApiError,
+    judge::normalize_tc_text,
     server::{routes::auth::parse_session, state::AppState},
 };
 
@@ -174,10 +175,10 @@ async fn write_tc_files(
         .map_err(|e| ApiError::Internal(format!("tc dir create: {e}")))?;
     for (i, tc) in test_cases.iter().enumerate() {
         let n = i as i64 + 1;
-        tokio::fs::write(dir.join(format!("{n}.in")), &tc.input)
+        tokio::fs::write(dir.join(format!("{n}.in")), normalize_tc_text(&tc.input))
             .await
             .map_err(|e| ApiError::Internal(format!("tc write: {e}")))?;
-        tokio::fs::write(dir.join(format!("{n}.out")), &tc.expected_output)
+        tokio::fs::write(dir.join(format!("{n}.out")), normalize_tc_text(&tc.expected_output))
             .await
             .map_err(|e| ApiError::Internal(format!("tc write: {e}")))?;
     }

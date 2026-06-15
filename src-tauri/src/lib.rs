@@ -1,5 +1,6 @@
 pub mod db;
 pub mod error;
+pub mod judge;
 pub mod server;
 
 use server::state::AppState;
