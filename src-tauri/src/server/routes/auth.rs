@@ -547,7 +547,7 @@ pub async fn change_password_student(
     let password_hash: String = row.get("password_hash");
     let password_reset_required: i64 = row.get("password_reset_required");
 
-    let skip_current_check = password_hash.is_empty() && password_reset_required == 1;
+    let skip_current_check = password_reset_required == 1;
 
     if !skip_current_check {
         let current = body

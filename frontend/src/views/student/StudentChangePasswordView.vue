@@ -38,13 +38,13 @@
               autocomplete="current-password"
               :placeholder="$t('auth.currentPassword')"
               :disabled="isSubmitting"
-              class="h-12 w-full rounded-lg border px-4 pr-12 outline-none transition-colors"
+              class="h-12 w-full rounded-lg border px-4 pr-12 outline-none transition-colors password-input"
               style="background: var(--color-bg-primary);
                      border-color: var(--color-border);
                      color: var(--color-text-primary)"
             />
             <button type="button"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 border-0 bg-transparent flex items-center justify-center cursor-pointer"
                     style="color: var(--color-text-muted)"
                     @click="showCurrent = !showCurrent"
                     :aria-label="$t('auth.togglePassword')">
@@ -66,13 +66,13 @@
               autocomplete="new-password"
               :placeholder="$t('auth.newPasswordPlaceholder')"
               :disabled="isSubmitting"
-              class="h-12 w-full rounded-lg border px-4 pr-12 outline-none transition-colors"
+              class="h-12 w-full rounded-lg border px-4 pr-12 outline-none transition-colors password-input"
               style="background: var(--color-bg-primary);
                      border-color: var(--color-border);
                      color: var(--color-text-primary)"
             />
             <button type="button"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 border-0 bg-transparent flex items-center justify-center cursor-pointer"
                     style="color: var(--color-text-muted)"
                     @click="showNew = !showNew"
                     :aria-label="$t('auth.togglePassword')">
@@ -94,13 +94,13 @@
               autocomplete="new-password"
               :placeholder="$t('auth.confirmNewPasswordPlaceholder')"
               :disabled="isSubmitting"
-              class="h-12 w-full rounded-lg border px-4 pr-12 outline-none transition-colors"
+              class="h-12 w-full rounded-lg border px-4 pr-12 outline-none transition-colors password-input"
               style="background: var(--color-bg-primary);
                      border-color: var(--color-border);
                      color: var(--color-text-primary)"
             />
             <button type="button"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 border-0 bg-transparent flex items-center justify-center cursor-pointer"
                     style="color: var(--color-text-muted)"
                     @click="showConfirm = !showConfirm"
                     :aria-label="$t('auth.togglePassword')">
@@ -184,3 +184,15 @@ async function onSubmit() {
   }
 }
 </script>
+
+<style scoped>
+/* 브라우저 기본 비밀번호 표시 아이콘 제거 (Edge/IE: ms-reveal, Chrome: webkit) */
+.password-input::-ms-reveal,
+.password-input::-ms-clear {
+  display: none;
+}
+.password-input::-webkit-contacts-auto-fill-button,
+.password-input::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+}
+</style>
