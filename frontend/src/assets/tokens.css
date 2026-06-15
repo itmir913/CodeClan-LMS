@@ -47,6 +47,11 @@
   --color-type-short:       #0891b2;
   --color-type-short-bg:    rgba(8, 145, 178, 0.1);
 
+  /* Scrollbar */
+  --color-scrollbar-track:       #e2e8f0;
+  --color-scrollbar-thumb:       #94a3b8;
+  --color-scrollbar-thumb-hover: #64748b;
+
   /* Card accent palette (수업 카드 색상 순환) */
   --color-card-accent-0: #2563eb;
   --color-card-accent-1: #7c3aed;
@@ -92,6 +97,11 @@
   --color-type-mcq-bg:      rgba(139, 92, 246, 0.15);
   --color-type-short:       #22d3ee;
   --color-type-short-bg:    rgba(6, 182, 212, 0.15);
+
+  /* Scrollbar — dark */
+  --color-scrollbar-track:       #1e293b;
+  --color-scrollbar-thumb:       #475569;
+  --color-scrollbar-thumb-hover: #94a3b8;
 
   /* Card accent palette — dark */
   --color-card-accent-0: #3b82f6;

@@ -5,6 +5,8 @@
 
 html {
   font-size: 16px;
+  /* 스크롤바 공간을 항상 예약 → 콘텐츠 overflow 시 레이아웃 흔들림 방지 */
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -78,6 +80,38 @@ body {
     opacity: 0.6;
     cursor: not-allowed;
   }
+}
+
+/* ── Custom Scrollbar ────────────────────────────────────────────────────── */
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
+}
+
+/* WebKit (Chrome / Edge / Tauri WebView2) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-scrollbar-track);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-scrollbar-thumb);
+  border-radius: 999px;
+  border: 2px solid var(--color-scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-scrollbar-thumb-hover);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--color-scrollbar-track);
 }
 
 /* ── Animations ──────────────────────────────────────────────────────────── */
