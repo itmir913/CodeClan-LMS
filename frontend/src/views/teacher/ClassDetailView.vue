@@ -440,7 +440,8 @@ import {
 } from '@tabler/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import { useStudentStore } from '@/stores/student'
-import { api, type ClassDetail, type StudentItem, type AddStudentBody } from '@/api/client'
+import { useClassStore } from '@/stores/class'
+import type { ClassDetail, StudentItem, AddStudentBody } from '@/api/client'
 import LanguageSelector from '@/components/LanguageSelector.vue'
 import ImportModal from '@/components/ImportModal.vue'
 import type { SynonymMap } from '@/utils/excelImport'
@@ -449,6 +450,7 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
+const classStore = useClassStore()
 const studentStore = useStudentStore()
 
 const classId = computed(() => Number(route.params.id))
@@ -642,7 +644,7 @@ onMounted(async () => {
   }
   classLoading.value = true
   try {
-    classDetail.value = await api.classes.get(classId.value)
+    classDetail.value = await classStore.fetchClassDetail(classId.value)
   } catch {
     router.push(auth.teacher?.role === 'admin' ? '/admin' : '/teacher')
     return
