@@ -568,7 +568,7 @@
                   class="tc-textarea rounded-xl px-3 py-2 border font-mono"
                   style="background: var(--color-bg-primary); color: var(--color-text-primary); border-color: var(--color-border)"
                 />
-                <div class="flex justify-center">
+                <div class="flex justify-center self-center">
                   <input
                     v-model="tc.is_sample"
                     type="checkbox"
