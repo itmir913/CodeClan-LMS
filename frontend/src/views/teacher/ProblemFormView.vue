@@ -55,7 +55,13 @@
          style="background: var(--color-danger-bg); color: var(--color-danger); border-bottom: 1px solid var(--color-danger-border)"
          role="alert">
       <IconAlertCircle :size="18" class="shrink-0" />
-      <span>{{ $t(`errors.${formError}`, $t('errors.ERR_UNKNOWN')) }}</span>
+      <span class="flex-1">{{ $t(`errors.${formError}`, $t('errors.ERR_UNKNOWN')) }}</span>
+      <button @click="formError = null"
+              class="shrink-0 p-1 rounded opacity-70 hover:opacity-100"
+              style="color: var(--color-danger)"
+              :aria-label="$t('common.close')">
+        <IconX :size="18" />
+      </button>
     </div>
 
     <!-- ── 로딩 (편집 모드 초기) ── -->
