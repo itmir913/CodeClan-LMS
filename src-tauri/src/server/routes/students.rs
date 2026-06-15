@@ -345,11 +345,9 @@ pub async fn delete_student(
     let session = parse_session(&headers, &state.db).await?;
     let teacher_id = session.teacher_id.ok_or(ApiError::Forbidden)?;
 
-    let mut tx = state.db.begin().await?;
-
     let exists: Option<i64> = sqlx::query_scalar("SELECT id FROM students WHERE id = ?")
         .bind(student_id)
-        .fetch_optional(&mut *tx)
+        .fetch_optional(&state.db)
         .await?;
     if exists.is_none() {
         return Err(ApiError::NotFound);
@@ -357,12 +355,13 @@ pub async fn delete_student(
 
     require_student_access(teacher_id, student_id, &state.db).await?;
 
+    let mut tx = state.db.begin().await?;
     sqlx::query("DELETE FROM students WHERE id = ?")
         .bind(student_id)
         .execute(&mut *tx)
         .await?;
-
     tx.commit().await?;
+
     Ok(Json(json!({ "ok": true })))
 }
 

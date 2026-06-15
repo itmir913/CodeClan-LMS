@@ -67,6 +67,10 @@
 - DB: `sqlx::query()` / `sqlx::query_as::<_, Type>()` 런타임 쿼리. `query!` 매크로 금지.
 - **모든 DB 쓰기 작업은 트랜잭션으로 묶는다**: `let mut tx = db.begin().await?` → 작업 → `tx.commit().await?`. 단순 단일 INSERT/UPDATE도 원칙적으로 트랜잭션 사용. 트랜잭션 내 쿼리는 `&mut *tx`로 실행.
 - **마지막 관리자 보호**: admin 삭제·역할 강등 시 트랜잭션 안에서 `COUNT(*) WHERE role='admin'`을 확인하고 1 이하면 `ERR_LAST_ADMIN` 반환.
+- **트랜잭션 전 선처리 규칙 (SQLite max_connections=1 필수)**: `tx.begin()`으로 커넥션을 잡기 **전에** 아래 두 가지를 반드시 완료한다.
+  1. **argon2 해싱** — `hash_password()`는 CPU 집약 작업(~300ms)이다. tx 안에서 실행하면 커넥션을 독점해 다른 요청이 pool timeout 난다. 항상 tx 밖에서 미리 계산 후 결과 문자열만 tx 안으로 전달.
+  2. **`require_admin` / `require_class_access` / `require_student_access` 등 권한 검사 함수** — 이 함수들은 `&SqlitePool`로 새 커넥션을 획득한다. tx가 열려 있는 상태에서 호출하면 pool timeout 발생. 반드시 `tx.begin()` 이전에 호출.
+  - **원칙**: tx는 INSERT/UPDATE/DELETE와 그에 원자적으로 묶여야 하는 읽기(`&mut *tx`)만 담당. 권한 확인·존재 확인·해싱은 모두 tx 이전에.
 
 ### TypeScript / Vue
 - 컴포넌트 파일명: `PascalCase.vue`
