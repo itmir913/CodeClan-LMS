@@ -117,6 +117,25 @@
           </router-link>
         </div>
 
+        <!-- 스페이서 -->
+        <div class="flex-1"></div>
+
+        <div class="mx-3 h-px" style="background: var(--color-border)"></div>
+
+        <!-- LMS 기본 설정 (하단 고정) -->
+        <div class="p-3">
+          <button
+            class="flex items-center gap-2.5 w-full min-h-10 py-2 px-3 rounded-lg font-medium border-0 leading-tight"
+            :style="activeSection === 'appSettings'
+              ? { background: 'var(--color-info-bg)', color: 'var(--color-accent)', fontWeight: 600 }
+              : { background: 'transparent', color: 'var(--color-text-muted)' }"
+            @click="openAppSettings"
+          >
+            <IconAdjustments :size="17" class="shrink-0" />
+            <span class="flex-1 text-center">{{ $t('admin.appSettings') }}</span>
+          </button>
+        </div>
+
       </aside>
 
       <!-- ── 메인 콘텐츠 ── -->
@@ -334,6 +353,83 @@
                 </tr>
               </tbody>
             </table>
+          </div>
+        </template>
+
+        <!-- LMS 기본 설정 탭 -->
+        <template v-else-if="activeSection === 'appSettings'">
+          <div class="flex items-center justify-between mb-6 min-h-9">
+            <h2 class="font-semibold tracking-widest uppercase"
+                style="color: var(--color-text-muted)">{{ $t('admin.appSettings') }}</h2>
+          </div>
+
+          <div v-if="appSettingsLoading"
+               class="flex items-center gap-3 py-8"
+               style="color: var(--color-text-muted)">
+            <IconLoader2 :size="20" class="spin" />
+            <span>{{ $t('common.loading') }}</span>
+          </div>
+
+          <div v-else class="max-w-lg flex flex-col gap-6">
+
+            <div v-if="appSettingsError"
+                 class="flex items-center gap-2 rounded-xl border px-5 py-4"
+                 style="background: var(--color-danger-bg); border-color: var(--color-danger-border); color: var(--color-danger)"
+                 role="alert">
+              <IconAlertCircle :size="18" class="shrink-0" />
+              <span>{{ appSettingsError }}</span>
+            </div>
+
+            <div v-if="appSettingsSuccess"
+                 class="flex items-center gap-2 rounded-xl border px-5 py-4"
+                 style="background: var(--color-success-bg); border-color: var(--color-success); color: var(--color-success)"
+                 role="status">
+              <IconCheck :size="18" class="shrink-0" />
+              <span>{{ $t('admin.appSettingsSaveSuccess') }}</span>
+            </div>
+
+            <!-- 학교 이름 -->
+            <div class="flex flex-col gap-2">
+              <label class="font-medium" style="color: var(--color-text-primary)">
+                {{ $t('admin.appSettingsSchoolName') }}
+              </label>
+              <input
+                v-model="appSettingsForm.school_name"
+                type="text"
+                class="h-12 w-full px-4 rounded-lg border outline-none"
+                style="background: var(--color-bg-primary); border-color: var(--color-border); color: var(--color-text-primary)"
+                :disabled="isSavingAppSettings"
+              />
+            </div>
+
+            <!-- 기본 언어 -->
+            <div class="flex flex-col gap-2">
+              <label class="font-medium" style="color: var(--color-text-primary)">
+                {{ $t('admin.appSettingsDefaultLocale') }}
+              </label>
+              <p style="color: var(--color-text-muted)">{{ $t('admin.appSettingsLocaleNote') }}</p>
+              <select
+                v-model="appSettingsForm.locale"
+                class="h-12 w-full px-4 rounded-lg border outline-none"
+                style="background: var(--color-bg-primary); border-color: var(--color-border); color: var(--color-text-primary)"
+                :disabled="isSavingAppSettings"
+              >
+                <option value="ko">{{ $t('admin.localeKo') }}</option>
+                <option value="en">{{ $t('admin.localeEn') }}</option>
+              </select>
+            </div>
+
+            <button
+              class="h-12 px-6 rounded-lg font-medium flex items-center justify-center gap-2"
+              style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+              :disabled="isSavingAppSettings"
+              :class="isSavingAppSettings ? 'opacity-60 cursor-not-allowed' : ''"
+              @click="onSaveAppSettings"
+            >
+              <IconLoader2 v-if="isSavingAppSettings" :size="18" class="spin" />
+              {{ isSavingAppSettings ? $t('admin.saving') : $t('admin.save') }}
+            </button>
+
           </div>
         </template>
 
@@ -671,6 +767,7 @@ import { useI18n } from 'vue-i18n'
 import {
   IconMoon, IconSun, IconPlus, IconUpload, IconLoader2, IconAlertCircle, IconPencil, IconTrash,
   IconSettings, IconUsers, IconBook, IconLayoutGrid, IconChevronRight, IconBooks,
+  IconAdjustments, IconCheck,
 } from '@tabler/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAdminStore } from '@/stores/admin'
@@ -678,6 +775,7 @@ import { useClassStore } from '@/stores/class'
 import LanguageSelector from '@/components/LanguageSelector.vue'
 import SettingsModal from '@/components/SettingsModal.vue'
 import ImportModal from '@/components/ImportModal.vue'
+import { api } from '@/api/client'
 import type { AdminTeacher, Subject } from '@/api/client'
 import type { SynonymMap } from '@/utils/excelImport'
 
@@ -690,7 +788,7 @@ const classStore = useClassStore()
 const isDark = ref(document.documentElement.getAttribute('data-theme') === 'dark')
 const isLoggingOut = ref(false)
 const showSettings = ref(false)
-const activeSection = ref<'classes' | 'teachers' | 'subjects'>('classes')
+const activeSection = ref<'classes' | 'teachers' | 'subjects' | 'appSettings'>('classes')
 
 // ── Modal visibility flags ─────────────────────────────────────
 const showAddTeacherModal = ref(false)
@@ -739,6 +837,47 @@ const isDeletingTeacher = ref(false)
 const addTeacherError = ref<string | null>(null)
 const editTeacherError = ref<string | null>(null)
 const deleteTeacherError = ref<string | null>(null)
+
+// ── App settings state ─────────────────────────────────────────
+const appSettingsForm = ref({ school_name: '', locale: 'ko' })
+const appSettingsLoading = ref(false)
+const isSavingAppSettings = ref(false)
+const appSettingsError = ref<string | null>(null)
+const appSettingsSuccess = ref(false)
+
+async function openAppSettings() {
+  activeSection.value = 'appSettings'
+  appSettingsError.value = null
+  appSettingsSuccess.value = false
+  appSettingsLoading.value = true
+  try {
+    const res = await api.admin.getAppSettings()
+    appSettingsForm.value = { school_name: res.school_name, locale: res.locale }
+  } catch (e) {
+    const code = e instanceof Error ? e.message : 'ERR_UNKNOWN'
+    appSettingsError.value = t(`errors.${code}`, t('errors.ERR_UNKNOWN'))
+  } finally {
+    appSettingsLoading.value = false
+  }
+}
+
+async function onSaveAppSettings() {
+  if (isSavingAppSettings.value) return
+  isSavingAppSettings.value = true
+  appSettingsError.value = null
+  appSettingsSuccess.value = false
+  try {
+    await api.admin.updateAppSettings(appSettingsForm.value)
+    appSettingsSuccess.value = true
+    // 학교 이름이 바뀌었을 수 있으므로 store 갱신
+    await auth.fetchSchoolName()
+  } catch (e) {
+    const code = e instanceof Error ? e.message : 'ERR_UNKNOWN'
+    appSettingsError.value = t(`errors.${code}`, t('errors.ERR_UNKNOWN'))
+  } finally {
+    isSavingAppSettings.value = false
+  }
+}
 
 // ── Subject modal state ────────────────────────────────────────
 const deleteSubjectTarget = ref<Subject | null>(null)

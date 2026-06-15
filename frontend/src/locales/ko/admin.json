@@ -31,5 +31,12 @@
   "delete": "삭제",
   "cancel": "취소",
   "save": "저장",
-  "add": "추가"
+  "add": "추가",
+  "appSettings": "LMS 기본 설정",
+  "appSettingsSchoolName": "학교 이름",
+  "appSettingsDefaultLocale": "기본 언어",
+  "appSettingsLocaleNote": "로그인하지 않은 상태의 기본 표시 언어입니다.",
+  "appSettingsSaveSuccess": "설정이 저장되었습니다.",
+  "localeKo": "한국어",
+  "localeEn": "English"
 }

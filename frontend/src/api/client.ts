@@ -139,6 +139,11 @@ export interface ImportSubjectRow {
   name: string
 }
 
+export interface AppSettings {
+  school_name: string
+  locale: string
+}
+
 export interface ImportStudentRow {
   grade: number
   class_no: number
@@ -299,6 +304,9 @@ export const api = {
       request<ImportResult>('POST', '/admin/teachers/import', data),
     importSubjects: (data: ImportSubjectRow[]) =>
       request<ImportResult>('POST', '/admin/subjects/import', data),
+    getAppSettings: () => request<AppSettings>('GET', '/admin/app-settings'),
+    updateAppSettings: (data: AppSettings) =>
+      request<{ ok: boolean }>('PUT', '/admin/app-settings', data),
   },
   settings: {
     setLocale: (locale: string) =>

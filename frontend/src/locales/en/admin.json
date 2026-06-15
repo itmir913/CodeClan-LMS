@@ -31,5 +31,12 @@
   "delete": "Delete",
   "cancel": "Cancel",
   "save": "Save",
-  "add": "Add"
+  "add": "Add",
+  "appSettings": "LMS Settings",
+  "appSettingsSchoolName": "School Name",
+  "appSettingsDefaultLocale": "Default Language",
+  "appSettingsLocaleNote": "The default display language for users who are not logged in.",
+  "appSettingsSaveSuccess": "Settings saved.",
+  "localeKo": "한국어",
+  "localeEn": "English"
 }

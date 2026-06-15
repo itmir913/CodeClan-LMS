@@ -48,6 +48,11 @@ pub fn build_router(state: AppState) -> Router {
         .route("/classes/:id/students/import", post(routes::students::import_students))
         .route("/students/:id", delete(routes::students::delete_student))
         .route("/students/:id/reset-password", post(routes::students::reset_student_password))
+        // Admin — app settings
+        .route(
+            "/admin/app-settings",
+            get(routes::admin::get_app_settings).put(routes::admin::update_app_settings),
+        )
         // Admin — teachers
         .route(
             "/admin/teachers",

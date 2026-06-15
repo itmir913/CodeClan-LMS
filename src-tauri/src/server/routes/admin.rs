@@ -25,6 +25,92 @@ async fn require_admin(teacher_id: i64, db: &sqlx::SqlitePool) -> Result<(), Api
     Ok(())
 }
 
+// ── App settings ─────────────────────────────────────────────────────────────
+
+#[derive(Serialize)]
+pub struct AppSettingsResponse {
+    pub school_name: String,
+    pub locale: String,
+}
+
+/// GET /api/admin/app-settings
+pub async fn get_app_settings(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+) -> Result<Json<AppSettingsResponse>, ApiError> {
+    let session = parse_session(&headers, &state.db).await?;
+    let teacher_id = session.teacher_id.ok_or(ApiError::Forbidden)?;
+    require_admin(teacher_id, &state.db).await?;
+
+    let school_name = sqlx::query_scalar::<_, String>(
+        "SELECT value FROM app_configs WHERE key = 'school_name'",
+    )
+    .fetch_optional(&state.db)
+    .await?
+    .unwrap_or_default();
+
+    let locale = sqlx::query_scalar::<_, String>(
+        "SELECT value FROM app_configs WHERE key = 'locale'",
+    )
+    .fetch_optional(&state.db)
+    .await?
+    .unwrap_or_else(|| "ko".to_string());
+
+    Ok(Json(AppSettingsResponse { school_name, locale }))
+}
+
+#[derive(Deserialize)]
+pub struct UpdateAppSettingsRequest {
+    pub school_name: String,
+    pub locale: String,
+}
+
+/// PUT /api/admin/app-settings
+pub async fn update_app_settings(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(body): Json<UpdateAppSettingsRequest>,
+) -> Result<Json<Value>, ApiError> {
+    let session = parse_session(&headers, &state.db).await?;
+    let teacher_id = session.teacher_id.ok_or(ApiError::Forbidden)?;
+    require_admin(teacher_id, &state.db).await?;
+
+    let school_name = body.school_name.trim().to_string();
+    if school_name.is_empty() {
+        return Err(ApiError::BadRequest("ERR_SCHOOL_NAME_REQUIRED".into()));
+    }
+
+    let raw_locale = body.locale.trim().to_string();
+    let locale = if raw_locale.is_empty()
+        || raw_locale.len() > 10
+        || !raw_locale.chars().all(|c| c.is_ascii_alphanumeric() || c == '-')
+    {
+        return Err(ApiError::BadRequest("ERR_INVALID_LOCALE".into()));
+    } else {
+        raw_locale
+    };
+
+    let mut tx = state.db.begin().await?;
+    sqlx::query(
+        "INSERT INTO app_configs (key, value) VALUES ('school_name', ?) \
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+    )
+    .bind(&school_name)
+    .execute(&mut *tx)
+    .await?;
+
+    sqlx::query(
+        "INSERT INTO app_configs (key, value) VALUES ('locale', ?) \
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+    )
+    .bind(&locale)
+    .execute(&mut *tx)
+    .await?;
+    tx.commit().await?;
+
+    Ok(Json(json!({ "ok": true })))
+}
+
 // ── Subjects ──────────────────────────────────────────────────────────────────
 
 #[derive(Serialize)]
