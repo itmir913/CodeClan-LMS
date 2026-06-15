@@ -272,7 +272,7 @@
               :disabled="!!editingId"
               class="h-9 px-4 rounded-lg font-medium transition-colors border"
               :style="formType === pt.value
-                ? 'border-width: 2px; border-color: var(--color-accent); background: var(--color-accent-subtle); color: var(--color-accent); font-weight: 600'
+                ? 'border-width: 1px; border-color: var(--color-accent); background: var(--color-accent-subtle); color: var(--color-accent); font-weight: 600'
                 : 'border-color: var(--color-border); background: var(--color-bg-primary); color: var(--color-text-muted)'"
               @click="formType = pt.value as TypeSlug"
             >
@@ -743,8 +743,8 @@ const formChoices = ref<ChoiceInput[]>([
 const formInputFormat = ref('')
 const formOutputFormat = ref('')
 const formConstraints = ref('')
-const formTimeLimitMs = ref(1000)
-const formMemoryLimitMb = ref(128)
+const formTimeLimitMs = ref(3000)
+const formMemoryLimitMb = ref(256)
 const formShowIoOnFail = ref(true)
 const formTestCases = ref<TestCaseInput[]>([])
 
@@ -753,8 +753,8 @@ const formTestCases = ref<TestCaseInput[]>([])
 const subjects = computed(() => classStore.subjects)
 
 const problemTypes = computed(() => [
-  { value: 'short_answer', label: t('problems.type_short_answer') },
   { value: 'multiple_choice', label: t('problems.type_multiple_choice') },
+  { value: 'short_answer', label: t('problems.type_short_answer') },
   { value: 'code_submit', label: t('problems.type_code_submit') },
 ])
 
