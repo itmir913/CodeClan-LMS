@@ -95,17 +95,22 @@ router.beforeEach(async (to) => {
   if (requiredRole === 'admin' || requiredRole === 'teacher') {
     try {
       const user = await api.auth.meTeacher()
+      // admin이 /teacher 홈에 오면 /admin으로 (공유 페이지인 classes, problem-bank는 그대로 허용)
+      if (to.name === 'teacher-home' && user.role === 'admin') {
+        return { name: 'admin-home' }
+      }
+      // teacher(non-admin)가 admin 전용 페이지에 오면 /teacher로
       if (requiredRole === 'admin' && user.role !== 'admin') {
-        // admin 전용 페이지 — teacher는 접근 불가
-        await api.auth.logoutTeacher().catch(() => {})
-        return { name: 'login' }
-      } else if (requiredRole === 'teacher' && user.role !== 'teacher' && user.role !== 'admin') {
-        // teacher 페이지 — admin도 허용
-        await api.auth.logoutTeacher().catch(() => {})
-        return { name: 'login' }
+        return { name: 'teacher-home' }
       }
     } catch {
-      return { name: 'login' }
+      // 교사 세션 없음 — 학생 세션이면 student 홈으로
+      try {
+        await api.auth.meStudent()
+        return { name: 'student-home' }
+      } catch {
+        return { name: 'login' }
+      }
     }
   }
 
@@ -113,7 +118,13 @@ router.beforeEach(async (to) => {
     try {
       await api.auth.meStudent()
     } catch {
-      return { name: 'login' }
+      // 학생 세션 없음 — 교사/관리자 세션이면 해당 홈으로
+      try {
+        const user = await api.auth.meTeacher()
+        return user.role === 'admin' ? { name: 'admin-home' } : { name: 'teacher-home' }
+      } catch {
+        return { name: 'login' }
+      }
     }
   }
 })

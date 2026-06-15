@@ -20,6 +20,15 @@
       </div>
       <div class="flex items-center gap-2">
         <button
+          class="w-9 h-9 p-0 rounded-lg flex items-center justify-center"
+          style="border: 1px solid var(--color-border); color: var(--color-text-muted); background: transparent"
+          @click="toggleTheme"
+          :aria-label="$t('auth.toggleTheme')"
+        >
+          <IconMoon v-if="!isDark" :size="18" />
+          <IconSun v-else :size="18" />
+        </button>
+        <button
           :disabled="isSaving || isLoading"
           class="h-9 px-4 rounded-lg border font-medium"
           style="background: var(--color-bg-primary); color: var(--color-text-muted); border-color: var(--color-border)"
@@ -592,7 +601,7 @@ import { renderMarkdown } from '@/utils/markdown'
 import {
   IconArrowLeft, IconPlus, IconLoader2,
   IconAlertCircle, IconX, IconTrash, IconEye,
-  IconChevronLeft, IconChevronRight,
+  IconChevronLeft, IconChevronRight, IconMoon, IconSun,
 } from '@tabler/icons-vue'
 import { useProblemStore } from '@/stores/problem'
 import { useClassStore } from '@/stores/class'
@@ -603,6 +612,13 @@ const route = useRoute()
 const { t } = useI18n()
 const store = useProblemStore()
 const classStore = useClassStore()
+
+const isDark = ref(document.documentElement.getAttribute('data-theme') === 'dark')
+
+function toggleTheme() {
+  isDark.value = !isDark.value
+  document.documentElement.setAttribute('data-theme', isDark.value ? 'dark' : 'light')
+}
 
 const editingId = computed(() => {
   const id = route.params.id

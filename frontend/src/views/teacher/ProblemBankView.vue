@@ -17,12 +17,23 @@
           <span class="text-xl font-bold" style="color: var(--color-text-primary)">{{ $t('problems.title') }}</span>
         </div>
       </div>
-      <button class="flex items-center gap-2 h-9 px-4 rounded-lg font-semibold"
-              style="background: var(--color-accent); color: #fff; border: none"
-              @click="openCreate">
-        <IconPlus :size="16" />
-        <span>{{ $t('problems.newProblem') }}</span>
-      </button>
+      <div class="flex items-center gap-2">
+        <button
+          class="w-9 h-9 p-0 rounded-lg flex items-center justify-center"
+          style="border: 1px solid var(--color-border); color: var(--color-text-muted); background: transparent"
+          @click="toggleTheme"
+          :aria-label="$t('auth.toggleTheme')"
+        >
+          <IconMoon v-if="!isDark" :size="18" />
+          <IconSun v-else :size="18" />
+        </button>
+        <button class="flex items-center gap-2 h-9 px-4 rounded-lg font-semibold"
+                style="background: var(--color-accent); color: #fff; border: none"
+                @click="openCreate">
+          <IconPlus :size="16" />
+          <span>{{ $t('problems.newProblem') }}</span>
+        </button>
+      </div>
     </header>
 
     <!-- ── 툴바 ── -->
@@ -203,7 +214,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import {
   IconArrowLeft, IconPlus, IconSearch, IconLoader2,
-  IconAlertCircle, IconAlertTriangle, IconBooks,
+  IconAlertCircle, IconAlertTriangle, IconBooks, IconMoon, IconSun,
 } from '@tabler/icons-vue'
 import { useProblemStore } from '@/stores/problem'
 import { useClassStore } from '@/stores/class'
@@ -215,6 +226,13 @@ const { t } = useI18n()
 const store = useProblemStore()
 const classStore = useClassStore()
 const auth = useAuthStore()
+
+const isDark = ref(document.documentElement.getAttribute('data-theme') === 'dark')
+
+function toggleTheme() {
+  isDark.value = !isDark.value
+  document.documentElement.setAttribute('data-theme', isDark.value ? 'dark' : 'light')
+}
 
 // ── 목록 상태 ────────────────────────────────────────────────────────────────
 
