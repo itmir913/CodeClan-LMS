@@ -641,7 +641,7 @@
       :title="$t('admin.importTeachers')"
       template-filename="teachers_template"
       :template-headers="teacherTemplateHeaders"
-      :template-sample="[['Hong Gildong', 'teacher1', 'password1', 'teacher']]"
+      :template-sample="[['Jonghwan Lee', 'teacher1', 'password1', 'teacher'],['Admin', 'admin', 'password1', 'admin']]"
       :synonym-map="teacherSynonymMap"
       :required-fields="['name', 'username', 'password']"
       :columns="teacherImportColumns"

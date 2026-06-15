@@ -186,54 +186,52 @@
             <table class="w-full">
               <thead>
                 <tr style="background: var(--color-bg-tertiary); border-bottom: 1px solid var(--color-border)">
-                  <th class="px-5 py-3 text-left font-semibold" style="color: var(--color-text-muted)">
+                  <th class="px-5 py-3 text-left font-semibold w-12" style="color: var(--color-text-muted)">
+                    {{ $t('students.seqNo') }}
+                  </th>
+                  <th class="px-5 py-3 text-left font-semibold hidden sm:table-cell" style="color: var(--color-text-muted)">
+                    {{ $t('students.grade') }}
+                  </th>
+                  <th class="px-5 py-3 text-left font-semibold hidden sm:table-cell" style="color: var(--color-text-muted)">
+                    {{ $t('students.classNo') }}
+                  </th>
+                  <th class="px-5 py-3 text-left font-semibold hidden sm:table-cell" style="color: var(--color-text-muted)">
                     {{ $t('students.number') }}
                   </th>
                   <th class="px-5 py-3 text-left font-semibold" style="color: var(--color-text-muted)">
                     {{ $t('students.name') }}
                   </th>
-                  <th class="px-5 py-3 text-left font-semibold hidden sm:table-cell"
-                      style="color: var(--color-text-muted)">
-                    {{ $t('students.username') }}
-                  </th>
                   <th class="px-5 py-3 text-left font-semibold hidden md:table-cell"
                       style="color: var(--color-text-muted)">
-                    {{ $t('students.passwordResetRequired') }}
+                    {{ $t('students.username') }}
                   </th>
                   <th class="px-5 py-3 w-24"></th>
                 </tr>
               </thead>
               <tbody>
                 <tr
-                  v-for="student in filteredStudents"
+                  v-for="(student, idx) in filteredStudents"
                   :key="student.id"
                   class="border-t"
                   style="border-color: var(--color-border)"
                 >
                   <td class="px-5 py-3 font-medium" style="color: var(--color-text-muted)">
+                    {{ idx + 1 }}
+                  </td>
+                  <td class="px-5 py-3 hidden sm:table-cell" style="color: var(--color-text-muted)">
+                    {{ student.grade }}
+                  </td>
+                  <td class="px-5 py-3 hidden sm:table-cell" style="color: var(--color-text-muted)">
+                    {{ student.class_no }}
+                  </td>
+                  <td class="px-5 py-3 hidden sm:table-cell" style="color: var(--color-text-muted)">
                     {{ student.number }}
                   </td>
                   <td class="px-5 py-3 font-medium" style="color: var(--color-text-primary)">
                     {{ student.name }}
                   </td>
-                  <td class="px-5 py-3 hidden sm:table-cell" style="color: var(--color-text-muted); font-family: monospace">
+                  <td class="px-5 py-3 hidden md:table-cell" style="color: var(--color-text-muted); font-family: monospace">
                     {{ student.username }}
-                  </td>
-                  <td class="px-5 py-3 hidden md:table-cell">
-                    <span
-                      class="inline-flex items-center gap-1.5 rounded-full px-3 py-0.5 font-medium"
-                      :style="student.password_reset_required
-                        ? { background: 'var(--color-warning-bg)', color: 'var(--color-warning)' }
-                        : { background: 'var(--color-success-bg)', color: 'var(--color-success)' }"
-                    >
-                      <span class="w-1.5 h-1.5 rounded-full"
-                            :style="student.password_reset_required
-                              ? { background: 'var(--color-warning)' }
-                              : { background: 'var(--color-success)' }"></span>
-                      {{ student.password_reset_required
-                          ? $t('students.passwordResetRequired')
-                          : $t('students.passwordSet') }}
-                    </span>
                   </td>
                   <td class="px-5 py-3">
                     <div class="flex items-center gap-1 justify-end">
@@ -342,7 +340,7 @@
       :title="$t('students.importExcel')"
       template-filename="students_template"
       :template-headers="studentTemplateHeaders"
-      :template-sample="[['3', '1', '1', 'Hong Gildong', '30101'], ['3', '1', '2', 'Kim Cheolsu', '']]"
+      :template-sample="[['3', '1', '1', 'Alice', 'student_30101'], ['3', '1', '2', 'Bob', '']]"
       :synonym-map="studentSynonymMap"
       :required-fields="['grade', 'class_no', 'number', 'name']"
       :columns="studentImportColumns"
@@ -525,7 +523,11 @@ const studentImportColumns = [
   { key: 'class_no', labelKey: 'students.classNo' },
   { key: 'number', labelKey: 'students.number' },
   { key: 'name', labelKey: 'students.name' },
-  { key: 'username', labelKey: 'students.username' },
+  {
+    key: 'username',
+    labelKey: 'students.username',
+    display: (row: Record<string, string>) => row.username || `(${t('common.auto')})`,
+  },
 ]
 const studentTemplateHeaders = computed(() => [
   t('students.grade'),

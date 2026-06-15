@@ -17,5 +17,6 @@
   "rowsDetected": "{count}건 인식됨",
   "moreRows": "건 더 있음",
   "importing": "가져오는 중...",
-  "importAction": "가져오기"
+  "importAction": "가져오기",
+  "auto": "자동"
 }

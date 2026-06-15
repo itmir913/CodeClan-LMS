@@ -84,7 +84,7 @@
                 autocomplete="current-password"
                 :placeholder="$t('auth.password')"
                 :disabled="isSubmitting"
-                class="h-12 w-full pl-4 pr-12 rounded-lg border outline-none transition-colors"
+                class="h-12 w-full pl-4 pr-12 rounded-lg border outline-none transition-colors password-input"
                 style="background: var(--color-bg-primary); border-color: var(--color-border); color: var(--color-text-primary)"
               />
               <button
@@ -192,5 +192,15 @@ onMounted(async () => {
 .login-submit:hover:not(:disabled) {
   opacity: 0.9;
   background: var(--color-accent);
+}
+
+/* 브라우저 기본 비밀번호 표시 아이콘 제거 (Edge/IE: ms-reveal, Chrome: webkit) */
+.password-input::-ms-reveal,
+.password-input::-ms-clear {
+  display: none;
+}
+.password-input::-webkit-contacts-auto-fill-button,
+.password-input::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
 }
 </style>

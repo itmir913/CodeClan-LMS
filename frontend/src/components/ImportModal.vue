@@ -98,7 +98,7 @@
                     class="px-4 py-2 whitespace-nowrap"
                     style="color: var(--color-text-primary)"
                   >
-                    {{ row[col.key] || '—' }}
+                    {{ col.display ? col.display(row) : (row[col.key] || '—') }}
                   </td>
                 </tr>
                 <tr v-if="parsedRows.length > 100">
@@ -161,6 +161,7 @@ import { downloadExcelTemplate } from '@/utils/templateDownload'
 interface Column {
   key: string
   labelKey: string
+  display?: (row: Record<string, string>) => string
 }
 
 const props = defineProps<{

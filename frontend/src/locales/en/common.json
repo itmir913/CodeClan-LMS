@@ -17,5 +17,6 @@
   "rowsDetected": "{count} rows detected",
   "moreRows": " more rows",
   "importing": "Importing...",
-  "importAction": "Import"
+  "importAction": "Import",
+  "auto": "auto"
 }
