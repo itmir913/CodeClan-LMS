@@ -166,7 +166,7 @@ pub async fn list_teachers(
     require_admin(teacher_id, &state.db).await?;
 
     let rows = sqlx::query(
-        "SELECT id, username, name, role, created_at FROM teachers ORDER BY created_at ASC",
+        "SELECT id, username, name, role, created_at FROM teachers ORDER BY CASE role WHEN 'admin' THEN 0 ELSE 1 END ASC, name ASC",
     )
     .fetch_all(&state.db)
     .await?;
