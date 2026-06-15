@@ -82,12 +82,12 @@
             </div>
           </div>
           <button
-            class="flex-shrink-0 hidden lg:flex w-8 h-8 rounded-lg items-center justify-center transition-colors preview-toggle-btn"
+            class="flex-shrink-0 hidden lg:flex w-8 h-8 p-0 rounded-lg items-center justify-center transition-colors preview-toggle-btn"
             style="color: var(--color-text-muted)"
             :title="$t('problems.hidePreview')"
             @click="previewOpen = false"
           >
-            <IconLayoutSidebarLeftCollapse :size="18" />
+            <IconChevronLeft :size="18" />
           </button>
         </div>
 
@@ -109,12 +109,11 @@
               {{ formTitle || '...' }}
             </h3>
 
-            <!-- 설명 -->
-            <p v-if="formDescription"
-               class="mb-4"
-               style="color: var(--color-text-muted); line-height: 1.6; white-space: pre-wrap; word-break: break-word">
-              {{ formDescription }}
-            </p>
+            <!-- 설명 (마크다운 렌더링) -->
+            <div v-if="formDescription"
+                 class="mb-4 preview-markdown"
+                 v-html="renderedDescription"
+            ></div>
 
             <!-- 단답형 -->
             <template v-if="formType === 'short_answer'">
@@ -222,9 +221,25 @@
             style="background: transparent; color: var(--color-text-muted); border-color: var(--color-border)"
             @click="previewOpen = true"
           >
-            <IconLayoutSidebarLeftExpand :size="16" />
+            <IconChevronRight :size="16" />
             <span>{{ $t('problems.showPreview') }}</span>
           </button>
+        </div>
+
+        <!-- 과목 -->
+        <div>
+          <label class="block font-semibold mb-2" style="color: var(--color-text-primary)">
+            {{ $t('problems.subject') }}
+          </label>
+          <select
+            v-model="formSubjectId"
+            :disabled="isSaving"
+            class="w-full h-11 rounded-xl px-4 border"
+            style="background: var(--color-bg-primary); color: var(--color-text-primary); border-color: var(--color-border)"
+          >
+            <option :value="null">{{ $t('problems.subjectNone') }}</option>
+            <option v-for="s in subjects" :key="s.id" :value="s.id">{{ s.name }}</option>
+          </select>
         </div>
 
         <!-- 유형 선택 (편집 시 비활성) -->
@@ -277,35 +292,19 @@
           ></textarea>
         </div>
 
-        <!-- 과목 + 교사 메모 -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block font-semibold mb-2" style="color: var(--color-text-primary)">
-              {{ $t('problems.subject') }}
-            </label>
-            <select
-              v-model="formSubjectId"
-              :disabled="isSaving"
-              class="w-full h-11 rounded-xl px-4 border"
-              style="background: var(--color-bg-primary); color: var(--color-text-primary); border-color: var(--color-border)"
-            >
-              <option :value="null">{{ $t('problems.subjectNone') }}</option>
-              <option v-for="s in subjects" :key="s.id" :value="s.id">{{ s.name }}</option>
-            </select>
-          </div>
-          <div>
-            <label class="block font-semibold mb-2" style="color: var(--color-text-primary)">
-              {{ $t('problems.comment') }}
-            </label>
-            <input
-              v-model="formComment"
-              :disabled="isSaving"
-              type="text"
-              class="w-full h-11 rounded-xl px-4 border"
-              style="background: var(--color-bg-primary); color: var(--color-text-primary); border-color: var(--color-border)"
-              :placeholder="$t('problems.commentPlaceholder')"
-            />
-          </div>
+        <!-- 교사 메모 -->
+        <div>
+          <label class="block font-semibold mb-2" style="color: var(--color-text-primary)">
+            {{ $t('problems.comment') }}
+          </label>
+          <input
+            v-model="formComment"
+            :disabled="isSaving"
+            type="text"
+            class="w-full h-11 rounded-xl px-4 border"
+            style="background: var(--color-bg-primary); color: var(--color-text-primary); border-color: var(--color-border)"
+            :placeholder="$t('problems.commentPlaceholder')"
+          />
         </div>
 
         <div class="h-px" style="background: var(--color-border)"></div>
@@ -338,15 +337,35 @@
 
         <!-- ── 객관식 전용 ── -->
         <template v-else-if="formType === 'multiple_choice'">
-          <label class="flex items-center gap-3 cursor-pointer">
-            <input
-              v-model="formAllowMultiple"
-              type="checkbox"
-              class="w-5 h-5 rounded"
-              style="accent-color: var(--color-accent)"
-            />
-            <span style="color: var(--color-text-primary)">{{ $t('problems.allowMultiple') }}</span>
-          </label>
+          <div>
+            <label class="block font-semibold mb-3" style="color: var(--color-text-primary)">
+              {{ $t('problems.selectMode') }}
+            </label>
+            <div class="flex gap-3">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="selectMode"
+                  :checked="!formAllowMultiple"
+                  class="w-5 h-5 p-0"
+                  style="accent-color: var(--color-accent)"
+                  @change="formAllowMultiple = false"
+                />
+                <span style="color: var(--color-text-primary)">{{ $t('problems.selectSingle') }}</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="selectMode"
+                  :checked="formAllowMultiple"
+                  class="w-5 h-5 p-0"
+                  style="accent-color: var(--color-accent)"
+                  @change="formAllowMultiple = true"
+                />
+                <span style="color: var(--color-text-primary)">{{ $t('problems.selectMultiple') }}</span>
+              </label>
+            </div>
+          </div>
 
           <div>
             <label class="block font-semibold mb-3" style="color: var(--color-text-primary)">
@@ -365,7 +384,7 @@
                     : 'border-color: var(--color-border); background: var(--color-bg-primary)'"
                 >
                   <input
-                    type="radio"
+                    :type="formAllowMultiple ? 'checkbox' : 'radio'"
                     name="correctChoice"
                     class="w-5 h-5 flex-shrink-0"
                     style="accent-color: var(--color-success)"
@@ -390,7 +409,7 @@
                 </label>
                 <button
                   v-if="formChoices.length > 2"
-                  class="w-8 h-8 rounded-lg border flex items-center justify-center flex-shrink-0 transition-colors"
+                  class="w-8 h-8 p-0 rounded-lg border flex items-center justify-center flex-shrink-0 transition-colors"
                   style="background: var(--color-bg-primary); color: var(--color-danger); border-color: var(--color-danger-border)"
                   @click="removeChoice(idx)"
                 >
@@ -537,7 +556,7 @@
                   />
                 </div>
                 <button
-                  class="w-9 h-9 rounded-lg border flex items-center justify-center transition-colors"
+                  class="w-9 h-9 p-0 rounded-lg border flex items-center justify-center transition-colors"
                   style="background: var(--color-bg-primary); color: var(--color-danger); border-color: var(--color-danger-border)"
                   @click="removeTestCase(idx)"
                 >
@@ -569,10 +588,12 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { marked } from 'marked'
+import DOMPurify from 'dompurify'
 import {
   IconArrowLeft, IconPlus, IconLoader2,
   IconAlertCircle, IconX, IconTrash, IconEye,
-  IconLayoutSidebarLeftCollapse, IconLayoutSidebarLeftExpand,
+  IconChevronLeft, IconChevronRight,
 } from '@tabler/icons-vue'
 import { useProblemStore } from '@/stores/problem'
 import { useClassStore } from '@/stores/class'
@@ -668,6 +689,11 @@ const sampleTestCases = computed(() =>
   formTestCases.value.filter((tc) => tc.is_sample)
 )
 
+const renderedDescription = computed(() => {
+  if (!formDescription.value) return ''
+  return DOMPurify.sanitize(marked.parse(formDescription.value) as string)
+})
+
 // ── helpers ───────────────────────────────────────────────────────────────────
 
 function typeLabel(slug: string): string {
@@ -691,7 +717,11 @@ function typeBadgeStyle(slug: string): string {
 // ── MCQ 선지 조작 ─────────────────────────────────────────────────────────────
 
 function setCorrectChoice(idx: number) {
-  formChoices.value.forEach((c, i) => { c.is_correct = i === idx })
+  if (formAllowMultiple.value) {
+    formChoices.value[idx].is_correct = !formChoices.value[idx].is_correct
+  } else {
+    formChoices.value.forEach((c, i) => { c.is_correct = i === idx })
+  }
 }
 
 function addChoice() {
@@ -856,5 +886,77 @@ onMounted(async () => {
 .resize-handle:hover,
 .resize-handle.dragging {
   background: var(--color-accent);
+}
+
+/* 미리보기 마크다운 스타일 */
+.preview-markdown {
+  color: var(--color-text-muted);
+  line-height: 1.7;
+  word-break: break-word;
+}
+.preview-markdown :deep(h1),
+.preview-markdown :deep(h2),
+.preview-markdown :deep(h3),
+.preview-markdown :deep(h4) {
+  color: var(--color-text-primary);
+  font-weight: 700;
+  margin: 0.75em 0 0.4em;
+  line-height: 1.4;
+}
+.preview-markdown :deep(h1) { font-size: 1.2rem; }
+.preview-markdown :deep(h2) { font-size: 1.1rem; }
+.preview-markdown :deep(h3) { font-size: 1rem; }
+.preview-markdown :deep(p) {
+  margin: 0 0 0.6em;
+}
+.preview-markdown :deep(p:last-child) {
+  margin-bottom: 0;
+}
+.preview-markdown :deep(ul),
+.preview-markdown :deep(ol) {
+  padding-left: 1.4em;
+  margin: 0 0 0.6em;
+}
+.preview-markdown :deep(li) {
+  margin-bottom: 0.2em;
+}
+.preview-markdown :deep(code) {
+  font-family: 'Pretendard Mono', monospace;
+  font-size: 0.9em;
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  background: var(--color-bg-primary);
+  color: var(--color-accent);
+  border: 1px solid var(--color-border);
+}
+.preview-markdown :deep(pre) {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.75em 1em;
+  overflow-x: auto;
+  margin: 0 0 0.6em;
+}
+.preview-markdown :deep(pre code) {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-text-primary);
+  font-size: 0.9em;
+}
+.preview-markdown :deep(blockquote) {
+  border-left: 3px solid var(--color-border);
+  padding-left: 0.75em;
+  margin: 0 0 0.6em;
+  color: var(--color-text-tertiary);
+}
+.preview-markdown :deep(strong) {
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+.preview-markdown :deep(hr) {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 0.75em 0;
 }
 </style>
