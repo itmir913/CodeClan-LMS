@@ -12,8 +12,8 @@
         </div>
         <div class="flex items-center gap-2">
           <button
-            class="w-9 h-9 p-0 rounded-lg flex items-center justify-center"
-            style="border: 1px solid var(--color-border); color: var(--color-text-muted); background: transparent"
+            class="w-9 h-9 p-0 rounded-lg flex items-center justify-center border bg-transparent"
+            style="border-color: var(--color-border); color: var(--color-text-muted);"
             @click="showSettings = true"
             :aria-label="$t('common.settings')"
           >
@@ -21,8 +21,8 @@
           </button>
           <LanguageSelector />
           <button
-            class="h-9 px-3 rounded-lg font-medium"
-            style="border: 1px solid var(--color-border); color: var(--color-text-muted); background: transparent"
+            class="h-9 px-3 rounded-lg font-medium border bg-transparent"
+            style="border-color: var(--color-border); color: var(--color-text-muted);"
             @click="onLogout"
             :disabled="isLoggingOut"
           >

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="min-h-screen flex flex-col" style="background: var(--color-bg-primary)">
 
     <!-- Top Nav -->
@@ -22,8 +22,8 @@
           </span>
 
           <button
-            class="w-9 h-9 p-0 rounded-lg flex items-center justify-center"
-            style="border: 1px solid var(--color-border); color: var(--color-text-muted); background: transparent"
+            class="w-9 h-9 p-0 rounded-lg flex items-center justify-center border bg-transparent"
+            style="border-color: var(--color-border); color: var(--color-text-muted);"
             @click="showSettings = true"
             :aria-label="$t('common.settings')"
           >
@@ -31,8 +31,8 @@
           </button>
 
           <button
-            class="w-9 h-9 p-0 rounded-lg flex items-center justify-center"
-            style="border: 1px solid var(--color-border); color: var(--color-text-muted); background: transparent"
+            class="w-9 h-9 p-0 rounded-lg flex items-center justify-center border bg-transparent"
+            style="border-color: var(--color-border); color: var(--color-text-muted);"
             @click="toggleTheme"
             :aria-label="$t('auth.toggleTheme')"
           >
@@ -43,8 +43,8 @@
           <LanguageSelector />
 
           <button
-            class="h-9 px-3 rounded-lg font-medium"
-            style="border: 1px solid var(--color-border); color: var(--color-text-muted); background: transparent"
+            class="h-9 px-3 rounded-lg font-medium border bg-transparent"
+            style="border-color: var(--color-border); color: var(--color-text-muted);"
             @click="onLogout"
             :disabled="isLoggingOut"
           >
@@ -58,11 +58,11 @@
     <!-- Body: Sidebar + Content -->
     <div class="flex flex-1 min-h-0">
 
-      <!-- ── 사이드바 ── -->
+      <!-- ?? ?ъ씠?쒕컮 ?? -->
       <aside class="w-56 flex-shrink-0 border-r overflow-y-auto flex flex-col"
              style="background: var(--color-bg-secondary); border-color: var(--color-border)">
 
-        <!-- 수업 전체 섹션 -->
+        <!-- ?섏뾽 ?꾩껜 ?뱀뀡 -->
         <div class="p-3 pt-4">
           <button
             class="flex items-center gap-2.5 w-full min-h-10 py-2 px-3 rounded-lg font-medium border-0 leading-tight"
@@ -78,7 +78,7 @@
 
         <div class="mx-3 mb-1 h-px" style="background: var(--color-border)"></div>
 
-        <!-- 교사·과목 관리 섹션 -->
+        <!-- 援먯궗쨌怨쇰ぉ 愿由??뱀뀡 -->
         <div class="p-3 flex flex-col gap-0.5">
           <button
             class="flex items-center gap-2.5 w-full min-h-10 py-2 px-3 rounded-lg font-medium border-0 leading-tight"
@@ -104,7 +104,7 @@
 
         <div class="mx-3 mt-1 h-px" style="background: var(--color-border)"></div>
 
-        <!-- 문제 은행 -->
+        <!-- 臾몄젣 ???-->
         <div class="p-3">
           <router-link
             to="/problem-bank"
@@ -117,12 +117,12 @@
           </router-link>
         </div>
 
-        <!-- 스페이서 -->
+        <!-- ?ㅽ럹?댁꽌 -->
         <div class="flex-1"></div>
 
         <div class="mx-3 h-px" style="background: var(--color-border)"></div>
 
-        <!-- LMS 기본 설정 (하단 고정) -->
+        <!-- LMS 湲곕낯 ?ㅼ젙 (?섎떒 怨좎젙) -->
         <div class="p-3">
           <button
             class="flex items-center gap-2.5 w-full min-h-10 py-2 px-3 rounded-lg font-medium border-0 leading-tight"
@@ -138,10 +138,10 @@
 
       </aside>
 
-      <!-- ── 메인 콘텐츠 ── -->
+      <!-- ?? 硫붿씤 肄섑뀗痢??? -->
       <main class="flex-1 overflow-y-auto px-6 pt-4 pb-16">
 
-        <!-- 수업 전체 탭 -->
+        <!-- ?섏뾽 ?꾩껜 ??-->
         <template v-if="activeSection === 'classes'">
           <div class="flex items-center justify-between mb-6 min-h-9">
             <h2 class="font-semibold tracking-widest uppercase"
@@ -214,8 +214,8 @@
                   <td class="px-5 py-3">
                     <router-link
                       :to="`/classes/${cls.id}`"
-                      class="w-8 h-8 rounded-lg flex items-center justify-center no-underline"
-                      style="border: 1px solid var(--color-border); color: var(--color-text-muted); background: transparent"
+                      class="w-8 h-8 rounded-lg flex items-center justify-center no-underline border bg-transparent"
+                      style="border-color: var(--color-border); color: var(--color-text-muted);"
                     >
                       <IconChevronRight :size="14" />
                     </router-link>
@@ -226,23 +226,23 @@
           </div>
         </template>
 
-        <!-- 교사 관리 탭 -->
+        <!-- 援먯궗 愿由???-->
         <template v-else-if="activeSection === 'teachers'">
           <div class="flex items-center justify-between mb-6 min-h-9">
             <h2 class="font-semibold tracking-widest uppercase"
                 style="color: var(--color-text-muted)">{{ $t('admin.teachers') }}</h2>
             <div class="flex items-center gap-2">
               <button
-                class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium"
-                style="border: 1px solid var(--color-border); color: var(--color-text-primary); background: var(--color-bg-secondary)"
+                class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium border"
+                style="border-color: var(--color-border); color: var(--color-text-primary); background: var(--color-bg-secondary);"
                 @click="showImportTeachersModal = true"
               >
                 <IconUpload :size="17" />
                 {{ $t('admin.importTeachers') }}
               </button>
               <button
-                class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium"
-                style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+                class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium border-0"
+                style="background: var(--color-accent); color: var(--color-accent-text);"
                 @click="openAddTeacherModal"
               >
                 <IconPlus :size="17" />
@@ -267,8 +267,8 @@
             <IconAlertCircle :size="20" class="shrink-0" />
             <span>{{ $t(`errors.${adminStore.error}`, $t('errors.ERR_UNKNOWN')) }}</span>
             <button
-              class="ml-auto h-8 px-3 rounded-lg font-medium"
-              style="background: transparent; border: 1px solid var(--color-danger-border); color: var(--color-danger)"
+              class="ml-auto h-8 px-3 rounded-lg font-medium border bg-transparent"
+              style="border-color: var(--color-danger-border); color: var(--color-danger);"
               @click="adminStore.fetchTeachers()"
             >{{ $t('common.retry') }}</button>
           </div>
@@ -332,16 +332,16 @@
                   <td class="px-5 py-3">
                     <div class="flex items-center gap-1">
                       <button
-                        class="w-8 h-8 p-0 rounded-lg flex items-center justify-center"
-                        style="background: transparent; border: 1px solid var(--color-border); color: var(--color-text-muted)"
+                        class="w-8 h-8 p-0 rounded-lg flex items-center justify-center border bg-transparent"
+                        style="border-color: var(--color-border); color: var(--color-text-muted);"
                         @click="openEditTeacherModal(teacher)"
                         :aria-label="$t('admin.editTeacher')"
                       >
                         <IconPencil :size="14" />
                       </button>
                       <button
-                        class="w-8 h-8 p-0 rounded-lg flex items-center justify-center"
-                        style="background: transparent; border: 1px solid var(--color-border); color: var(--color-text-muted)"
+                        class="w-8 h-8 p-0 rounded-lg flex items-center justify-center border bg-transparent"
+                        style="border-color: var(--color-border); color: var(--color-text-muted);"
                         @click="openDeleteTeacherModal(teacher)"
                         :aria-label="$t('admin.deleteTeacher')"
                         :disabled="teacher.id === auth.teacher?.id"
@@ -356,7 +356,7 @@
           </div>
         </template>
 
-        <!-- LMS 기본 설정 탭 -->
+        <!-- LMS 湲곕낯 ?ㅼ젙 ??-->
         <template v-else-if="activeSection === 'appSettings'">
           <div class="flex items-center justify-between mb-6 min-h-9">
             <h2 class="font-semibold tracking-widest uppercase"
@@ -388,7 +388,7 @@
               <span>{{ $t('admin.appSettingsSaveSuccess') }}</span>
             </div>
 
-            <!-- 학교 이름 -->
+            <!-- ?숆탳 ?대쫫 -->
             <div class="flex flex-col gap-2">
               <label class="font-medium" style="color: var(--color-text-primary)">
                 {{ $t('admin.appSettingsSchoolName') }}
@@ -402,7 +402,7 @@
               />
             </div>
 
-            <!-- 기본 언어 -->
+            <!-- 湲곕낯 ?몄뼱 -->
             <div class="flex flex-col gap-2">
               <label class="font-medium" style="color: var(--color-text-primary)">
                 {{ $t('admin.appSettingsDefaultLocale') }}
@@ -420,8 +420,8 @@
             </div>
 
             <button
-              class="h-12 px-6 rounded-lg font-medium flex items-center justify-center gap-2"
-              style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+              class="h-12 px-6 rounded-lg font-medium flex items-center justify-center gap-2 border-0"
+              style="background: var(--color-accent); color: var(--color-accent-text);"
               :disabled="isSavingAppSettings"
               :class="isSavingAppSettings ? 'opacity-60 cursor-not-allowed' : ''"
               @click="onSaveAppSettings"
@@ -433,23 +433,23 @@
           </div>
         </template>
 
-        <!-- 과목 관리 탭 -->
+        <!-- 怨쇰ぉ 愿由???-->
         <template v-else-if="activeSection === 'subjects'">
           <div class="flex items-center justify-between mb-6 min-h-9">
             <h2 class="font-semibold tracking-widest uppercase"
                 style="color: var(--color-text-muted)">{{ $t('admin.subjects') }}</h2>
             <div class="flex items-center gap-2">
               <button
-                class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium"
-                style="border: 1px solid var(--color-border); color: var(--color-text-primary); background: var(--color-bg-secondary)"
+                class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium border"
+                style="border-color: var(--color-border); color: var(--color-text-primary); background: var(--color-bg-secondary);"
                 @click="showImportSubjectsModal = true"
               >
                 <IconUpload :size="17" />
                 {{ $t('admin.importSubjects') }}
               </button>
               <button
-                class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium"
-                style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+                class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium border-0"
+                style="background: var(--color-accent); color: var(--color-accent-text);"
                 @click="openAddSubjectModal"
               >
                 <IconPlus :size="17" />
@@ -479,8 +479,8 @@
                   </td>
                   <td class="px-5 py-3 w-16">
                     <button
-                      class="w-8 h-8 p-0 rounded-lg flex items-center justify-center"
-                      style="background: transparent; border: 1px solid var(--color-border); color: var(--color-text-muted)"
+                      class="w-8 h-8 p-0 rounded-lg flex items-center justify-center border bg-transparent"
+                      style="border-color: var(--color-border); color: var(--color-text-muted);"
                       @click="openDeleteSubjectModal(subject)"
                       :aria-label="$t('admin.deleteTeacher')"
                     >
@@ -496,14 +496,14 @@
       </main>
     </div>
 
-    <!-- ── Add Teacher Modal ── -->
+    <!-- ?? Add Teacher Modal ?? -->
     <Teleport to="body">
       <div v-if="showAddTeacherModal"
            class="fixed inset-0 z-50 overflow-y-auto"
            style="background: var(--color-modal-overlay)">
         <div class="flex min-h-full items-center justify-center px-4 py-4">
-        <div class="w-full max-w-lg rounded-xl p-6"
-             style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
+        <div class="w-full max-w-lg rounded-xl p-6 border"
+             style="background: var(--color-bg-secondary); border-color: var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-5" style="color: var(--color-text-primary)">
             {{ $t('admin.addTeacher') }}
           </h2>
@@ -543,12 +543,12 @@
               <span>{{ addTeacherError }}</span>
             </div>
             <div class="flex justify-end gap-3 pt-1">
-              <button type="button" class="h-10 px-5 rounded-lg font-medium"
-                      style="border: 1px solid var(--color-border); color: var(--color-text-primary); background: transparent"
+              <button type="button" class="h-10 px-5 rounded-lg font-medium border bg-transparent"
+                      style="border-color: var(--color-border); color: var(--color-text-primary);"
                       @click="closeModals">{{ $t('admin.cancel') }}</button>
               <button type="submit" :disabled="isAddingTeacher"
-                      class="h-10 px-5 rounded-lg font-medium flex items-center gap-2"
-                      style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+                      class="h-10 px-5 rounded-lg font-medium flex items-center gap-2 border-0"
+                      style="background: var(--color-accent); color: var(--color-accent-text);"
                       :class="isAddingTeacher ? 'opacity-60 cursor-not-allowed' : ''">
                 <IconLoader2 v-if="isAddingTeacher" :size="17" class="spin" />
                 {{ isAddingTeacher ? $t('admin.adding') : $t('admin.add') }}
@@ -560,14 +560,14 @@
       </div>
     </Teleport>
 
-    <!-- ── Edit Teacher Modal ── -->
+    <!-- ?? Edit Teacher Modal ?? -->
     <Teleport to="body">
       <div v-if="showEditTeacherModal"
            class="fixed inset-0 z-50 overflow-y-auto"
            style="background: var(--color-modal-overlay)">
         <div class="flex min-h-full items-center justify-center px-4 py-4">
-        <div class="w-full max-w-lg rounded-xl p-6"
-             style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
+        <div class="w-full max-w-lg rounded-xl p-6 border"
+             style="background: var(--color-bg-secondary); border-color: var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-5" style="color: var(--color-text-primary)">
             {{ $t('admin.editTeacher') }}
           </h2>
@@ -604,12 +604,12 @@
               <span>{{ editTeacherError }}</span>
             </div>
             <div class="flex justify-end gap-3 pt-1">
-              <button type="button" class="h-10 px-5 rounded-lg font-medium"
-                      style="border: 1px solid var(--color-border); color: var(--color-text-primary); background: transparent"
+              <button type="button" class="h-10 px-5 rounded-lg font-medium border bg-transparent"
+                      style="border-color: var(--color-border); color: var(--color-text-primary);"
                       @click="closeModals">{{ $t('admin.cancel') }}</button>
               <button type="submit" :disabled="isSavingTeacher"
-                      class="h-10 px-5 rounded-lg font-medium flex items-center gap-2"
-                      style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+                      class="h-10 px-5 rounded-lg font-medium flex items-center gap-2 border-0"
+                      style="background: var(--color-accent); color: var(--color-accent-text);"
                       :class="isSavingTeacher ? 'opacity-60 cursor-not-allowed' : ''">
                 <IconLoader2 v-if="isSavingTeacher" :size="17" class="spin" />
                 {{ isSavingTeacher ? $t('admin.saving') : $t('admin.save') }}
@@ -621,14 +621,14 @@
       </div>
     </Teleport>
 
-    <!-- ── Delete Teacher Modal ── -->
+    <!-- ?? Delete Teacher Modal ?? -->
     <Teleport to="body">
       <div v-if="showDeleteTeacherModal"
            class="fixed inset-0 z-50 overflow-y-auto"
            style="background: var(--color-modal-overlay)">
         <div class="flex min-h-full items-center justify-center px-4 py-4">
-        <div class="w-full max-w-md rounded-xl p-6"
-             style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
+        <div class="w-full max-w-md rounded-xl p-6 border"
+             style="background: var(--color-bg-secondary); border-color: var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-2" style="color: var(--color-text-primary)">{{ $t('admin.deleteTeacher') }}</h2>
           <p class="mb-1" style="color: var(--color-text-primary)">
             {{ $t('admin.deleteTeacherConfirm', { name: deleteTeacherTarget?.name }) }}
@@ -642,12 +642,12 @@
             <span>{{ deleteTeacherError }}</span>
           </div>
           <div class="flex justify-end gap-3">
-            <button class="h-10 px-5 rounded-lg font-medium"
-                    style="border: 1px solid var(--color-border); color: var(--color-text-primary); background: transparent"
+            <button class="h-10 px-5 rounded-lg font-medium border bg-transparent"
+                    style="border-color: var(--color-border); color: var(--color-text-primary);"
                     @click="closeModals" :disabled="isDeletingTeacher">{{ $t('admin.cancel') }}</button>
             <button :disabled="isDeletingTeacher"
-                    class="h-10 px-5 rounded-lg font-medium flex items-center gap-2"
-                    style="background: var(--color-danger); color: var(--color-accent-text); border: none"
+                    class="h-10 px-5 rounded-lg font-medium flex items-center gap-2 border-0"
+                    style="background: var(--color-danger); color: var(--color-accent-text);"
                     :class="isDeletingTeacher ? 'opacity-60 cursor-not-allowed' : ''"
                     @click="onDeleteTeacherConfirm">
               <IconLoader2 v-if="isDeletingTeacher" :size="17" class="spin" />
@@ -659,14 +659,14 @@
       </div>
     </Teleport>
 
-    <!-- ── Add Subject Modal ── -->
+    <!-- ?? Add Subject Modal ?? -->
     <Teleport to="body">
       <div v-if="showAddSubjectModal"
            class="fixed inset-0 z-50 overflow-y-auto"
            style="background: var(--color-modal-overlay)">
         <div class="flex min-h-full items-center justify-center px-4 py-4">
-        <div class="w-full max-w-md rounded-xl p-6"
-             style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
+        <div class="w-full max-w-md rounded-xl p-6 border"
+             style="background: var(--color-bg-secondary); border-color: var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-5" style="color: var(--color-text-primary)">{{ $t('admin.addSubject') }}</h2>
           <form @submit.prevent="onAddSubjectSubmit" novalidate class="flex flex-col gap-4">
             <div class="flex flex-col gap-2">
@@ -684,12 +684,12 @@
               <span>{{ addSubjectError }}</span>
             </div>
             <div class="flex justify-end gap-3 pt-1">
-              <button type="button" class="h-10 px-5 rounded-lg font-medium"
-                      style="border: 1px solid var(--color-border); color: var(--color-text-primary); background: transparent"
+              <button type="button" class="h-10 px-5 rounded-lg font-medium border bg-transparent"
+                      style="border-color: var(--color-border); color: var(--color-text-primary);"
                       @click="closeModals">{{ $t('admin.cancel') }}</button>
               <button type="submit" :disabled="isAddingSubject"
-                      class="h-10 px-5 rounded-lg font-medium flex items-center gap-2"
-                      style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+                      class="h-10 px-5 rounded-lg font-medium flex items-center gap-2 border-0"
+                      style="background: var(--color-accent); color: var(--color-accent-text);"
                       :class="isAddingSubject ? 'opacity-60 cursor-not-allowed' : ''">
                 <IconLoader2 v-if="isAddingSubject" :size="17" class="spin" />
                 {{ isAddingSubject ? $t('admin.adding') : $t('admin.add') }}
@@ -701,14 +701,14 @@
       </div>
     </Teleport>
 
-    <!-- ── Delete Subject Modal ── -->
+    <!-- ?? Delete Subject Modal ?? -->
     <Teleport to="body">
       <div v-if="showDeleteSubjectModal"
            class="fixed inset-0 z-50 overflow-y-auto"
            style="background: var(--color-modal-overlay)">
         <div class="flex min-h-full items-center justify-center px-4 py-4">
-        <div class="w-full max-w-md rounded-xl p-6"
-             style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
+        <div class="w-full max-w-md rounded-xl p-6 border"
+             style="background: var(--color-bg-secondary); border-color: var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-2" style="color: var(--color-text-primary)">{{ $t('admin.subjects') }}</h2>
           <p class="mb-1" style="color: var(--color-text-primary)">
             {{ $t('admin.deleteSubjectConfirm', { name: deleteSubjectTarget?.name }) }}
@@ -722,12 +722,12 @@
             <span>{{ deleteSubjectError }}</span>
           </div>
           <div class="flex justify-end gap-3">
-            <button class="h-10 px-5 rounded-lg font-medium"
-                    style="border: 1px solid var(--color-border); color: var(--color-text-primary); background: transparent"
+            <button class="h-10 px-5 rounded-lg font-medium border bg-transparent"
+                    style="border-color: var(--color-border); color: var(--color-text-primary);"
                     @click="closeModals" :disabled="isDeletingSubject">{{ $t('admin.cancel') }}</button>
             <button :disabled="isDeletingSubject"
-                    class="h-10 px-5 rounded-lg font-medium flex items-center gap-2"
-                    style="background: var(--color-danger); color: var(--color-accent-text); border: none"
+                    class="h-10 px-5 rounded-lg font-medium flex items-center gap-2 border-0"
+                    style="background: var(--color-danger); color: var(--color-accent-text);"
                     :class="isDeletingSubject ? 'opacity-60 cursor-not-allowed' : ''"
                     @click="onDeleteSubjectConfirm">
               <IconLoader2 v-if="isDeletingSubject" :size="17" class="spin" />
@@ -741,7 +741,7 @@
 
     <SettingsModal v-model="showSettings" />
 
-    <!-- ── Import Teachers Modal ── -->
+    <!-- ?? Import Teachers Modal ?? -->
     <ImportModal
       v-model:show="showImportTeachersModal"
       :title="$t('admin.importTeachers')"
@@ -754,7 +754,7 @@
       :on-import="handleImportTeachers"
     />
 
-    <!-- ── Import Subjects Modal ── -->
+    <!-- ?? Import Subjects Modal ?? -->
     <ImportModal
       v-model:show="showImportSubjectsModal"
       :title="$t('admin.importSubjects')"
@@ -800,7 +800,7 @@ const isLoggingOut = ref(false)
 const showSettings = ref(false)
 const activeSection = ref<'classes' | 'teachers' | 'subjects' | 'appSettings'>('classes')
 
-// ── Modal visibility flags ─────────────────────────────────────
+// ?? Modal visibility flags ?????????????????????????????????????
 const showAddTeacherModal = ref(false)
 const showEditTeacherModal = ref(false)
 const showDeleteTeacherModal = ref(false)
@@ -809,15 +809,15 @@ const showDeleteSubjectModal = ref(false)
 const showImportTeachersModal = ref(false)
 const showImportSubjectsModal = ref(false)
 
-// ── Import config ──────────────────────────────────────────────
+// ?? Import config ??????????????????????????????????????????????
 const teacherSynonymMap: SynonymMap = {
-  name: ['name', '이름', '성명'],
-  username: ['username', 'id', '아이디'],
-  password: ['password', 'pw', '비밀번호', '패스워드'],
-  role: ['role', '역할', '권한'],
+  name: ['name', '?대쫫', '?깅챸'],
+  username: ['username', 'id', '?꾩씠??],
+  password: ['password', 'pw', '鍮꾨?踰덊샇', '?⑥뒪?뚮뱶'],
+  role: ['role', '??븷', '沅뚰븳'],
 }
 const subjectSynonymMap: SynonymMap = {
-  name: ['name', 'subject', '과목명', '과목', '과목 이름', 'subject name'],
+  name: ['name', 'subject', '怨쇰ぉ紐?, '怨쇰ぉ', '怨쇰ぉ ?대쫫', 'subject name'],
 }
 const teacherImportColumns = [
   { key: 'name', labelKey: 'admin.teacherName' },
@@ -836,7 +836,7 @@ const teacherTemplateHeaders = computed(() => [
 ])
 const subjectTemplateHeaders = computed(() => [t('admin.subjectName')])
 
-// ── Teacher modal state ────────────────────────────────────────
+// ?? Teacher modal state ????????????????????????????????????????
 const editTeacherTarget = ref<AdminTeacher | null>(null)
 const deleteTeacherTarget = ref<AdminTeacher | null>(null)
 const addTeacherForm = ref({ name: '', username: '', password: '', role: 'teacher' })
@@ -848,7 +848,7 @@ const addTeacherError = ref<string | null>(null)
 const editTeacherError = ref<string | null>(null)
 const deleteTeacherError = ref<string | null>(null)
 
-// ── App settings state ─────────────────────────────────────────
+// ?? App settings state ?????????????????????????????????????????
 const appSettingsForm = ref({ school_name: '', locale: 'ko' })
 const appSettingsLoading = ref(false)
 const isSavingAppSettings = ref(false)
@@ -879,7 +879,7 @@ async function onSaveAppSettings() {
   try {
     await api.admin.updateAppSettings(appSettingsForm.value)
     appSettingsSuccess.value = true
-    // 학교 이름이 바뀌었을 수 있으므로 store 갱신
+    // ?숆탳 ?대쫫??諛붾뚯뿀?????덉쑝誘濡?store 媛깆떊
     await auth.fetchSchoolName()
   } catch (e) {
     const code = e instanceof Error ? e.message : 'ERR_UNKNOWN'
@@ -889,7 +889,7 @@ async function onSaveAppSettings() {
   }
 }
 
-// ── Subject modal state ────────────────────────────────────────
+// ?? Subject modal state ????????????????????????????????????????
 const deleteSubjectTarget = ref<Subject | null>(null)
 const addSubjectName = ref('')
 const isAddingSubject = ref(false)
@@ -897,13 +897,13 @@ const isDeletingSubject = ref(false)
 const addSubjectError = ref<string | null>(null)
 const deleteSubjectError = ref<string | null>(null)
 
-// ── Theme ──────────────────────────────────────────────────────
+// ?? Theme ??????????????????????????????????????????????????????
 function toggleTheme() {
   isDark.value = !isDark.value
   document.documentElement.setAttribute('data-theme', isDark.value ? 'dark' : 'light')
 }
 
-// ── Logout ─────────────────────────────────────────────────────
+// ?? Logout ?????????????????????????????????????????????????????
 async function onLogout() {
   if (isLoggingOut.value) return
   isLoggingOut.value = true
@@ -915,7 +915,7 @@ async function onLogout() {
   }
 }
 
-// ── Modal helpers ──────────────────────────────────────────────
+// ?? Modal helpers ??????????????????????????????????????????????
 function closeModals() {
   showAddTeacherModal.value = false
   showEditTeacherModal.value = false
@@ -956,7 +956,7 @@ function onKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') closeModals()
 }
 
-// ── Teacher actions ────────────────────────────────────────────
+// ?? Teacher actions ????????????????????????????????????????????
 async function onAddTeacherSubmit() {
   if (isAddingTeacher.value) return
   addTeacherError.value = null
@@ -1003,7 +1003,7 @@ async function onDeleteTeacherConfirm() {
   }
 }
 
-// ── Import handlers ────────────────────────────────────────────
+// ?? Import handlers ????????????????????????????????????????????
 async function handleImportTeachers(rows: Record<string, string>[]) {
   const data = rows.map((r) => ({
     name: r.name,
@@ -1019,7 +1019,7 @@ async function handleImportSubjects(rows: Record<string, string>[]) {
   return await adminStore.importSubjects(data)
 }
 
-// ── Subject actions ────────────────────────────────────────────
+// ?? Subject actions ????????????????????????????????????????????
 async function onAddSubjectSubmit() {
   if (isAddingSubject.value) return
   addSubjectError.value = null
@@ -1050,7 +1050,7 @@ async function onDeleteSubjectConfirm() {
   }
 }
 
-// ── Lifecycle ──────────────────────────────────────────────────
+// ?? Lifecycle ??????????????????????????????????????????????????
 onMounted(async () => {
   if (!auth.teacher) {
     try { await auth.fetchTeacherMe() } catch { router.push('/login'); return }

@@ -14,8 +14,8 @@
 
         <div class="flex items-center gap-2">
           <button
-            class="w-9 h-9 p-0 rounded-lg flex items-center justify-center cursor-pointer"
-            style="border: 1px solid var(--color-border); color: var(--color-text-muted); background: transparent"
+            class="w-9 h-9 p-0 rounded-lg flex items-center justify-center cursor-pointer border bg-transparent"
+            style="border-color: var(--color-border); color: var(--color-text-muted);"
             @click="toggleTheme"
             :aria-label="$t('auth.toggleTheme')"
           >
@@ -104,9 +104,9 @@
           <button
             type="submit"
             :disabled="isSubmitting"
-            class="login-submit h-12 w-full flex items-center justify-center gap-2 rounded-lg font-semibold cursor-pointer transition-opacity"
+            class="login-submit h-12 w-full flex items-center justify-center gap-2 rounded-lg font-semibold cursor-pointer transition-opacity border"
             :class="isSubmitting ? 'opacity-60 cursor-not-allowed' : ''"
-            style="background: var(--color-accent); color: var(--color-accent-text); border: 1px solid var(--color-accent)"
+            style="background: var(--color-accent); color: var(--color-accent-text); border-color: var(--color-accent);"
           >
             <IconLoader2 v-if="isSubmitting" :size="20" class="spin" />
             {{ isSubmitting ? $t('auth.signingIn') : $t('auth.signIn') }}

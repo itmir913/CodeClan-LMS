@@ -22,8 +22,8 @@
             {{ $t('auth.settingsTitle') }}
           </h2>
           <button
-            class="w-8 h-8 p-0 rounded-lg flex items-center justify-center"
-            style="border: 1px solid var(--color-border); color: var(--color-text-muted); background: transparent"
+            class="w-8 h-8 p-0 rounded-lg flex items-center justify-center border bg-transparent"
+            style="border-color: var(--color-border); color: var(--color-text-muted);"
             @click="$emit('update:modelValue', false)"
             :aria-label="$t('common.cancel')"
           >
@@ -32,7 +32,7 @@
         </div>
 
         <!-- Body -->
-        <div class="px-6 py-5 flex flex-col gap-6 overflow-y-auto" style="max-height: 70vh">
+        <div class="px-6 py-5 flex flex-col gap-6 overflow-y-auto modal-body">
 
           <!-- ── 이름 변경 (교사/admin 전용) ── -->
           <section v-if="isTeacher">
@@ -65,7 +65,8 @@
               />
               <button
                 class="h-10 px-4 rounded-lg font-medium flex items-center gap-2 shrink-0"
-                style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+                class="border-0"
+                style="background: var(--color-accent); color: var(--color-accent-text);"
                 :disabled="isSavingName"
                 @click="onSaveName"
               >
@@ -171,7 +172,8 @@
               </div>
               <button
                 class="h-10 px-4 rounded-lg font-medium flex items-center justify-center gap-2 w-full"
-                style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+                class="border-0"
+                style="background: var(--color-accent); color: var(--color-accent-text);"
                 :disabled="isSavingPw"
                 @click="onSavePw"
               >
@@ -297,6 +299,9 @@ watch(
 </script>
 
 <style scoped>
+.modal-body {
+  max-height: 70vh;
+}
 .password-input::-ms-reveal,
 .password-input::-ms-clear {
   display: none;

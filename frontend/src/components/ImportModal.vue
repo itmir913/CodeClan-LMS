@@ -7,8 +7,8 @@
     >
       <div class="flex min-h-full items-center justify-center px-4 py-4">
       <div
-        class="w-full max-w-3xl rounded-xl p-6"
-        style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)"
+        class="w-full max-w-3xl rounded-xl p-6 border"
+        style="background: var(--color-bg-secondary); border-color: var(--color-border); box-shadow: var(--shadow-dropdown)"
       >
         <!-- Header -->
         <div class="flex items-center justify-between mb-5">
@@ -154,8 +154,8 @@
           <button
             v-if="!importResult"
             type="button"
-            class="h-10 px-5 rounded-lg font-medium"
-            style="border: 1px solid var(--color-border); color: var(--color-text-primary); background: transparent"
+            class="h-10 px-5 rounded-lg font-medium border bg-transparent"
+            style="border-color: var(--color-border); color: var(--color-text-primary);"
             @click="emit('update:show', false)"
           >
             {{ $t('common.cancel') }}
@@ -163,8 +163,8 @@
           <button
             v-if="!importResult"
             :disabled="isImporting || parsedRows.length === 0"
-            class="h-10 px-5 rounded-lg font-medium flex items-center gap-2"
-            style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+            class="h-10 px-5 rounded-lg font-medium flex items-center gap-2 border-0"
+            style="background: var(--color-accent); color: var(--color-accent-text);"
             :class="(isImporting || parsedRows.length === 0) ? 'opacity-60 cursor-not-allowed' : ''"
             @click="onImportClick"
           >
@@ -174,8 +174,8 @@
           <button
             v-if="importResult"
             type="button"
-            class="h-10 px-5 rounded-lg font-medium"
-            style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+            class="h-10 px-5 rounded-lg font-medium border-0"
+            style="background: var(--color-accent); color: var(--color-accent-text);"
             @click="emit('update:show', false)"
           >
             {{ $t('common.close') }}

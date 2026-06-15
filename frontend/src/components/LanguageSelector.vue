@@ -2,31 +2,30 @@
   <div class="relative" ref="containerRef">
     <button
       type="button"
-      class="flex items-center gap-1.5 rounded-md h-9 py-0 px-3"
-      style="background: transparent; border: 1px solid var(--color-border); color: var(--color-text-muted);"
+      class="flex items-center gap-1.5 rounded-md h-9 py-0 px-3 border bg-transparent"
+      style="border-color: var(--color-border); color: var(--color-text-muted);"
       @click="open = !open"
     >
       <IconLanguage :size="16" />
       <span class="font-medium">{{ currentLabel }}</span>
-      <IconChevronDown :size="14" :style="{ transform: open ? 'rotate(180deg)' : '', transition: 'transform 0.15s' }" />
+      <IconChevronDown :size="14" class="transition-transform duration-150" :class="{ 'rotate-180': open }" />
     </button>
 
     <Transition name="dropdown">
       <div
         v-if="open"
-        class="absolute right-0 mt-1 rounded-md overflow-hidden z-50"
-        style="min-width: 120px; background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown);"
+        class="absolute right-0 mt-1 rounded-md overflow-hidden z-50 border lang-dropdown"
+        style="background: var(--color-bg-secondary); border-color: var(--color-border); box-shadow: var(--shadow-dropdown);"
       >
         <button
           v-for="lang in languages"
           :key="lang.code"
           type="button"
-          class="w-full flex items-center gap-2 px-4 py-2.5 text-left"
+          class="w-full flex items-center gap-2 px-4 py-2.5 text-left border-0 bg-transparent"
+          :class="locale === lang.code ? 'font-semibold' : 'font-normal'"
           :style="{
-            background: locale === lang.code ? 'var(--color-info-bg)' : 'transparent',
+            background: locale === lang.code ? 'var(--color-info-bg)' : undefined,
             color: locale === lang.code ? 'var(--color-accent)' : 'var(--color-text-primary)',
-            border: 'none',
-            fontWeight: locale === lang.code ? '600' : '400',
           }"
           @click="select(lang.code)"
         >
@@ -75,6 +74,9 @@ onUnmounted(() => document.removeEventListener('mousedown', onOutsideClick))
 </script>
 
 <style scoped>
+.lang-dropdown {
+  min-width: 120px;
+}
 .dropdown-enter-active,
 .dropdown-leave-active {
   transition: opacity 0.1s, transform 0.1s;

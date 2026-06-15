@@ -8,8 +8,8 @@
       <!-- 상단: 뒤로 가기 + 수업명 -->
       <div class="px-4 pt-5 pb-0">
         <button
-          class="flex items-center gap-2 h-9 px-2 rounded-lg border-0"
-          style="background: transparent; color: var(--color-text-muted)"
+          class="flex items-center gap-2 h-9 px-2 rounded-lg border-0 bg-transparent"
+          style="color: var(--color-text-muted);"
           @click="goBack"
         >
           <IconArrowLeft :size="16" />
@@ -76,8 +76,8 @@
         </span>
         <div class="flex items-center gap-2">
           <button
-            class="w-9 h-9 p-0 rounded-lg flex items-center justify-center"
-            style="border: 1px solid var(--color-border); color: var(--color-text-muted); background: transparent"
+            class="w-9 h-9 p-0 rounded-lg flex items-center justify-center border bg-transparent"
+            style="border-color: var(--color-border); color: var(--color-text-muted);"
             @click="toggleTheme"
             :aria-label="$t('auth.toggleTheme')"
           >
@@ -118,8 +118,8 @@
               </div>
               <!-- 개별 추가 -->
               <button
-                class="h-9 px-4 rounded-lg flex items-center gap-1.5 font-medium"
-                style="border: 1px solid var(--color-border); color: var(--color-text-primary); background: var(--color-bg-secondary)"
+                class="h-9 px-4 rounded-lg flex items-center gap-1.5 font-medium border"
+                style="border-color: var(--color-border); color: var(--color-text-primary); background: var(--color-bg-secondary);"
                 @click="openAddModal"
               >
                 <IconUserPlus :size="15" />
@@ -127,8 +127,8 @@
               </button>
               <!-- 엑셀 임포트 -->
               <button
-                class="h-9 px-4 rounded-lg flex items-center gap-1.5 font-semibold"
-                style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+                class="h-9 px-4 rounded-lg flex items-center gap-1.5 font-semibold border-0"
+                style="background: var(--color-accent); color: var(--color-accent-text);"
                 @click="showImportModal = true"
               >
                 <IconUpload :size="15" />
@@ -153,16 +153,15 @@
             <IconAlertCircle :size="20" class="shrink-0" />
             <span>{{ $t(`errors.${studentStore.error}`, $t('errors.ERR_UNKNOWN')) }}</span>
             <button
-              class="ml-auto h-8 px-3 rounded-lg font-medium"
-              style="background: transparent; border: 1px solid var(--color-danger-border); color: var(--color-danger)"
+              class="ml-auto h-8 px-3 rounded-lg font-medium border bg-transparent"
+              style="border-color: var(--color-danger-border); color: var(--color-danger);"
               @click="loadStudents"
             >{{ $t('common.retry') }}</button>
           </div>
 
           <!-- 빈 상태 -->
           <div v-else-if="filteredStudents.length === 0 && !searchQuery"
-               class="flex flex-col items-center justify-center py-20 rounded-2xl border"
-               style="border: 1.5px dashed var(--color-border)">
+               class="flex flex-col items-center justify-center py-20 rounded-2xl student-empty-state">
             <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
                  style="background: var(--color-info-bg); color: var(--color-accent)">
               <IconUsers :size="28" />
@@ -235,16 +234,16 @@
                   <td class="px-5 py-3">
                     <div class="flex items-center gap-1 justify-end">
                       <button
-                        class="w-8 h-8 p-0 rounded-lg flex items-center justify-center"
-                        style="background: transparent; border: 1px solid var(--color-border); color: var(--color-text-muted)"
+                        class="w-8 h-8 p-0 rounded-lg flex items-center justify-center border bg-transparent"
+                        style="border-color: var(--color-border); color: var(--color-text-muted);"
                         @click="openResetPasswordModal(student)"
                         :aria-label="$t('students.resetPassword')"
                       >
                         <IconKey :size="14" />
                       </button>
                       <button
-                        class="w-8 h-8 p-0 rounded-lg flex items-center justify-center"
-                        style="background: transparent; border: 1px solid var(--color-border); color: var(--color-text-muted)"
+                        class="w-8 h-8 p-0 rounded-lg flex items-center justify-center border bg-transparent"
+                        style="border-color: var(--color-border); color: var(--color-text-muted);"
                         @click="openDeleteModal(student)"
                         :aria-label="$t('students.deleteStudent')"
                       >
@@ -278,8 +277,8 @@
            class="fixed inset-0 z-50 overflow-y-auto"
            style="background: var(--color-modal-overlay)">
         <div class="flex min-h-full items-center justify-center px-4 py-4">
-        <div class="w-full max-w-md rounded-xl p-6"
-             style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
+        <div class="w-full max-w-md rounded-xl p-6 border"
+             style="background: var(--color-bg-secondary); border-color: var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-5" style="color: var(--color-text-primary)">
             {{ $t('students.addStudent') }}
           </h2>
@@ -318,12 +317,12 @@
               <span>{{ addError }}</span>
             </div>
             <div class="flex justify-end gap-3 pt-1">
-              <button type="button" class="h-10 px-5 rounded-lg font-medium"
-                      style="border: 1px solid var(--color-border); color: var(--color-text-primary); background: transparent"
+              <button type="button" class="h-10 px-5 rounded-lg font-medium border bg-transparent"
+                      style="border-color: var(--color-border); color: var(--color-text-primary);"
                       @click="closeModals">{{ $t('students.cancel') }}</button>
               <button type="submit" :disabled="isAdding"
-                      class="h-10 px-5 rounded-lg font-medium flex items-center gap-2"
-                      style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+                      class="h-10 px-5 rounded-lg font-medium flex items-center gap-2 border-0"
+                      style="background: var(--color-accent); color: var(--color-accent-text);"
                       :class="isAdding ? 'opacity-60 cursor-not-allowed' : ''">
                 <IconLoader2 v-if="isAdding" :size="17" class="spin" />
                 {{ isAdding ? $t('students.adding') : $t('students.add') }}
@@ -354,8 +353,8 @@
            class="fixed inset-0 z-50 overflow-y-auto"
            style="background: var(--color-modal-overlay)">
         <div class="flex min-h-full items-center justify-center px-4 py-4">
-        <div class="w-full max-w-md rounded-xl p-6"
-             style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
+        <div class="w-full max-w-md rounded-xl p-6 border"
+             style="background: var(--color-bg-secondary); border-color: var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-2" style="color: var(--color-text-primary)">
             {{ $t('students.resetPassword') }}
           </h2>
@@ -373,12 +372,12 @@
             <span>{{ resetError }}</span>
           </div>
           <div class="flex justify-end gap-3">
-            <button class="h-10 px-5 rounded-lg font-medium"
-                    style="border: 1px solid var(--color-border); color: var(--color-text-primary); background: transparent"
+            <button class="h-10 px-5 rounded-lg font-medium border bg-transparent"
+                    style="border-color: var(--color-border); color: var(--color-text-primary);"
                     @click="closeModals" :disabled="isResetting">{{ $t('students.cancel') }}</button>
             <button :disabled="isResetting"
-                    class="h-10 px-5 rounded-lg font-medium flex items-center gap-2"
-                    style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+                    class="h-10 px-5 rounded-lg font-medium flex items-center gap-2 border-0"
+                    style="background: var(--color-accent); color: var(--color-accent-text);"
                     :class="isResetting ? 'opacity-60 cursor-not-allowed' : ''"
                     @click="onResetConfirm">
               <IconLoader2 v-if="isResetting" :size="17" class="spin" />
@@ -396,8 +395,8 @@
            class="fixed inset-0 z-50 overflow-y-auto"
            style="background: var(--color-modal-overlay)">
         <div class="flex min-h-full items-center justify-center px-4 py-4">
-        <div class="w-full max-w-md rounded-xl p-6"
-             style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
+        <div class="w-full max-w-md rounded-xl p-6 border"
+             style="background: var(--color-bg-secondary); border-color: var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-2" style="color: var(--color-text-primary)">
             {{ $t('students.deleteStudent') }}
           </h2>
@@ -415,12 +414,12 @@
             <span>{{ deleteError }}</span>
           </div>
           <div class="flex justify-end gap-3">
-            <button class="h-10 px-5 rounded-lg font-medium"
-                    style="border: 1px solid var(--color-border); color: var(--color-text-primary); background: transparent"
+            <button class="h-10 px-5 rounded-lg font-medium border bg-transparent"
+                    style="border-color: var(--color-border); color: var(--color-text-primary);"
                     @click="closeModals" :disabled="isDeleting">{{ $t('students.cancel') }}</button>
             <button :disabled="isDeleting"
-                    class="h-10 px-5 rounded-lg font-medium flex items-center gap-2"
-                    style="background: var(--color-danger); color: var(--color-accent-text); border: none"
+                    class="h-10 px-5 rounded-lg font-medium flex items-center gap-2 border-0"
+                    style="background: var(--color-danger); color: var(--color-accent-text);"
                     :class="isDeleting ? 'opacity-60 cursor-not-allowed' : ''"
                     @click="onDeleteConfirm">
               <IconLoader2 v-if="isDeleting" :size="17" class="spin" />
@@ -675,3 +674,9 @@ watch(classId, async (newId) => {
   await loadStudents()
 })
 </script>
+
+<style scoped>
+.student-empty-state {
+  border: 1.5px dashed var(--color-border);
+}
+</style>

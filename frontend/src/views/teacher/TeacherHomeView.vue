@@ -18,8 +18,8 @@
           </span>
 
           <button
-            class="w-9 h-9 p-0 rounded-lg flex items-center justify-center"
-            style="border: 1px solid var(--color-border); color: var(--color-text-muted); background: transparent"
+            class="w-9 h-9 p-0 rounded-lg flex items-center justify-center border bg-transparent"
+            style="border-color: var(--color-border); color: var(--color-text-muted);"
             @click="showSettings = true"
             :aria-label="$t('common.settings')"
           >
@@ -27,8 +27,8 @@
           </button>
 
           <button
-            class="w-9 h-9 p-0 rounded-lg flex items-center justify-center"
-            style="border: 1px solid var(--color-border); color: var(--color-text-muted); background: transparent"
+            class="w-9 h-9 p-0 rounded-lg flex items-center justify-center border bg-transparent"
+            style="border-color: var(--color-border); color: var(--color-text-muted);"
             @click="toggleTheme"
             :aria-label="$t('auth.toggleTheme')"
           >
@@ -39,8 +39,8 @@
           <LanguageSelector />
 
           <button
-            class="h-9 px-3 rounded-lg font-medium"
-            style="border: 1px solid var(--color-border); color: var(--color-text-muted); background: transparent"
+            class="h-9 px-3 rounded-lg font-medium border bg-transparent"
+            style="border-color: var(--color-border); color: var(--color-text-muted);"
             @click="onLogout"
             :disabled="isLoggingOut"
           >
@@ -63,16 +63,16 @@
         </h2>
         <div class="flex items-center gap-2">
           <button
-            class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium border"
-            style="background: transparent; color: var(--color-text-muted); border-color: var(--color-border)"
+            class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium border bg-transparent"
+            style="color: var(--color-text-muted); border-color: var(--color-border)"
             @click="$router.push('/problem-bank')"
           >
             <IconBooks :size="16" />
             {{ $t('problems.title') }}
           </button>
           <button
-            class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium"
-            style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+            class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium border-0"
+            style="background: var(--color-accent); color: var(--color-accent-text);"
             @click="openAddModal"
           >
             <IconPlus :size="17" />
@@ -97,8 +97,8 @@
         <IconAlertCircle :size="20" class="shrink-0" />
         <span>{{ $t(`errors.${classStore.error}`, $t('errors.ERR_UNKNOWN')) }}</span>
         <button
-          class="ml-auto h-8 px-3 rounded-lg font-medium"
-          style="background: transparent; border: 1px solid var(--color-danger-border); color: var(--color-danger)"
+          class="ml-auto h-8 px-3 rounded-lg font-medium border bg-transparent"
+          style="border-color: var(--color-danger-border); color: var(--color-danger)"
           @click="classStore.fetchClasses()"
         >{{ $t('common.retry') }}</button>
       </div>
@@ -130,16 +130,16 @@
               </div>
               <div class="flex items-center gap-1 shrink-0">
                 <button
-                  class="w-8 h-8 p-0 rounded-lg flex items-center justify-center"
-                  style="background: transparent; border: 1px solid var(--color-border); color: var(--color-text-muted)"
+                  class="w-8 h-8 p-0 rounded-lg flex items-center justify-center border bg-transparent"
+                  style="border-color: var(--color-border); color: var(--color-text-muted)"
                   @click.stop="openEditModal(cls)"
                   :aria-label="$t('classes.editClass')"
                 >
                   <IconPencil :size="15" />
                 </button>
                 <button
-                  class="w-8 h-8 p-0 rounded-lg flex items-center justify-center"
-                  style="background: transparent; border: 1px solid var(--color-border); color: var(--color-text-muted)"
+                  class="w-8 h-8 p-0 rounded-lg flex items-center justify-center border bg-transparent"
+                  style="border-color: var(--color-border); color: var(--color-text-muted)"
                   @click.stop="openDeleteModal(cls)"
                   :aria-label="$t('classes.deleteClass')"
                 >
@@ -175,8 +175,8 @@
            class="fixed inset-0 z-50 overflow-y-auto"
            style="background: var(--color-modal-overlay)">
         <div class="flex min-h-full items-center justify-center px-4 py-4">
-        <div class="w-full max-w-lg rounded-xl p-6"
-             style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
+        <div class="w-full max-w-lg rounded-xl p-6 border"
+             style="background: var(--color-bg-secondary); border-color: var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-5" style="color: var(--color-text-primary)">
             {{ $t('classes.addClass') }}
           </h2>
@@ -228,15 +228,15 @@
             <div class="flex justify-end gap-3 pt-1">
               <button
                 type="button"
-                class="h-10 px-5 rounded-lg font-medium"
-                style="border: 1px solid var(--color-border); color: var(--color-text-primary); background: transparent"
+                class="h-10 px-5 rounded-lg font-medium border bg-transparent"
+                style="border-color: var(--color-border); color: var(--color-text-primary);"
                 @click="closeModals"
               >{{ $t('classes.cancel') }}</button>
               <button
                 type="submit"
                 :disabled="isAdding"
-                class="h-10 px-5 rounded-lg font-medium flex items-center gap-2"
-                style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+                class="h-10 px-5 rounded-lg font-medium flex items-center gap-2 border-0"
+                style="background: var(--color-accent); color: var(--color-accent-text);"
                 :class="isAdding ? 'opacity-60 cursor-not-allowed' : ''"
               >
                 <IconLoader2 v-if="isAdding" :size="17" class="spin" />
@@ -255,8 +255,8 @@
            class="fixed inset-0 z-50 overflow-y-auto"
            style="background: var(--color-modal-overlay)">
         <div class="flex min-h-full items-center justify-center px-4 py-4">
-        <div class="w-full max-w-lg rounded-xl p-6"
-             style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
+        <div class="w-full max-w-lg rounded-xl p-6 border"
+             style="background: var(--color-bg-secondary); border-color: var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-5" style="color: var(--color-text-primary)">
             {{ $t('classes.editClass') }}
           </h2>
@@ -301,15 +301,15 @@
             <div class="flex justify-end gap-3 pt-1">
               <button
                 type="button"
-                class="h-10 px-5 rounded-lg font-medium"
-                style="border: 1px solid var(--color-border); color: var(--color-text-primary); background: transparent"
+                class="h-10 px-5 rounded-lg font-medium border bg-transparent"
+                style="border-color: var(--color-border); color: var(--color-text-primary);"
                 @click="closeModals"
               >{{ $t('classes.cancel') }}</button>
               <button
                 type="submit"
                 :disabled="isSaving"
-                class="h-10 px-5 rounded-lg font-medium flex items-center gap-2"
-                style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+                class="h-10 px-5 rounded-lg font-medium flex items-center gap-2 border-0"
+                style="background: var(--color-accent); color: var(--color-accent-text);"
                 :class="isSaving ? 'opacity-60 cursor-not-allowed' : ''"
               >
                 <IconLoader2 v-if="isSaving" :size="17" class="spin" />
@@ -328,8 +328,8 @@
            class="fixed inset-0 z-50 overflow-y-auto"
            style="background: var(--color-modal-overlay)">
         <div class="flex min-h-full items-center justify-center px-4 py-4">
-        <div class="w-full max-w-md rounded-xl p-6"
-             style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
+        <div class="w-full max-w-md rounded-xl p-6 border"
+             style="background: var(--color-bg-secondary); border-color: var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-2" style="color: var(--color-text-primary)">
             {{ $t('classes.deleteClass') }}
           </h2>
@@ -350,15 +350,15 @@
 
           <div class="flex justify-end gap-3">
             <button
-              class="h-10 px-5 rounded-lg font-medium"
-              style="border: 1px solid var(--color-border); color: var(--color-text-primary); background: transparent"
+              class="h-10 px-5 rounded-lg font-medium border bg-transparent"
+              style="border-color: var(--color-border); color: var(--color-text-primary);"
               @click="closeModals"
               :disabled="isDeleting"
             >{{ $t('classes.cancel') }}</button>
             <button
               :disabled="isDeleting"
-              class="h-10 px-5 rounded-lg font-medium flex items-center gap-2"
-              style="background: var(--color-danger); color: var(--color-accent-text); border: none"
+              class="h-10 px-5 rounded-lg font-medium flex items-center gap-2 border-0"
+              style="background: var(--color-danger); color: var(--color-accent-text);"
               :class="isDeleting ? 'opacity-60 cursor-not-allowed' : ''"
               @click="onDeleteConfirm"
             >

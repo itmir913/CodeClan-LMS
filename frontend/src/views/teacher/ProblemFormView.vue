@@ -6,8 +6,8 @@
             style="background: var(--color-bg-primary); border-bottom: 1px solid var(--color-border)">
       <div class="flex items-center gap-3">
         <button
-          class="flex items-center gap-2 h-9 px-3 rounded-lg border"
-          style="background: transparent; color: var(--color-text-muted); border-color: var(--color-border)"
+          class="flex items-center gap-2 h-9 px-3 rounded-lg border bg-transparent"
+          style="color: var(--color-text-muted); border-color: var(--color-border);"
           @click="goBack"
         >
           <IconArrowLeft :size="16" />
@@ -20,8 +20,8 @@
       </div>
       <div class="flex items-center gap-2">
         <button
-          class="w-9 h-9 p-0 rounded-lg flex items-center justify-center"
-          style="border: 1px solid var(--color-border); color: var(--color-text-muted); background: transparent"
+          class="w-9 h-9 p-0 rounded-lg flex items-center justify-center border bg-transparent"
+          style="border-color: var(--color-border); color: var(--color-text-muted);"
           @click="toggleTheme"
           :aria-label="$t('auth.toggleTheme')"
         >
@@ -31,7 +31,7 @@
         <button
           :disabled="isSaving || isLoading"
           class="h-9 px-4 rounded-lg border font-medium"
-          style="background: var(--color-bg-primary); color: var(--color-text-muted); border-color: var(--color-border)"
+          style="background: var(--color-bg-primary); color: var(--color-text-muted); border-color: var(--color-border);"
           @click="submitForm(true)"
         >
           <IconLoader2 v-if="isSaving && savingAsDraft" :size="15" class="spin inline-block mr-1" />
@@ -39,8 +39,8 @@
         </button>
         <button
           :disabled="isSaving || isLoading"
-          class="h-9 px-5 rounded-lg font-semibold"
-          style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+          class="h-9 px-5 rounded-lg font-semibold border-0"
+          style="background: var(--color-accent); color: var(--color-accent-text);"
           @click="submitForm(false)"
         >
           <IconLoader2 v-if="isSaving && !savingAsDraft" :size="15" class="spin inline-block mr-1" />
@@ -110,7 +110,7 @@
 
         <!-- 미리보기 콘텐츠 -->
         <div class="p-5">
-          <div class="rounded-xl p-5" style="background: var(--color-bg-secondary); border: 1px solid var(--color-border)">
+          <div class="rounded-xl p-5 border" style="background: var(--color-bg-secondary); border-color: var(--color-border);">
 
             <!-- 유형 뱃지 -->
             <div class="flex items-center gap-2 mb-3">
@@ -171,13 +171,13 @@
               <div v-if="formInputFormat || formOutputFormat || formConstraints" class="flex flex-col gap-3 mb-4">
                 <div v-if="formInputFormat">
                   <p class="font-semibold mb-1" style="color: var(--color-text-muted)">{{ $t('problems.inputFormat') }}</p>
-                  <div class="rounded-lg px-3 py-2" style="background: var(--color-bg-primary); border: 1px solid var(--color-border)">
+                  <div class="rounded-lg px-3 py-2 border" style="background: var(--color-bg-primary); border-color: var(--color-border);">
                     <pre class="font-mono" style="color: var(--color-text-primary); white-space: pre-wrap; word-break: break-word">{{ formInputFormat }}</pre>
                   </div>
                 </div>
                 <div v-if="formOutputFormat">
                   <p class="font-semibold mb-1" style="color: var(--color-text-muted)">{{ $t('problems.outputFormat') }}</p>
-                  <div class="rounded-lg px-3 py-2" style="background: var(--color-bg-primary); border: 1px solid var(--color-border)">
+                  <div class="rounded-lg px-3 py-2 border" style="background: var(--color-bg-primary); border-color: var(--color-border);">
                     <pre class="font-mono" style="color: var(--color-text-primary); white-space: pre-wrap; word-break: break-word">{{ formOutputFormat }}</pre>
                   </div>
                 </div>
@@ -198,13 +198,13 @@
                   >
                     <div>
                       <p class="mb-1" style="color: var(--color-text-tertiary)">{{ $t('problems.inputStdin') }}</p>
-                      <div class="rounded-lg px-3 py-2" style="background: var(--color-bg-primary); border: 1px solid var(--color-border)">
+                      <div class="rounded-lg px-3 py-2 border" style="background: var(--color-bg-primary); border-color: var(--color-border);">
                         <pre class="font-mono" style="color: var(--color-text-primary); white-space: pre-wrap">{{ tc.input || '-' }}</pre>
                       </div>
                     </div>
                     <div>
                       <p class="mb-1" style="color: var(--color-text-tertiary)">{{ $t('problems.expectedOutput') }}</p>
-                      <div class="rounded-lg px-3 py-2" style="background: var(--color-bg-primary); border: 1px solid var(--color-border)">
+                      <div class="rounded-lg px-3 py-2 border" style="background: var(--color-bg-primary); border-color: var(--color-border);">
                         <pre class="font-mono" style="color: var(--color-text-primary); white-space: pre-wrap">{{ tc.expected_output || '-' }}</pre>
                       </div>
                     </div>
@@ -235,8 +235,8 @@
         <!-- 미리보기 열기 버튼 (미리보기 닫힘 시, 데스크톱 전용) -->
         <div v-if="!previewOpen" class="hidden lg:flex">
           <button
-            class="flex items-center gap-2 h-9 px-3 rounded-lg border"
-            style="background: transparent; color: var(--color-text-muted); border-color: var(--color-border)"
+            class="flex items-center gap-2 h-9 px-3 rounded-lg border bg-transparent"
+            style="color: var(--color-text-muted); border-color: var(--color-border);"
             @click="previewOpen = true"
           >
             <IconChevronRight :size="16" />
@@ -437,8 +437,7 @@
               </div>
             </div>
             <button
-              class="flex items-center gap-2 h-10 px-4 rounded-xl border font-medium transition-colors add-item-btn"
-              style="background: transparent; color: var(--color-text-tertiary); border: 1.5px dashed var(--color-border)"
+              class="flex items-center gap-2 h-10 px-4 rounded-xl font-medium transition-colors add-item-btn"
               @click="addChoice"
             >
               <IconPlus :size="15" />
@@ -588,8 +587,7 @@
 
             <div class="flex items-center gap-2">
               <button
-                class="flex items-center gap-2 h-10 px-4 rounded-xl border font-medium transition-colors add-item-btn"
-                style="background: transparent; color: var(--color-text-tertiary); border: 1.5px dashed var(--color-border)"
+                class="flex items-center gap-2 h-10 px-4 rounded-xl font-medium transition-colors add-item-btn"
                 @click="addTestCase"
               >
                 <IconPlus :size="15" />
@@ -597,8 +595,7 @@
               </button>
               <button
                 :disabled="isImportingZip"
-                class="flex items-center gap-2 h-10 px-4 rounded-xl border font-medium transition-colors add-item-btn"
-                style="background: transparent; color: var(--color-text-tertiary); border: 1.5px dashed var(--color-border)"
+                class="flex items-center gap-2 h-10 px-4 rounded-xl font-medium transition-colors add-item-btn"
                 @click="zipFileInput?.click()"
               >
                 <IconLoader2 v-if="isImportingZip" :size="15" class="spin" />
@@ -614,8 +611,7 @@
               />
               <button
                 :disabled="isExportingZip || formTestCases.length === 0"
-                class="flex items-center gap-2 h-10 px-4 rounded-xl border font-medium transition-colors add-item-btn"
-                style="background: transparent; color: var(--color-text-tertiary); border: 1.5px dashed var(--color-border)"
+                class="flex items-center gap-2 h-10 px-4 rounded-xl font-medium transition-colors add-item-btn"
                 @click="exportToZip"
               >
                 <IconLoader2 v-if="isExportingZip" :size="15" class="spin" />
@@ -1107,6 +1103,11 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.add-item-btn {
+  border: 1.5px dashed var(--color-border);
+  color: var(--color-text-tertiary);
+  background: transparent;
+}
 .add-item-btn:hover {
   border-color: var(--color-accent) !important;
   color: var(--color-accent) !important;

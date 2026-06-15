@@ -5,8 +5,8 @@
     <header class="h-15 flex items-center justify-between px-7 flex-shrink-0"
             style="background: var(--color-bg-primary); border-bottom: 1px solid var(--color-border)">
       <div class="flex items-center gap-4">
-        <button class="flex items-center gap-2 h-9 px-3 rounded-lg border"
-                style="background: transparent; color: var(--color-text-muted); border-color: var(--color-border)"
+        <button class="flex items-center gap-2 h-9 px-3 rounded-lg border bg-transparent"
+                style="color: var(--color-text-muted); border-color: var(--color-border)"
                 @click="goBack">
           <IconArrowLeft :size="15" />
           <span>{{ auth.teacher?.role === 'admin' ? $t('admin.adminBadge') : $t('problems.myClasses') }}</span>
@@ -19,16 +19,16 @@
       </div>
       <div class="flex items-center gap-2">
         <button
-          class="w-9 h-9 p-0 rounded-lg flex items-center justify-center"
-          style="border: 1px solid var(--color-border); color: var(--color-text-muted); background: transparent"
+          class="w-9 h-9 p-0 rounded-lg flex items-center justify-center border bg-transparent"
+          style="border-color: var(--color-border); color: var(--color-text-muted);"
           @click="toggleTheme"
           :aria-label="$t('auth.toggleTheme')"
         >
           <IconMoon v-if="!isDark" :size="18" />
           <IconSun v-else :size="18" />
         </button>
-        <button class="flex items-center gap-2 h-9 px-4 rounded-lg font-semibold"
-                style="background: var(--color-accent); color: var(--color-accent-text); border: none"
+        <button class="flex items-center gap-2 h-9 px-4 rounded-lg font-semibold border-0"
+                style="background: var(--color-accent); color: var(--color-accent-text);"
                 @click="openCreate">
           <IconPlus :size="16" />
           <span>{{ $t('problems.newProblem') }}</span>
@@ -44,7 +44,7 @@
       <!-- 좁은 화면: 각 항목이 1열로 쌓임 -->
 
       <!-- 검색 -->
-      <div class="relative w-full sm:flex-1" style="min-width: 0; max-width: 340px">
+      <div class="relative w-full sm:flex-1 min-w-0 search-wrap">
         <IconSearch :size="16" class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
                     style="color: var(--color-text-tertiary)" />
         <input
@@ -97,8 +97,8 @@
 
       <!-- 에러 -->
       <div v-else-if="store.error"
-           class="flex items-center gap-3 p-4 rounded-xl mb-4"
-           style="background: var(--color-danger-bg); color: var(--color-danger); border: 1px solid var(--color-danger-border)"
+           class="flex items-center gap-3 p-4 rounded-xl mb-4 border"
+           style="background: var(--color-danger-bg); color: var(--color-danger); border-color: var(--color-danger-border);"
            role="alert">
         <IconAlertCircle :size="20" class="shrink-0" />
         <span>{{ $t(`errors.${store.error}`, $t('errors.ERR_UNKNOWN')) }}</span>
@@ -168,7 +168,7 @@
             </button>
             <button
               class="h-8 px-3 rounded-lg border font-medium transition-colors"
-              style="background: var(--color-bg-primary); color: var(--color-danger); border-color: var(--color-danger-border)"
+              style="background: var(--color-bg-primary); color: var(--color-danger); border-color: var(--color-danger-border);"
               @click="confirmDelete(p)"
             >
               {{ $t('problems.delete') }}
@@ -186,7 +186,7 @@
       <div class="w-full max-w-lg rounded-2xl p-7 flex flex-col gap-5"
            style="background: var(--color-bg-primary)">
         <div class="flex items-center gap-3">
-          <IconAlertTriangle :size="22" style="color: var(--color-danger); flex-shrink: 0" />
+          <IconAlertTriangle :size="22" class="shrink-0" style="color: var(--color-danger);" />
           <h2 class="text-xl font-bold" style="color: var(--color-text-primary)">
             {{ $t('problems.deleteConfirmTitle') }}
           </h2>
@@ -213,8 +213,8 @@
           </button>
           <button
             :disabled="isDeleting"
-            class="h-10 px-5 rounded-xl font-semibold"
-            style="background: var(--color-danger); color: var(--color-accent-text); border: none"
+            class="h-10 px-5 rounded-xl font-semibold border-0"
+            style="background: var(--color-danger); color: var(--color-accent-text);"
             @click="doDelete"
           >
             <IconLoader2 v-if="isDeleting" :size="15" class="spin inline-block mr-1" />
@@ -363,6 +363,9 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.search-wrap {
+  max-width: 340px;
+}
 .problem-row:hover {
   border-color: var(--color-border-strong) !important;
   background: var(--color-bg-tertiary) !important;
