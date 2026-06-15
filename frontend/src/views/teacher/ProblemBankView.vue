@@ -124,8 +124,8 @@
 
           <!-- 임시저장 뱃지 -->
           <span v-if="p.is_draft"
-                class="h-6 px-3 rounded-full font-medium flex-shrink-0"
-                style="background: var(--color-warning-bg); color: var(--color-warning); display: inline-flex; align-items: center">
+                class="h-6 px-3 rounded-full font-medium flex-shrink-0 inline-flex items-center"
+                style="background: var(--color-warning-bg); color: var(--color-warning)">
             {{ $t('problems.draft') }}
           </span>
 

@@ -48,7 +48,7 @@
               {{ auth.student?.name }}
             </h1>
             <p style="color: var(--color-text-muted)">
-              {{ auth.student?.grade }}학년 {{ auth.student?.class_no }}반 {{ auth.student?.number }}번
+              {{ $t('student.gradeClassInfo', { grade: auth.student?.grade, class_no: auth.student?.class_no, number: auth.student?.number }) }}
             </p>
           </div>
         </div>

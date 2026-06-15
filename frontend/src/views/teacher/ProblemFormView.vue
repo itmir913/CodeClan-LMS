@@ -113,8 +113,8 @@
             </div>
 
             <!-- 제목 -->
-            <h3 class="font-bold mb-3"
-                style="color: var(--color-text-primary); line-height: 1.5; font-size: 1.05rem; white-space: pre-wrap; word-break: break-word">
+            <h3 class="text-base font-bold mb-3 leading-normal whitespace-pre-wrap break-words"
+                style="color: var(--color-text-primary)">
               {{ formTitle || '...' }}
             </h3>
 
@@ -295,8 +295,8 @@
           <textarea
             v-model="formDescription"
             :disabled="isSaving"
-            class="w-full rounded-xl px-4 py-3 border resize-y"
-            style="background: var(--color-bg-primary); color: var(--color-text-primary); border-color: var(--color-border); min-height: 100px; line-height: 1.6"
+            class="w-full rounded-xl px-4 py-3 border resize-y min-h-24 leading-relaxed"
+            style="background: var(--color-bg-primary); color: var(--color-text-primary); border-color: var(--color-border)"
             :placeholder="$t('problems.descriptionPlaceholder')"
           ></textarea>
         </div>
@@ -328,8 +328,8 @@
               v-model="formAnswer"
               :disabled="isSaving"
               rows="4"
-              class="w-full rounded-xl px-4 py-3 border resize-y"
-              style="background: var(--color-bg-primary); color: var(--color-text-primary); border-color: var(--color-border); font-family: var(--font-mono); line-height: 1.6; min-height: 88px"
+              class="w-full rounded-xl px-4 py-3 border resize-y min-h-20 leading-relaxed"
+              style="background: var(--color-bg-primary); color: var(--color-text-primary); border-color: var(--color-border); font-family: var(--font-mono)"
               :placeholder="$t('problems.answerPlaceholder')"
             ></textarea>
           </div>
@@ -447,8 +447,8 @@
               <textarea
                 v-model="formInputFormat"
                 :disabled="isSaving"
-                class="w-full rounded-xl px-4 py-3 border resize-y"
-                style="background: var(--color-bg-primary); color: var(--color-text-primary); border-color: var(--color-border); min-height: 88px"
+                class="w-full rounded-xl px-4 py-3 border resize-y min-h-20"
+                style="background: var(--color-bg-primary); color: var(--color-text-primary); border-color: var(--color-border)"
               ></textarea>
             </div>
             <div>
@@ -458,8 +458,8 @@
               <textarea
                 v-model="formOutputFormat"
                 :disabled="isSaving"
-                class="w-full rounded-xl px-4 py-3 border resize-y"
-                style="background: var(--color-bg-primary); color: var(--color-text-primary); border-color: var(--color-border); min-height: 88px"
+                class="w-full rounded-xl px-4 py-3 border resize-y min-h-20"
+                style="background: var(--color-bg-primary); color: var(--color-text-primary); border-color: var(--color-border)"
               ></textarea>
             </div>
           </div>
@@ -471,8 +471,8 @@
             <textarea
               v-model="formConstraints"
               :disabled="isSaving"
-              class="w-full rounded-xl px-4 py-3 border resize-y"
-              style="background: var(--color-bg-primary); color: var(--color-text-primary); border-color: var(--color-border); min-height: 64px"
+              class="w-full rounded-xl px-4 py-3 border resize-y min-h-16"
+              style="background: var(--color-bg-primary); color: var(--color-text-primary); border-color: var(--color-border)"
             ></textarea>
           </div>
 

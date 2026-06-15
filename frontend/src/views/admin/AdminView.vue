@@ -76,7 +76,7 @@
           </button>
         </div>
 
-        <div class="mx-3 mb-1" style="height: 1px; background: var(--color-border)"></div>
+        <div class="mx-3 mb-1 h-px" style="background: var(--color-border)"></div>
 
         <!-- 교사·과목 관리 섹션 -->
         <div class="p-3 flex flex-col gap-0.5">
@@ -102,7 +102,7 @@
           </button>
         </div>
 
-        <div class="mx-3 mt-1" style="height: 1px; background: var(--color-border)"></div>
+        <div class="mx-3 mt-1 h-px" style="background: var(--color-border)"></div>
 
         <!-- 문제 은행 -->
         <div class="p-3">

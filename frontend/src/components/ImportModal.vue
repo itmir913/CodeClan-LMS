@@ -69,8 +69,8 @@
             {{ $t('common.rowsDetected', { count: parsedRows.length }) }}
           </p>
           <div
-            class="rounded-xl border overflow-auto"
-            style="border-color: var(--color-border); max-height: 220px"
+            class="rounded-xl border overflow-auto max-h-56"
+            style="border-color: var(--color-border)"
           >
             <table class="w-full">
               <thead>

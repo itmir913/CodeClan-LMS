@@ -96,7 +96,7 @@
           <!-- 헤더 -->
           <div class="flex items-center justify-between gap-3 mb-5 flex-wrap">
             <div>
-              <h2 class="font-bold" style="font-size: 20px; color: var(--color-text-primary)">
+              <h2 class="text-xl font-bold" style="color: var(--color-text-primary)">
                 {{ $t('students.title') }}
               </h2>
               <p class="mt-1" style="color: var(--color-text-muted)">
@@ -161,8 +161,8 @@
 
           <!-- 빈 상태 -->
           <div v-else-if="filteredStudents.length === 0 && !searchQuery"
-               class="flex flex-col items-center justify-center py-20 rounded-xl border"
-               style="border: 1.5px dashed var(--color-border); border-radius: 16px">
+               class="flex flex-col items-center justify-center py-20 rounded-2xl border"
+               style="border: 1.5px dashed var(--color-border)">
             <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
                  style="background: var(--color-info-bg); color: var(--color-accent)">
               <IconUsers :size="28" />

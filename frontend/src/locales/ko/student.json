@@ -1,3 +1,4 @@
 {
-  "noActiveSession": "현재 진행 중인 시험이 없습니다"
+  "noActiveSession": "현재 진행 중인 시험이 없습니다",
+  "gradeClassInfo": "{grade}학년 {class_no}반 {number}번"
 }

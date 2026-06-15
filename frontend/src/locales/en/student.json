@@ -1,3 +1,4 @@
 {
-  "noActiveSession": "No active exam session at the moment"
+  "noActiveSession": "No active exam session at the moment",
+  "gradeClassInfo": "Grade {grade}, Class {class_no}, No. {number}"
 }
