@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { api, type ClassItem, type ClassDetail, type Subject } from '@/api/client'
+import { api, type ClassItem, type Subject } from '@/api/client'
 
 export const useClassStore = defineStore('class', () => {
   const classes = ref<ClassItem[]>([])
@@ -39,10 +39,6 @@ export const useClassStore = defineStore('class', () => {
     await fetchClasses()
   }
 
-  async function fetchClassDetail(id: number): Promise<ClassDetail> {
-    return api.classes.get(id)
-  }
-
   return {
     classes,
     subjects,
@@ -53,6 +49,5 @@ export const useClassStore = defineStore('class', () => {
     createClass,
     updateClass,
     deleteClass,
-    fetchClassDetail,
   }
 })
