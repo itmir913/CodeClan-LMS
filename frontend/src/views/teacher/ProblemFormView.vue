@@ -640,7 +640,7 @@ const loadError = ref<string | null>(null)
 
 // ── 미리보기 패널 상태 ────────────────────────────────────────────────────────
 const previewOpen = ref(true)
-const previewWidth = ref(420)
+const previewWidth = ref(Math.round(window.innerWidth * 0.4))
 const isDragging = ref(false)
 
 function startDrag(e: MouseEvent) {
@@ -650,8 +650,12 @@ function startDrag(e: MouseEvent) {
   const startWidth = previewWidth.value
 
   function onMouseMove(ev: MouseEvent) {
+    const total = window.innerWidth
     const delta = ev.clientX - startX
-    previewWidth.value = Math.max(180, Math.min(900, startWidth + delta))
+    previewWidth.value = Math.max(
+      Math.round(total * 0.2),
+      Math.min(Math.round(total * 0.8), startWidth + delta),
+    )
   }
 
   function onMouseUp() {
