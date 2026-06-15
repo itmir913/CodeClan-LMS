@@ -14,12 +14,15 @@
           <h2 class="font-semibold" style="color: var(--color-text-primary)">{{ title }}</h2>
           <button
             type="button"
-            class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium border"
-            style="background: transparent; color: var(--color-text-muted); border-color: var(--color-border)"
+            class="h-9 px-4 rounded-lg flex items-center gap-2 font-medium border transition-colors"
+            :style="downloadDone
+              ? { background: 'var(--color-success-bg)', color: 'var(--color-success)', borderColor: 'var(--color-success)' }
+              : { background: 'transparent', color: 'var(--color-text-muted)', borderColor: 'var(--color-border)' }"
             @click="onDownloadTemplate"
           >
-            <IconDownload :size="16" />
-            {{ $t('common.downloadTemplate') }}
+            <IconCheck v-if="downloadDone" :size="16" />
+            <IconDownload v-else :size="16" />
+            {{ downloadDone ? $t('common.downloaded') : $t('common.downloadTemplate') }}
           </button>
         </div>
 
@@ -151,7 +154,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted } from 'vue'
-import { IconDownload, IconUpload, IconAlertCircle, IconLoader2 } from '@tabler/icons-vue'
+import { IconDownload, IconUpload, IconAlertCircle, IconLoader2, IconCheck } from '@tabler/icons-vue'
 import { parseExcelFile, type SynonymMap } from '@/utils/excelImport'
 import { downloadExcelTemplate } from '@/utils/templateDownload'
 
@@ -178,6 +181,7 @@ const emit = defineEmits<{
 
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const selectedFileName = ref('')
+const downloadDone = ref(false)
 const parsedRows = ref<Record<string, string>[]>([])
 const parseError = ref<string | null>(null)
 const importError = ref<string | null>(null)
@@ -194,6 +198,7 @@ watch(
       importError.value = null
       isImporting.value = false
       isDragging.value = false
+      downloadDone.value = false
       if (fileInputRef.value) fileInputRef.value.value = ''
     }
   },
@@ -225,6 +230,8 @@ function onDrop(e: DragEvent) {
 
 function onDownloadTemplate() {
   downloadExcelTemplate(props.templateFilename, props.templateHeaders, props.templateSample)
+  downloadDone.value = true
+  setTimeout(() => { downloadDone.value = false }, 2000)
 }
 
 async function onImportClick() {

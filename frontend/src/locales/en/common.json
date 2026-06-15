@@ -11,6 +11,7 @@
   "submitting": "Submitting...",
   "noResults": "No results found",
   "downloadTemplate": "Download Template",
+  "downloaded": "Downloaded",
   "dropOrClick": "Drop file here or click to browse",
   "fileFormats": "Supports .xlsx and .csv",
   "rowsDetected": "{count} rows detected",
