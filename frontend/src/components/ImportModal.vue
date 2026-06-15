@@ -2,11 +2,12 @@
   <Teleport to="body">
     <div
       v-if="show"
-      class="fixed inset-0 z-50 flex items-center justify-center px-4"
+      class="fixed inset-0 z-50 overflow-y-auto"
       style="background: var(--color-modal-overlay)"
     >
+      <div class="flex min-h-full items-center justify-center px-4 py-4">
       <div
-        class="w-full max-w-2xl rounded-xl p-6"
+        class="w-full max-w-3xl rounded-xl p-6"
         style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)"
       >
         <!-- Header -->
@@ -180,6 +181,7 @@
             {{ $t('common.close') }}
           </button>
         </div>
+      </div>
       </div>
     </div>
   </Teleport>

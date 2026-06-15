@@ -499,9 +499,10 @@
     <!-- ── Add Teacher Modal ── -->
     <Teleport to="body">
       <div v-if="showAddTeacherModal"
-           class="fixed inset-0 z-50 flex items-center justify-center px-4"
+           class="fixed inset-0 z-50 overflow-y-auto"
            style="background: var(--color-modal-overlay)">
-        <div class="w-full max-w-md rounded-xl p-6"
+        <div class="flex min-h-full items-center justify-center px-4 py-4">
+        <div class="w-full max-w-lg rounded-xl p-6"
              style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-5" style="color: var(--color-text-primary)">
             {{ $t('admin.addTeacher') }}
@@ -555,15 +556,17 @@
             </div>
           </form>
         </div>
+        </div>
       </div>
     </Teleport>
 
     <!-- ── Edit Teacher Modal ── -->
     <Teleport to="body">
       <div v-if="showEditTeacherModal"
-           class="fixed inset-0 z-50 flex items-center justify-center px-4"
+           class="fixed inset-0 z-50 overflow-y-auto"
            style="background: var(--color-modal-overlay)">
-        <div class="w-full max-w-md rounded-xl p-6"
+        <div class="flex min-h-full items-center justify-center px-4 py-4">
+        <div class="w-full max-w-lg rounded-xl p-6"
              style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-5" style="color: var(--color-text-primary)">
             {{ $t('admin.editTeacher') }}
@@ -614,15 +617,17 @@
             </div>
           </form>
         </div>
+        </div>
       </div>
     </Teleport>
 
     <!-- ── Delete Teacher Modal ── -->
     <Teleport to="body">
       <div v-if="showDeleteTeacherModal"
-           class="fixed inset-0 z-50 flex items-center justify-center px-4"
+           class="fixed inset-0 z-50 overflow-y-auto"
            style="background: var(--color-modal-overlay)">
-        <div class="w-full max-w-sm rounded-xl p-6"
+        <div class="flex min-h-full items-center justify-center px-4 py-4">
+        <div class="w-full max-w-md rounded-xl p-6"
              style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-2" style="color: var(--color-text-primary)">{{ $t('admin.deleteTeacher') }}</h2>
           <p class="mb-1" style="color: var(--color-text-primary)">
@@ -650,15 +655,17 @@
             </button>
           </div>
         </div>
+        </div>
       </div>
     </Teleport>
 
     <!-- ── Add Subject Modal ── -->
     <Teleport to="body">
       <div v-if="showAddSubjectModal"
-           class="fixed inset-0 z-50 flex items-center justify-center px-4"
+           class="fixed inset-0 z-50 overflow-y-auto"
            style="background: var(--color-modal-overlay)">
-        <div class="w-full max-w-sm rounded-xl p-6"
+        <div class="flex min-h-full items-center justify-center px-4 py-4">
+        <div class="w-full max-w-md rounded-xl p-6"
              style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-5" style="color: var(--color-text-primary)">{{ $t('admin.addSubject') }}</h2>
           <form @submit.prevent="onAddSubjectSubmit" novalidate class="flex flex-col gap-4">
@@ -690,15 +697,17 @@
             </div>
           </form>
         </div>
+        </div>
       </div>
     </Teleport>
 
     <!-- ── Delete Subject Modal ── -->
     <Teleport to="body">
       <div v-if="showDeleteSubjectModal"
-           class="fixed inset-0 z-50 flex items-center justify-center px-4"
+           class="fixed inset-0 z-50 overflow-y-auto"
            style="background: var(--color-modal-overlay)">
-        <div class="w-full max-w-sm rounded-xl p-6"
+        <div class="flex min-h-full items-center justify-center px-4 py-4">
+        <div class="w-full max-w-md rounded-xl p-6"
              style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-2" style="color: var(--color-text-primary)">{{ $t('admin.subjects') }}</h2>
           <p class="mb-1" style="color: var(--color-text-primary)">
@@ -725,6 +734,7 @@
               {{ isDeletingSubject ? $t('admin.deleting') : $t('admin.delete') }}
             </button>
           </div>
+        </div>
         </div>
       </div>
     </Teleport>

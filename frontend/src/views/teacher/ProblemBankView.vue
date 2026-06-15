@@ -180,9 +180,10 @@
 
     <!-- ══ 삭제 확인 모달 ══ -->
     <div v-if="deleteTarget"
-         class="fixed inset-0 z-50 flex items-center justify-center p-4"
+         class="fixed inset-0 z-50 overflow-y-auto"
          style="background: var(--color-modal-overlay)">
-      <div class="w-full max-w-md rounded-2xl p-7 flex flex-col gap-5"
+      <div class="flex min-h-full items-center justify-center p-4">
+      <div class="w-full max-w-lg rounded-2xl p-7 flex flex-col gap-5"
            style="background: var(--color-bg-primary)">
         <div class="flex items-center gap-3">
           <IconAlertTriangle :size="22" style="color: var(--color-danger); flex-shrink: 0" />
@@ -220,6 +221,7 @@
             {{ isDeleting ? $t('problems.deleting') : $t('problems.delete') }}
           </button>
         </div>
+      </div>
       </div>
     </div>
 

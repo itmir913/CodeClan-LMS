@@ -172,9 +172,10 @@
     <!-- ── Add Class Modal ── -->
     <Teleport to="body">
       <div v-if="showAddModal"
-           class="fixed inset-0 z-50 flex items-center justify-center px-4"
+           class="fixed inset-0 z-50 overflow-y-auto"
            style="background: var(--color-modal-overlay)">
-        <div class="w-full max-w-md rounded-xl p-6"
+        <div class="flex min-h-full items-center justify-center px-4 py-4">
+        <div class="w-full max-w-lg rounded-xl p-6"
              style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-5" style="color: var(--color-text-primary)">
             {{ $t('classes.addClass') }}
@@ -244,15 +245,17 @@
             </div>
           </form>
         </div>
+        </div>
       </div>
     </Teleport>
 
     <!-- ── Edit Class Modal ── -->
     <Teleport to="body">
       <div v-if="showEditModal"
-           class="fixed inset-0 z-50 flex items-center justify-center px-4"
+           class="fixed inset-0 z-50 overflow-y-auto"
            style="background: var(--color-modal-overlay)">
-        <div class="w-full max-w-md rounded-xl p-6"
+        <div class="flex min-h-full items-center justify-center px-4 py-4">
+        <div class="w-full max-w-lg rounded-xl p-6"
              style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-5" style="color: var(--color-text-primary)">
             {{ $t('classes.editClass') }}
@@ -315,15 +318,17 @@
             </div>
           </form>
         </div>
+        </div>
       </div>
     </Teleport>
 
     <!-- ── Delete Confirm Modal ── -->
     <Teleport to="body">
       <div v-if="showDeleteModal"
-           class="fixed inset-0 z-50 flex items-center justify-center px-4"
+           class="fixed inset-0 z-50 overflow-y-auto"
            style="background: var(--color-modal-overlay)">
-        <div class="w-full max-w-sm rounded-xl p-6"
+        <div class="flex min-h-full items-center justify-center px-4 py-4">
+        <div class="w-full max-w-md rounded-xl p-6"
              style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-2" style="color: var(--color-text-primary)">
             {{ $t('classes.deleteClass') }}
@@ -361,6 +366,7 @@
               {{ isDeleting ? $t('classes.deleting') : $t('classes.delete') }}
             </button>
           </div>
+        </div>
         </div>
       </div>
     </Teleport>

@@ -2,13 +2,14 @@
   <Teleport to="body">
     <div
       v-if="modelValue"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4"
+      class="fixed inset-0 z-50 overflow-y-auto"
       style="background: var(--color-modal-overlay)"
       role="dialog"
       aria-modal="true"
     >
+      <div class="flex min-h-full items-center justify-center p-4">
       <div
-        class="w-full max-w-md rounded-2xl border flex flex-col"
+        class="w-full max-w-lg rounded-2xl border flex flex-col"
         style="background: var(--color-bg-secondary); border-color: var(--color-border); box-shadow: var(--shadow-dropdown)"
         @keydown.esc="$emit('update:modelValue', false)"
         tabindex="-1"
@@ -181,6 +182,7 @@
           </section>
 
         </div>
+      </div>
       </div>
     </div>
   </Teleport>

@@ -275,9 +275,10 @@
     <!-- ── 개별 추가 모달 ── -->
     <Teleport to="body">
       <div v-if="showAddModal"
-           class="fixed inset-0 z-50 flex items-center justify-center px-4"
+           class="fixed inset-0 z-50 overflow-y-auto"
            style="background: var(--color-modal-overlay)">
-        <div class="w-full max-w-sm rounded-xl p-6"
+        <div class="flex min-h-full items-center justify-center px-4 py-4">
+        <div class="w-full max-w-md rounded-xl p-6"
              style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-5" style="color: var(--color-text-primary)">
             {{ $t('students.addStudent') }}
@@ -330,6 +331,7 @@
             </div>
           </form>
         </div>
+        </div>
       </div>
     </Teleport>
 
@@ -349,9 +351,10 @@
     <!-- ── 비밀번호 초기화 확인 모달 ── -->
     <Teleport to="body">
       <div v-if="showResetModal"
-           class="fixed inset-0 z-50 flex items-center justify-center px-4"
+           class="fixed inset-0 z-50 overflow-y-auto"
            style="background: var(--color-modal-overlay)">
-        <div class="w-full max-w-sm rounded-xl p-6"
+        <div class="flex min-h-full items-center justify-center px-4 py-4">
+        <div class="w-full max-w-md rounded-xl p-6"
              style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-2" style="color: var(--color-text-primary)">
             {{ $t('students.resetPassword') }}
@@ -383,15 +386,17 @@
             </button>
           </div>
         </div>
+        </div>
       </div>
     </Teleport>
 
     <!-- ── 학생 삭제 확인 모달 ── -->
     <Teleport to="body">
       <div v-if="showDeleteModal"
-           class="fixed inset-0 z-50 flex items-center justify-center px-4"
+           class="fixed inset-0 z-50 overflow-y-auto"
            style="background: var(--color-modal-overlay)">
-        <div class="w-full max-w-sm rounded-xl p-6"
+        <div class="flex min-h-full items-center justify-center px-4 py-4">
+        <div class="w-full max-w-md rounded-xl p-6"
              style="background: var(--color-bg-secondary); border: 1px solid var(--color-border); box-shadow: var(--shadow-dropdown)">
           <h2 class="font-semibold mb-2" style="color: var(--color-text-primary)">
             {{ $t('students.deleteStudent') }}
@@ -422,6 +427,7 @@
               {{ isDeleting ? $t('students.deleting') : $t('students.delete') }}
             </button>
           </div>
+        </div>
         </div>
       </div>
     </Teleport>
