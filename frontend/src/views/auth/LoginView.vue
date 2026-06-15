@@ -7,7 +7,7 @@
       <div class="max-w-4xl mx-auto h-full flex items-center justify-between px-4">
 
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-lg text-white"
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-white shrink-0"
                style="background: var(--color-accent)">C</div>
           <span class="font-semibold" style="color: var(--color-text-primary)">CodeClan LMS</span>
         </div>
