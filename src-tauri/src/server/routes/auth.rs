@@ -282,11 +282,9 @@ pub async fn change_password_teacher(
         return Err(ApiError::BadRequest("ERR_PASSWORD_TOO_SHORT".into()));
     }
 
-    let mut tx = state.db.begin().await?;
-
     let row = sqlx::query("SELECT password_hash FROM teachers WHERE id = ?")
         .bind(teacher_id)
-        .fetch_optional(&mut *tx)
+        .fetch_optional(&state.db)
         .await?
         .ok_or(ApiError::NotFound)?;
 
@@ -305,13 +303,14 @@ pub async fn change_password_teacher(
         .map_err(|e| ApiError::Internal(format!("argon2: {e}")))?
         .to_string();
 
+    let mut tx = state.db.begin().await?;
     sqlx::query("UPDATE teachers SET password_hash = ? WHERE id = ?")
         .bind(&new_hash)
         .bind(teacher_id)
         .execute(&mut *tx)
         .await?;
-
     tx.commit().await?;
+
     Ok(Json(json!({ "ok": true })))
 }
 
@@ -536,13 +535,11 @@ pub async fn change_password_student(
         return Err(ApiError::BadRequest("ERR_PASSWORD_TOO_SHORT".into()));
     }
 
-    let mut tx = state.db.begin().await?;
-
     let row = sqlx::query(
         "SELECT password_hash, password_reset_required FROM students WHERE id = ?",
     )
     .bind(student_id)
-    .fetch_optional(&mut *tx)
+    .fetch_optional(&state.db)
     .await?
     .ok_or(ApiError::NotFound)?;
 
@@ -571,6 +568,7 @@ pub async fn change_password_student(
         .map_err(|e| ApiError::Internal(format!("argon2: {e}")))?
         .to_string();
 
+    let mut tx = state.db.begin().await?;
     sqlx::query(
         "UPDATE students SET password_hash = ?, password_reset_required = 0 WHERE id = ?",
     )
@@ -578,7 +576,7 @@ pub async fn change_password_student(
     .bind(student_id)
     .execute(&mut *tx)
     .await?;
-
     tx.commit().await?;
+
     Ok(Json(json!({ "ok": true })))
 }

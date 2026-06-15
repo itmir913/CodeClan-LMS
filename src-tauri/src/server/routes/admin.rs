@@ -258,6 +258,20 @@ pub async fn update_teacher(
         }
     }
 
+    // 해싱은 CPU 집약 작업이므로 트랜잭션 밖에서 미리 계산
+    let new_password_hash: Option<String> = match &body.password {
+        Some(pw) if !pw.is_empty() => {
+            let salt = SaltString::generate(&mut OsRng);
+            Some(
+                Argon2::default()
+                    .hash_password(pw.as_bytes(), &salt)
+                    .map_err(|e| ApiError::Internal(format!("argon2: {e}")))?
+                    .to_string(),
+            )
+        }
+        _ => None,
+    };
+
     let mut tx = state.db.begin().await?;
 
     let exists: Option<i64> = sqlx::query_scalar("SELECT id FROM teachers WHERE id = ?")
@@ -304,19 +318,12 @@ pub async fn update_teacher(
             .await?;
     }
 
-    if let Some(ref password) = body.password {
-        if !password.is_empty() {
-            let salt = SaltString::generate(&mut OsRng);
-            let hash = Argon2::default()
-                .hash_password(password.as_bytes(), &salt)
-                .map_err(|e| ApiError::Internal(format!("argon2: {e}")))?
-                .to_string();
-            sqlx::query("UPDATE teachers SET password_hash = ? WHERE id = ?")
-                .bind(&hash)
-                .bind(target_id)
-                .execute(&mut *tx)
-                .await?;
-        }
+    if let Some(ref hash) = new_password_hash {
+        sqlx::query("UPDATE teachers SET password_hash = ? WHERE id = ?")
+            .bind(hash)
+            .bind(target_id)
+            .execute(&mut *tx)
+            .await?;
     }
 
     tx.commit().await?;
@@ -347,8 +354,14 @@ pub async fn import_teachers(
         return Err(ApiError::BadRequest("ERR_IMPORT_EMPTY".into()));
     }
 
-    let mut tx = state.db.begin().await?;
-
+    // 검증 및 해싱을 트랜잭션 밖에서 미리 수행
+    struct PreparedTeacher {
+        username: String,
+        name: String,
+        hash: String,
+        role: &'static str,
+    }
+    let mut prepared: Vec<PreparedTeacher> = Vec::with_capacity(body.len());
     for item in &body {
         if item.username.trim().is_empty() || item.name.trim().is_empty() {
             return Err(ApiError::BadRequest("ERR_IMPORT_ROW_INVALID".into()));
@@ -362,14 +375,18 @@ pub async fn import_teachers(
             .hash_password(item.password.as_bytes(), &salt)
             .map_err(|e| ApiError::Internal(format!("argon2: {e}")))?
             .to_string();
+        prepared.push(PreparedTeacher { username: item.username.trim().to_string(), name: item.name.trim().to_string(), hash, role });
+    }
 
+    let mut tx = state.db.begin().await?;
+    for p in &prepared {
         sqlx::query(
             "INSERT INTO teachers (username, name, password_hash, role) VALUES (?, ?, ?, ?)",
         )
-        .bind(item.username.trim())
-        .bind(item.name.trim())
-        .bind(&hash)
-        .bind(role)
+        .bind(&p.username)
+        .bind(&p.name)
+        .bind(&p.hash)
+        .bind(p.role)
         .execute(&mut *tx)
         .await
         .map_err(|e| {
@@ -383,7 +400,7 @@ pub async fn import_teachers(
     }
 
     tx.commit().await?;
-    Ok(Json(json!({ "imported": body.len() })))
+    Ok(Json(json!({ "imported": prepared.len() })))
 }
 
 /// POST /api/admin/subjects/import

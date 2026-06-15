@@ -1,8 +1,13 @@
+use argon2::{
+    password_hash::{PasswordHasher, SaltString},
+    Argon2,
+};
 use axum::{
     extract::{Path, State},
     http::HeaderMap,
     Json,
 };
+use rand_core::OsRng;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
@@ -370,25 +375,30 @@ pub async fn reset_student_password(
     let session = parse_session(&headers, &state.db).await?;
     let teacher_id = session.teacher_id.ok_or(ApiError::Forbidden)?;
 
-    let mut tx = state.db.begin().await?;
-
-    let exists: Option<i64> = sqlx::query_scalar("SELECT id FROM students WHERE id = ?")
+    let username: Option<String> = sqlx::query_scalar("SELECT username FROM students WHERE id = ?")
         .bind(student_id)
-        .fetch_optional(&mut *tx)
+        .fetch_optional(&state.db)
         .await?;
-    if exists.is_none() {
-        return Err(ApiError::NotFound);
-    }
+    let username = username.ok_or(ApiError::NotFound)?;
 
     require_student_access(teacher_id, student_id, &state.db).await?;
 
+    // 해싱은 CPU 집약 작업이므로 트랜잭션 밖에서 수행 (커넥션 독점 방지)
+    let salt = SaltString::generate(&mut OsRng);
+    let hash = Argon2::default()
+        .hash_password(username.as_bytes(), &salt)
+        .map_err(|e| ApiError::Internal(format!("argon2: {e}")))?
+        .to_string();
+
+    let mut tx = state.db.begin().await?;
     sqlx::query(
-        "UPDATE students SET password_hash = '', password_reset_required = 1 WHERE id = ?",
+        "UPDATE students SET password_hash = ?, password_reset_required = 1 WHERE id = ?",
     )
+    .bind(&hash)
     .bind(student_id)
     .execute(&mut *tx)
     .await?;
-
     tx.commit().await?;
+
     Ok(Json(json!({ "ok": true })))
 }
