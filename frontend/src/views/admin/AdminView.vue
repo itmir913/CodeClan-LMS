@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="min-h-screen flex flex-col" style="background: var(--color-bg-primary)">
 
     <!-- Top Nav -->
@@ -58,11 +58,11 @@
     <!-- Body: Sidebar + Content -->
     <div class="flex flex-1 min-h-0">
 
-      <!-- ?? ?ъ씠?쒕컮 ?? -->
+      <!-- ── 사이드바 ── -->
       <aside class="w-56 flex-shrink-0 border-r overflow-y-auto flex flex-col"
              style="background: var(--color-bg-secondary); border-color: var(--color-border)">
 
-        <!-- ?섏뾽 ?꾩껜 ?뱀뀡 -->
+        <!-- 수업 전체 섹션 -->
         <div class="p-3 pt-4">
           <button
             class="flex items-center gap-2.5 w-full min-h-10 py-2 px-3 rounded-lg font-medium border-0 leading-tight"
@@ -78,7 +78,7 @@
 
         <div class="mx-3 mb-1 h-px" style="background: var(--color-border)"></div>
 
-        <!-- 援먯궗쨌怨쇰ぉ 愿由??뱀뀡 -->
+        <!-- 교사·과목 관리 섹션 -->
         <div class="p-3 flex flex-col gap-0.5">
           <button
             class="flex items-center gap-2.5 w-full min-h-10 py-2 px-3 rounded-lg font-medium border-0 leading-tight"
@@ -104,7 +104,7 @@
 
         <div class="mx-3 mt-1 h-px" style="background: var(--color-border)"></div>
 
-        <!-- 臾몄젣 ???-->
+        <!-- 문제 은행 -->
         <div class="p-3">
           <router-link
             to="/problem-bank"
@@ -117,12 +117,12 @@
           </router-link>
         </div>
 
-        <!-- ?ㅽ럹?댁꽌 -->
+        <!-- 스페이서 -->
         <div class="flex-1"></div>
 
         <div class="mx-3 h-px" style="background: var(--color-border)"></div>
 
-        <!-- LMS 湲곕낯 ?ㅼ젙 (?섎떒 怨좎젙) -->
+        <!-- LMS 기본 설정 (하단 고정) -->
         <div class="p-3">
           <button
             class="flex items-center gap-2.5 w-full min-h-10 py-2 px-3 rounded-lg font-medium border-0 leading-tight"
@@ -138,10 +138,10 @@
 
       </aside>
 
-      <!-- ?? 硫붿씤 肄섑뀗痢??? -->
+      <!-- ── 메인 콘텐츠 ── -->
       <main class="flex-1 overflow-y-auto px-6 pt-4 pb-16">
 
-        <!-- ?섏뾽 ?꾩껜 ??-->
+        <!-- 수업 전체 탭 -->
         <template v-if="activeSection === 'classes'">
           <div class="flex items-center justify-between mb-6 min-h-9">
             <h2 class="font-semibold tracking-widest uppercase"
@@ -226,7 +226,7 @@
           </div>
         </template>
 
-        <!-- 援먯궗 愿由???-->
+        <!-- 교사 관리 탭 -->
         <template v-else-if="activeSection === 'teachers'">
           <div class="flex items-center justify-between mb-6 min-h-9">
             <h2 class="font-semibold tracking-widest uppercase"
@@ -356,7 +356,7 @@
           </div>
         </template>
 
-        <!-- LMS 湲곕낯 ?ㅼ젙 ??-->
+        <!-- LMS 기본 설정 탭 -->
         <template v-else-if="activeSection === 'appSettings'">
           <div class="flex items-center justify-between mb-6 min-h-9">
             <h2 class="font-semibold tracking-widest uppercase"
@@ -388,7 +388,7 @@
               <span>{{ $t('admin.appSettingsSaveSuccess') }}</span>
             </div>
 
-            <!-- ?숆탳 ?대쫫 -->
+            <!-- 학교 이름 -->
             <div class="flex flex-col gap-2">
               <label class="font-medium" style="color: var(--color-text-primary)">
                 {{ $t('admin.appSettingsSchoolName') }}
@@ -402,7 +402,7 @@
               />
             </div>
 
-            <!-- 湲곕낯 ?몄뼱 -->
+            <!-- 기본 언어 -->
             <div class="flex flex-col gap-2">
               <label class="font-medium" style="color: var(--color-text-primary)">
                 {{ $t('admin.appSettingsDefaultLocale') }}
@@ -433,7 +433,7 @@
           </div>
         </template>
 
-        <!-- 怨쇰ぉ 愿由???-->
+        <!-- 과목 관리 탭 -->
         <template v-else-if="activeSection === 'subjects'">
           <div class="flex items-center justify-between mb-6 min-h-9">
             <h2 class="font-semibold tracking-widest uppercase"
@@ -496,7 +496,7 @@
       </main>
     </div>
 
-    <!-- ?? Add Teacher Modal ?? -->
+    <!-- ── Add Teacher Modal ── -->
     <Teleport to="body">
       <div v-if="showAddTeacherModal"
            class="fixed inset-0 z-50 overflow-y-auto"
@@ -560,7 +560,7 @@
       </div>
     </Teleport>
 
-    <!-- ?? Edit Teacher Modal ?? -->
+    <!-- ── Edit Teacher Modal ── -->
     <Teleport to="body">
       <div v-if="showEditTeacherModal"
            class="fixed inset-0 z-50 overflow-y-auto"
@@ -621,7 +621,7 @@
       </div>
     </Teleport>
 
-    <!-- ?? Delete Teacher Modal ?? -->
+    <!-- ── Delete Teacher Modal ── -->
     <Teleport to="body">
       <div v-if="showDeleteTeacherModal"
            class="fixed inset-0 z-50 overflow-y-auto"
@@ -659,7 +659,7 @@
       </div>
     </Teleport>
 
-    <!-- ?? Add Subject Modal ?? -->
+    <!-- ── Add Subject Modal ── -->
     <Teleport to="body">
       <div v-if="showAddSubjectModal"
            class="fixed inset-0 z-50 overflow-y-auto"
@@ -701,7 +701,7 @@
       </div>
     </Teleport>
 
-    <!-- ?? Delete Subject Modal ?? -->
+    <!-- ── Delete Subject Modal ── -->
     <Teleport to="body">
       <div v-if="showDeleteSubjectModal"
            class="fixed inset-0 z-50 overflow-y-auto"
@@ -741,7 +741,7 @@
 
     <SettingsModal v-model="showSettings" />
 
-    <!-- ?? Import Teachers Modal ?? -->
+    <!-- ── Import Teachers Modal ── -->
     <ImportModal
       v-model:show="showImportTeachersModal"
       :title="$t('admin.importTeachers')"
@@ -754,7 +754,7 @@
       :on-import="handleImportTeachers"
     />
 
-    <!-- ?? Import Subjects Modal ?? -->
+    <!-- ── Import Subjects Modal ── -->
     <ImportModal
       v-model:show="showImportSubjectsModal"
       :title="$t('admin.importSubjects')"
@@ -800,7 +800,7 @@ const isLoggingOut = ref(false)
 const showSettings = ref(false)
 const activeSection = ref<'classes' | 'teachers' | 'subjects' | 'appSettings'>('classes')
 
-// ?? Modal visibility flags ?????????????????????????????????????
+// ── Modal visibility flags ─────────────────────────────────────
 const showAddTeacherModal = ref(false)
 const showEditTeacherModal = ref(false)
 const showDeleteTeacherModal = ref(false)
@@ -809,15 +809,15 @@ const showDeleteSubjectModal = ref(false)
 const showImportTeachersModal = ref(false)
 const showImportSubjectsModal = ref(false)
 
-// ?? Import config ??????????????????????????????????????????????
+// ── Import config ──────────────────────────────────────────────
 const teacherSynonymMap: SynonymMap = {
-  name: ['name', '?대쫫', '?깅챸'],
-  username: ['username', 'id', '?꾩씠??],
-  password: ['password', 'pw', '鍮꾨?踰덊샇', '?⑥뒪?뚮뱶'],
-  role: ['role', '??븷', '沅뚰븳'],
+  name: ['name', '이름', '성명'],
+  username: ['username', 'id', '아이디'],
+  password: ['password', 'pw', '비밀번호', '패스워드'],
+  role: ['role', '역할', '권한'],
 }
 const subjectSynonymMap: SynonymMap = {
-  name: ['name', 'subject', '怨쇰ぉ紐?, '怨쇰ぉ', '怨쇰ぉ ?대쫫', 'subject name'],
+  name: ['name', 'subject', '과목명', '과목', '과목 이름', 'subject name'],
 }
 const teacherImportColumns = [
   { key: 'name', labelKey: 'admin.teacherName' },
@@ -836,7 +836,7 @@ const teacherTemplateHeaders = computed(() => [
 ])
 const subjectTemplateHeaders = computed(() => [t('admin.subjectName')])
 
-// ?? Teacher modal state ????????????????????????????????????????
+// ── Teacher modal state ────────────────────────────────────────
 const editTeacherTarget = ref<AdminTeacher | null>(null)
 const deleteTeacherTarget = ref<AdminTeacher | null>(null)
 const addTeacherForm = ref({ name: '', username: '', password: '', role: 'teacher' })
@@ -848,7 +848,7 @@ const addTeacherError = ref<string | null>(null)
 const editTeacherError = ref<string | null>(null)
 const deleteTeacherError = ref<string | null>(null)
 
-// ?? App settings state ?????????????????????????????????????????
+// ── App settings state ─────────────────────────────────────────
 const appSettingsForm = ref({ school_name: '', locale: 'ko' })
 const appSettingsLoading = ref(false)
 const isSavingAppSettings = ref(false)
@@ -879,7 +879,7 @@ async function onSaveAppSettings() {
   try {
     await api.admin.updateAppSettings(appSettingsForm.value)
     appSettingsSuccess.value = true
-    // ?숆탳 ?대쫫??諛붾뚯뿀?????덉쑝誘濡?store 媛깆떊
+    // 학교 이름이 바뀌었을 수 있으므로 store 갱신
     await auth.fetchSchoolName()
   } catch (e) {
     const code = e instanceof Error ? e.message : 'ERR_UNKNOWN'
@@ -889,7 +889,7 @@ async function onSaveAppSettings() {
   }
 }
 
-// ?? Subject modal state ????????????????????????????????????????
+// ── Subject modal state ────────────────────────────────────────
 const deleteSubjectTarget = ref<Subject | null>(null)
 const addSubjectName = ref('')
 const isAddingSubject = ref(false)
@@ -897,13 +897,13 @@ const isDeletingSubject = ref(false)
 const addSubjectError = ref<string | null>(null)
 const deleteSubjectError = ref<string | null>(null)
 
-// ?? Theme ??????????????????????????????????????????????????????
+// ── Theme ──────────────────────────────────────────────────────
 function toggleTheme() {
   isDark.value = !isDark.value
   document.documentElement.setAttribute('data-theme', isDark.value ? 'dark' : 'light')
 }
 
-// ?? Logout ?????????????????????????????????????????????????????
+// ── Logout ─────────────────────────────────────────────────────
 async function onLogout() {
   if (isLoggingOut.value) return
   isLoggingOut.value = true
@@ -915,7 +915,7 @@ async function onLogout() {
   }
 }
 
-// ?? Modal helpers ??????????????????????????????????????????????
+// ── Modal helpers ──────────────────────────────────────────────
 function closeModals() {
   showAddTeacherModal.value = false
   showEditTeacherModal.value = false
@@ -956,7 +956,7 @@ function onKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') closeModals()
 }
 
-// ?? Teacher actions ????????????????????????????????????????????
+// ── Teacher actions ────────────────────────────────────────────
 async function onAddTeacherSubmit() {
   if (isAddingTeacher.value) return
   addTeacherError.value = null
@@ -1003,7 +1003,7 @@ async function onDeleteTeacherConfirm() {
   }
 }
 
-// ?? Import handlers ????????????????????????????????????????????
+// ── Import handlers ────────────────────────────────────────────
 async function handleImportTeachers(rows: Record<string, string>[]) {
   const data = rows.map((r) => ({
     name: r.name,
@@ -1019,7 +1019,7 @@ async function handleImportSubjects(rows: Record<string, string>[]) {
   return await adminStore.importSubjects(data)
 }
 
-// ?? Subject actions ????????????????????????????????????????????
+// ── Subject actions ────────────────────────────────────────────
 async function onAddSubjectSubmit() {
   if (isAddingSubject.value) return
   addSubjectError.value = null
@@ -1050,7 +1050,7 @@ async function onDeleteSubjectConfirm() {
   }
 }
 
-// ?? Lifecycle ??????????????????????????????????????????????????
+// ── Lifecycle ──────────────────────────────────────────────────
 onMounted(async () => {
   if (!auth.teacher) {
     try { await auth.fetchTeacherMe() } catch { router.push('/login'); return }
