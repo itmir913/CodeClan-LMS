@@ -90,6 +90,49 @@ async fn require_student_access(
     Ok(())
 }
 
+/// GET /api/student/classes
+pub async fn list_my_classes(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+) -> Result<Json<Vec<crate::server::routes::classes::ClassResponse>>, ApiError> {
+    let session = parse_session(&headers, &state.db).await?;
+    let student_id = session.student_id.ok_or(ApiError::Forbidden)?;
+
+    let rows = sqlx::query(
+        "SELECT c.id, c.name, c.subject_id, c.teacher_id, c.created_at, \
+         COALESCE(s.name, '') as subject_name, \
+         COALESCE(t.name, '') as teacher_name, \
+         (SELECT COUNT(*) FROM class_students cs2 WHERE cs2.class_id = c.id) as student_count \
+         FROM class_students cs \
+         INNER JOIN classes c ON c.id = cs.class_id \
+         LEFT JOIN subjects s ON s.id = c.subject_id \
+         LEFT JOIN teachers t ON t.id = c.teacher_id \
+         WHERE cs.student_id = ? \
+         ORDER BY s.name ASC, c.name ASC",
+    )
+    .bind(student_id)
+    .fetch_all(&state.db)
+    .await?;
+
+    use sqlx::Row as _;
+    let classes = rows
+        .iter()
+        .map(|r| crate::server::routes::classes::ClassResponse {
+            id: r.get("id"),
+            name: r.get("name"),
+            subject_id: r.get("subject_id"),
+            subject_name: r.get("subject_name"),
+            teacher_id: r.get("teacher_id"),
+            teacher_name: r.get("teacher_name"),
+            student_count: r.get("student_count"),
+            has_active_session: false,
+            created_at: r.get("created_at"),
+        })
+        .collect();
+
+    Ok(Json(classes))
+}
+
 /// GET /api/classes/:id/students
 pub async fn list_students(
     State(state): State<AppState>,

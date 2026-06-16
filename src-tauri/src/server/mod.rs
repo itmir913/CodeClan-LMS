@@ -39,6 +39,8 @@ pub fn build_router(state: AppState) -> Router {
                 .put(routes::classes::update_class)
                 .delete(routes::classes::delete_class),
         )
+        // Student — my classes
+        .route("/student/classes", get(routes::students::list_my_classes))
         // Students
         .route(
             "/classes/:id/students",

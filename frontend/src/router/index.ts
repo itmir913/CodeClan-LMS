@@ -46,6 +46,12 @@ const router = createRouter({
       meta: { requiresAuth: 'student' },
     },
     {
+      path: '/student/classes/:id',
+      name: 'student-class-detail',
+      component: () => import('@/views/student/StudentClassDetailView.vue'),
+      meta: { requiresAuth: 'student' },
+    },
+    {
       path: '/problem-bank',
       name: 'problem-bank',
       component: () => import('@/views/teacher/ProblemBankView.vue'),

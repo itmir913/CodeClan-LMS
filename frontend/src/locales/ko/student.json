@@ -1,4 +1,9 @@
 {
   "noActiveSession": "현재 진행 중인 시험이 없습니다",
-  "gradeClassInfo": "{grade}학년 {class_no}반 {number}번"
+  "gradeClassInfo": "{grade}학년 {class_no}반 {number}번",
+  "myClasses": "내 수업",
+  "noClasses": "배정된 수업이 없습니다",
+  "noClassesHint": "선생님께 수업 배정을 요청하세요",
+  "classDetail": "수업 상세",
+  "teacher": "담당 교사"
 }

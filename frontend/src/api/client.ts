@@ -312,6 +312,9 @@ export const api = {
     updateAppSettings: (data: AppSettings) =>
       request<{ ok: boolean }>('PUT', '/admin/app-settings', data),
   },
+  student: {
+    myClasses: () => request<ClassItem[]>('GET', '/student/classes'),
+  },
   settings: {
     setLocale: (locale: string) =>
       request<{ ok: boolean }>('PUT', '/settings/locale', { locale }),
