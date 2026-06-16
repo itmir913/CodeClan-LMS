@@ -304,9 +304,8 @@ watch(
 .password-input::-ms-clear {
   display: none;
 }
-/* stylelint-disable-next-line selector-pseudo-element-no-unknown */
+/* 브라우저 기본 비밀번호 표시 아이콘 제거 (Edge/IE: ms-reveal, Chrome: webkit) */
 .password-input::-webkit-contacts-auto-fill-button,
-/* stylelint-disable-next-line selector-pseudo-element-no-unknown */
 .password-input::-webkit-credentials-auto-fill-button {
   visibility: hidden;
 }
