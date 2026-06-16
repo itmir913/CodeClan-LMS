@@ -195,7 +195,7 @@ import { IconX, IconLoader2, IconEye, IconEyeOff } from '@tabler/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 
 const props = defineProps<{ modelValue: boolean }>()
-const emit = defineEmits<{ (e: 'update:modelValue', val: boolean): void }>()
+defineEmits<{ (e: 'update:modelValue', val: boolean): void }>()
 
 const { t } = useI18n()
 const auth = useAuthStore()
@@ -304,7 +304,9 @@ watch(
 .password-input::-ms-clear {
   display: none;
 }
+/* stylelint-disable-next-line selector-pseudo-element-no-unknown */
 .password-input::-webkit-contacts-auto-fill-button,
+/* stylelint-disable-next-line selector-pseudo-element-no-unknown */
 .password-input::-webkit-credentials-auto-fill-button {
   visibility: hidden;
 }
