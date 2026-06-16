@@ -83,11 +83,15 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
+  const requiredRole = to.meta.requiresAuth as string | undefined
+
   // setup 체크는 항상 먼저
   try {
     const status = await api.setup.status()
 
-    if (status.locale) {
+    // 인증 불필요 페이지(login, setup)에서만 앱 기본 locale 적용.
+    // 인증 페이지는 me 엔드포인트가 개인 locale을 내려주므로 여기서 적용하면 flicker 발생.
+    if (!requiredRole && status.locale) {
       applyLocale(status.locale)
     }
 
@@ -101,8 +105,6 @@ router.beforeEach(async (to) => {
   } catch {
     if (to.name !== 'setup') return { name: 'setup' }
   }
-
-  const requiredRole = to.meta.requiresAuth as string | undefined
 
   if (requiredRole === 'admin' || requiredRole === 'teacher') {
     try {
