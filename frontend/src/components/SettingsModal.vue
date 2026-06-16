@@ -64,8 +64,7 @@
                 @keydown.enter="onSaveName"
               />
               <button
-                class="h-10 px-4 rounded-lg font-medium flex items-center gap-2 shrink-0"
-                class="border-0"
+                class="h-10 px-4 rounded-lg font-medium flex items-center gap-2 shrink-0 border-0"
                 style="background: var(--color-accent); color: var(--color-accent-text);"
                 :disabled="isSavingName"
                 @click="onSaveName"
@@ -171,8 +170,7 @@
                 </div>
               </div>
               <button
-                class="h-10 px-4 rounded-lg font-medium flex items-center justify-center gap-2 w-full"
-                class="border-0"
+                class="h-10 px-4 rounded-lg font-medium flex items-center justify-center gap-2 w-full border-0"
                 style="background: var(--color-accent); color: var(--color-accent-text);"
                 :disabled="isSavingPw"
                 @click="onSavePw"
