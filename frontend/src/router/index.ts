@@ -2,6 +2,12 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { api } from '@/api/client'
 import { i18n } from '@/i18n'
 
+function applyLocale(locale: string | null | undefined) {
+  if (!locale) return
+  i18n.global.locale.value = locale as 'ko' | 'en'
+  localStorage.setItem('cc_locale', locale)
+}
+
 const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -82,7 +88,7 @@ router.beforeEach(async (to) => {
     const status = await api.setup.status()
 
     if (status.locale) {
-      i18n.global.locale.value = status.locale as 'ko' | 'en'
+      applyLocale(status.locale)
     }
 
     if (status.needs_setup && to.name !== 'setup') {
@@ -101,7 +107,7 @@ router.beforeEach(async (to) => {
   if (requiredRole === 'admin' || requiredRole === 'teacher') {
     try {
       const res = await api.auth.meTeacher()
-      i18n.global.locale.value = res.locale as 'ko' | 'en'
+      applyLocale(res.locale)
       // admin이 /teacher 홈에 오면 /admin으로 (공유 페이지인 classes, problem-bank는 그대로 허용)
       if (to.name === 'teacher-home' && res.user.role === 'admin') {
         return { name: 'admin-home' }
@@ -114,7 +120,7 @@ router.beforeEach(async (to) => {
       // 교사 세션 없음 — 학생 세션이면 student 홈으로
       try {
         const res = await api.auth.meStudent()
-        i18n.global.locale.value = res.locale as 'ko' | 'en'
+        applyLocale(res.locale)
         return { name: 'student-home' }
       } catch {
         return { name: 'login' }
@@ -125,12 +131,12 @@ router.beforeEach(async (to) => {
   if (requiredRole === 'student') {
     try {
       const res = await api.auth.meStudent()
-      i18n.global.locale.value = res.locale as 'ko' | 'en'
+      applyLocale(res.locale)
     } catch {
       // 학생 세션 없음 — 교사/관리자 세션이면 해당 홈으로
       try {
         const res = await api.auth.meTeacher()
-        i18n.global.locale.value = res.locale as 'ko' | 'en'
+        applyLocale(res.locale)
         return res.user.role === 'admin' ? { name: 'admin-home' } : { name: 'teacher-home' }
       } catch {
         return { name: 'login' }
