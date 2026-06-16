@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { api, type StudentItem, type AddStudentBody, type BulkResult, type ImportStudentRow } from '@/api/client'
+import { api, type StudentItem, type AddStudentBody, type UpdateStudentBody, type BulkResult, type ImportStudentRow } from '@/api/client'
 
 export const useStudentStore = defineStore('student', () => {
   const students = ref<StudentItem[]>([])
@@ -32,6 +32,11 @@ export const useStudentStore = defineStore('student', () => {
     return result
   }
 
+  async function updateStudent(classId: number, studentId: number, data: UpdateStudentBody): Promise<void> {
+    await api.students.update(studentId, data)
+    await fetchStudents(classId)
+  }
+
   async function deleteStudent(classId: number, studentId: number): Promise<void> {
     await api.students.delete(studentId)
     await fetchStudents(classId)
@@ -60,6 +65,7 @@ export const useStudentStore = defineStore('student', () => {
     addStudent,
     bulkAddStudents,
     importStudents,
+    updateStudent,
     deleteStudent,
     resetStudentPassword,
   }

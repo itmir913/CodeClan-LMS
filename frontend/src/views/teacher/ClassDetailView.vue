@@ -236,6 +236,14 @@
                       <button
                         class="w-8 h-8 p-0 rounded-lg flex items-center justify-center border bg-transparent"
                         style="border-color: var(--color-border); color: var(--color-text-muted);"
+                        @click="openEditModal(student)"
+                        :aria-label="$t('students.editStudent')"
+                      >
+                        <IconPencil :size="14" />
+                      </button>
+                      <button
+                        class="w-8 h-8 p-0 rounded-lg flex items-center justify-center border bg-transparent"
+                        style="border-color: var(--color-border); color: var(--color-text-muted);"
                         @click="openResetPasswordModal(student)"
                         :aria-label="$t('students.resetPassword')"
                       >
@@ -283,12 +291,6 @@
             {{ $t('students.addStudent') }}
           </h2>
           <form @submit.prevent="onAddSubmit" novalidate class="flex flex-col gap-4">
-            <div class="flex flex-col gap-2">
-              <label class="font-medium" style="color: var(--color-text-primary)">{{ $t('students.name') }}</label>
-              <input v-model="addForm.name" type="text" :disabled="isAdding"
-                     class="h-12 w-full px-4 rounded-lg border outline-none"
-                     style="background: var(--color-bg-primary); border-color: var(--color-border); color: var(--color-text-primary)" />
-            </div>
             <div class="grid grid-cols-3 gap-3">
               <div class="flex flex-col gap-2">
                 <label class="font-medium" style="color: var(--color-text-primary)">{{ $t('students.grade') }}</label>
@@ -309,6 +311,25 @@
                        style="background: var(--color-bg-primary); border-color: var(--color-border); color: var(--color-text-primary)" />
               </div>
             </div>
+            <div class="flex flex-col gap-2">
+              <label class="font-medium" style="color: var(--color-text-primary)">{{ $t('students.name') }}</label>
+              <input v-model="addForm.name" type="text" :disabled="isAdding"
+                     class="h-12 w-full px-4 rounded-lg border outline-none"
+                     style="background: var(--color-bg-primary); border-color: var(--color-border); color: var(--color-text-primary)" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label class="font-medium" style="color: var(--color-text-primary)">{{ $t('students.username') }}</label>
+              <input v-model="addForm.username" type="text" :disabled="isAdding"
+                     class="h-12 w-full px-4 rounded-lg border outline-none"
+                     style="background: var(--color-bg-primary); border-color: var(--color-border); color: var(--color-text-primary)" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label class="font-medium" style="color: var(--color-text-primary)">{{ $t('students.password') }}</label>
+              <input v-model="addForm.password" type="password" :disabled="isAdding"
+                     :placeholder="$t('students.passwordPlaceholder')"
+                     class="h-12 w-full px-4 rounded-lg border outline-none"
+                     style="background: var(--color-bg-primary); border-color: var(--color-border); color: var(--color-text-primary)" />
+            </div>
             <div v-if="addError"
                  class="flex items-center gap-2 rounded-lg border px-4 py-3"
                  style="background: var(--color-danger-bg); border-color: var(--color-danger-border); color: var(--color-danger)"
@@ -326,6 +347,82 @@
                       :class="isAdding ? 'opacity-60 cursor-not-allowed' : ''">
                 <IconLoader2 v-if="isAdding" :size="17" class="spin" />
                 {{ isAdding ? $t('students.adding') : $t('students.add') }}
+              </button>
+            </div>
+          </form>
+        </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- ── 학생 수정 모달 ── -->
+    <Teleport to="body">
+      <div v-if="showEditModal"
+           class="fixed inset-0 z-50 overflow-y-auto"
+           style="background: var(--color-modal-overlay)">
+        <div class="flex min-h-full items-center justify-center px-4 py-4">
+        <div class="w-full max-w-md rounded-xl p-6 border"
+             style="background: var(--color-bg-secondary); border-color: var(--color-border); box-shadow: var(--shadow-dropdown)">
+          <h2 class="font-semibold mb-5" style="color: var(--color-text-primary)">
+            {{ $t('students.editStudent') }}
+          </h2>
+          <form @submit.prevent="onEditSubmit" novalidate class="flex flex-col gap-4">
+            <div class="grid grid-cols-3 gap-3">
+              <div class="flex flex-col gap-2">
+                <label class="font-medium" style="color: var(--color-text-primary)">{{ $t('students.grade') }}</label>
+                <input v-model.number="editForm.grade" type="number" min="1" max="6" :disabled="isEditing"
+                       class="h-12 w-full px-3 rounded-lg border outline-none"
+                       style="background: var(--color-bg-primary); border-color: var(--color-border); color: var(--color-text-primary)" />
+              </div>
+              <div class="flex flex-col gap-2">
+                <label class="font-medium" style="color: var(--color-text-primary)">{{ $t('students.classNo') }}</label>
+                <input v-model.number="editForm.class_no" type="number" min="1" max="99" :disabled="isEditing"
+                       class="h-12 w-full px-3 rounded-lg border outline-none"
+                       style="background: var(--color-bg-primary); border-color: var(--color-border); color: var(--color-text-primary)" />
+              </div>
+              <div class="flex flex-col gap-2">
+                <label class="font-medium" style="color: var(--color-text-primary)">{{ $t('students.number') }}</label>
+                <input v-model.number="editForm.number" type="number" min="1" max="99" :disabled="isEditing"
+                       class="h-12 w-full px-3 rounded-lg border outline-none"
+                       style="background: var(--color-bg-primary); border-color: var(--color-border); color: var(--color-text-primary)" />
+              </div>
+            </div>
+            <div class="flex flex-col gap-2">
+              <label class="font-medium" style="color: var(--color-text-primary)">{{ $t('students.name') }}</label>
+              <input v-model="editForm.name" type="text" :disabled="isEditing"
+                     class="h-12 w-full px-4 rounded-lg border outline-none"
+                     style="background: var(--color-bg-primary); border-color: var(--color-border); color: var(--color-text-primary)" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label class="font-medium" style="color: var(--color-text-primary)">{{ $t('students.username') }}</label>
+              <input v-model="editForm.username" type="text" :disabled="isEditing"
+                     class="h-12 w-full px-4 rounded-lg border outline-none"
+                     style="background: var(--color-bg-primary); border-color: var(--color-border); color: var(--color-text-primary)" />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label class="font-medium" style="color: var(--color-text-primary)">{{ $t('students.password') }}</label>
+              <input v-model="editForm.password" type="password" :disabled="isEditing"
+                     :placeholder="$t('students.passwordEditPlaceholder')"
+                     class="h-12 w-full px-4 rounded-lg border outline-none"
+                     style="background: var(--color-bg-primary); border-color: var(--color-border); color: var(--color-text-primary)" />
+            </div>
+            <div v-if="editError"
+                 class="flex items-center gap-2 rounded-lg border px-4 py-3"
+                 style="background: var(--color-danger-bg); border-color: var(--color-danger-border); color: var(--color-danger)"
+                 role="alert">
+              <IconAlertCircle :size="18" class="shrink-0" />
+              <span>{{ editError }}</span>
+            </div>
+            <div class="flex justify-end gap-3 pt-1">
+              <button type="button" class="h-10 px-5 rounded-lg font-medium border bg-transparent"
+                      style="border-color: var(--color-border); color: var(--color-text-primary);"
+                      @click="closeModals">{{ $t('students.cancel') }}</button>
+              <button type="submit" :disabled="isEditing"
+                      class="h-10 px-5 rounded-lg font-medium flex items-center gap-2 border-0"
+                      style="background: var(--color-accent); color: var(--color-accent-text);"
+                      :class="isEditing ? 'opacity-60 cursor-not-allowed' : ''">
+                <IconLoader2 v-if="isEditing" :size="17" class="spin" />
+                {{ isEditing ? $t('students.editing') : $t('students.save') }}
               </button>
             </div>
           </form>
@@ -441,11 +538,11 @@ import { useI18n } from 'vue-i18n'
 import {
   IconArrowLeft, IconMoon, IconSun, IconLoader2, IconAlertCircle,
   IconUsers, IconUserPlus, IconUpload, IconSearch, IconKey, IconTrash, IconTool,
-  IconBook2, IconClipboardList, IconCalendarCheck,
+  IconBook2, IconClipboardList, IconCalendarCheck, IconPencil,
 } from '@tabler/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import { useStudentStore } from '@/stores/student'
-import { api, type ClassDetail, type StudentItem, type AddStudentBody } from '@/api/client'
+import { api, type ClassDetail, type StudentItem, type AddStudentBody, type UpdateStudentBody } from '@/api/client'
 import LanguageSelector from '@/components/LanguageSelector.vue'
 import ImportModal from '@/components/ImportModal.vue'
 import type { SynonymMap } from '@/utils/excelImport'
@@ -486,13 +583,13 @@ const filteredStudents = computed(() => {
 
 // ── 개별 추가 모달 ────────────────────────────────────
 const showAddModal = ref(false)
-const addForm = ref<AddStudentBody>({ name: '', grade: 3, class_no: 1, number: 1 })
+const addForm = ref<AddStudentBody>({ name: '', grade: 3, class_no: 1, number: 1, username: '', password: '' })
 const isAdding = ref(false)
 const addError = ref<string | null>(null)
 
 function openAddModal() {
   closeModals()
-  addForm.value = { name: '', grade: 3, class_no: 1, number: 1 }
+  addForm.value = { name: '', grade: 3, class_no: 1, number: 1, username: '', password: '' }
   showAddModal.value = true
 }
 
@@ -552,6 +649,42 @@ async function handleImportStudents(rows: Record<string, string>[]) {
   await studentStore.importStudents(classId.value, data)
 }
 
+// ── 수정 모달 ────────────────────────────────────────
+const showEditModal = ref(false)
+const editTarget = ref<StudentItem | null>(null)
+const editForm = ref<UpdateStudentBody>({ name: '', grade: 3, class_no: 1, number: 1, username: '', password: '' })
+const isEditing = ref(false)
+const editError = ref<string | null>(null)
+
+function openEditModal(student: StudentItem) {
+  closeModals()
+  editTarget.value = student
+  editForm.value = {
+    name: student.name,
+    grade: student.grade,
+    class_no: student.class_no,
+    number: student.number,
+    username: student.username,
+    password: '',
+  }
+  showEditModal.value = true
+}
+
+async function onEditSubmit() {
+  if (isEditing.value) return
+  editError.value = null
+  isEditing.value = true
+  try {
+    await studentStore.updateStudent(classId.value, editTarget.value!.id, editForm.value)
+    closeModals()
+  } catch (e) {
+    const code = e instanceof Error ? e.message : 'ERR_UNKNOWN'
+    editError.value = t(`errors.${code}`, t('errors.ERR_UNKNOWN'))
+  } finally {
+    isEditing.value = false
+  }
+}
+
 // ── 비밀번호 초기화 모달 ──────────────────────────────
 const showResetModal = ref(false)
 const resetTarget = ref<StudentItem | null>(null)
@@ -609,12 +742,15 @@ async function onDeleteConfirm() {
 // ── 공통 ──────────────────────────────────────────────
 function closeModals() {
   showAddModal.value = false
+  showEditModal.value = false
   showImportModal.value = false
   showResetModal.value = false
   showDeleteModal.value = false
+  editTarget.value = null
   resetTarget.value = null
   deleteTarget.value = null
   addError.value = null
+  editError.value = null
   resetError.value = null
   deleteError.value = null
 }

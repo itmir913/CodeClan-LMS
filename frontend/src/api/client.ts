@@ -117,6 +117,17 @@ export interface AddStudentBody {
   grade: number
   class_no: number
   number: number
+  username?: string
+  password?: string
+}
+
+export interface UpdateStudentBody {
+  name: string
+  grade: number
+  class_no: number
+  number: number
+  username: string
+  password?: string
 }
 
 export interface BulkResult {
@@ -290,6 +301,8 @@ export const api = {
       request<BulkResult>('POST', `/classes/${classId}/students/bulk`, data),
     importStudents: (classId: number, data: ImportStudentRow[]) =>
       request<ImportResult>('POST', `/classes/${classId}/students/import`, data),
+    update: (id: number, data: UpdateStudentBody) =>
+      request<{ ok: boolean }>('PUT', `/students/${id}`, data),
     delete: (id: number) => request<{ ok: boolean }>('DELETE', `/students/${id}`),
     resetPassword: (id: number) =>
       request<{ ok: boolean }>('POST', `/students/${id}/reset-password`),

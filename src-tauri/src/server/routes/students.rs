@@ -30,6 +30,26 @@ pub struct AddStudentBody {
     pub grade: i64,
     pub class_no: i64,
     pub number: i64,
+    pub username: Option<String>,
+    pub password: Option<String>,
+}
+
+#[derive(Deserialize)]
+pub struct UpdateStudentBody {
+    pub name: String,
+    pub grade: i64,
+    pub class_no: i64,
+    pub number: i64,
+    pub username: String,
+    pub password: Option<String>,
+}
+
+fn hash_password(password: &str) -> Result<String, ApiError> {
+    let salt = SaltString::generate(&mut OsRng);
+    Argon2::default()
+        .hash_password(password.as_bytes(), &salt)
+        .map(|h| h.to_string())
+        .map_err(|e| ApiError::Internal(format!("argon2: {e}")))
 }
 
 async fn require_class_access(
@@ -194,18 +214,30 @@ pub async fn add_student(
         return Err(ApiError::BadRequest("ERR_STUDENT_NUMBER_INVALID".into()));
     }
 
-    let username = format!("{}{:02}{:02}", body.grade, body.class_no, body.number);
+    let username = match &body.username {
+        Some(u) if !u.trim().is_empty() => u.trim().to_string(),
+        _ => format!("{}{:02}{:02}", body.grade, body.class_no, body.number),
+    };
+    let password = match &body.password {
+        Some(p) if !p.trim().is_empty() => p.trim().to_string(),
+        _ => username.clone(),
+    };
+
+    // 해싱은 tx 밖에서 수행 (커넥션 독점 방지)
+    let password_hash = hash_password(&password)?;
 
     let mut tx = state.db.begin().await?;
 
     let insert_result = sqlx::query(
-        "INSERT INTO students (username, name, grade, class_no, number) VALUES (?, ?, ?, ?, ?)",
+        "INSERT INTO students (username, name, grade, class_no, number, password_hash) \
+         VALUES (?, ?, ?, ?, ?, ?)",
     )
     .bind(&username)
     .bind(body.name.trim())
     .bind(body.grade)
     .bind(body.class_no)
     .bind(body.number)
+    .bind(&password_hash)
     .execute(&mut *tx)
     .await;
 
@@ -248,24 +280,55 @@ pub async fn bulk_add_students(
         return Err(ApiError::BadRequest("ERR_BULK_EMPTY".into()));
     }
 
-    let mut tx = state.db.begin().await?;
-    let mut inserted: i64 = 0;
-    let mut skipped: i64 = 0;
+    // 해싱은 tx 밖에서 선처리 (커넥션 독점 방지)
+    struct ProcessedItem {
+        username: String,
+        password_hash: String,
+        name: String,
+        grade: i64,
+        class_no: i64,
+        number: i64,
+    }
 
+    let mut processed: Vec<ProcessedItem> = Vec::with_capacity(body.len());
     for item in &body {
         if item.name.trim().is_empty() {
             continue;
         }
-        let username = format!("{}{:02}{:02}", item.grade, item.class_no, item.number);
+        let username = match &item.username {
+            Some(u) if !u.trim().is_empty() => u.trim().to_string(),
+            _ => format!("{}{:02}{:02}", item.grade, item.class_no, item.number),
+        };
+        let password = match &item.password {
+            Some(p) if !p.trim().is_empty() => p.trim().to_string(),
+            _ => username.clone(),
+        };
+        let password_hash = hash_password(&password)?;
+        processed.push(ProcessedItem {
+            username,
+            password_hash,
+            name: item.name.trim().to_string(),
+            grade: item.grade,
+            class_no: item.class_no,
+            number: item.number,
+        });
+    }
 
+    let mut tx = state.db.begin().await?;
+    let mut inserted: i64 = 0;
+    let mut skipped: i64 = 0;
+
+    for item in &processed {
         let insert_result = sqlx::query(
-            "INSERT INTO students (username, name, grade, class_no, number) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO students (username, name, grade, class_no, number, password_hash) \
+             VALUES (?, ?, ?, ?, ?, ?)",
         )
-        .bind(&username)
-        .bind(item.name.trim())
+        .bind(&item.username)
+        .bind(&item.name)
         .bind(item.grade)
         .bind(item.class_no)
         .bind(item.number)
+        .bind(&item.password_hash)
         .execute(&mut *tx)
         .await;
 
@@ -337,8 +400,17 @@ pub async fn import_students(
         return Err(ApiError::BadRequest("ERR_IMPORT_EMPTY".into()));
     }
 
-    let mut tx = state.db.begin().await?;
+    // 해싱 선처리
+    struct ImportProcessed {
+        username: String,
+        password_hash: String,
+        name: String,
+        grade: i64,
+        class_no: i64,
+        number: i64,
+    }
 
+    let mut processed: Vec<ImportProcessed> = Vec::with_capacity(body.len());
     for item in &body {
         if item.name.trim().is_empty() {
             return Err(ApiError::BadRequest("ERR_IMPORT_ROW_INVALID".into()));
@@ -347,15 +419,30 @@ pub async fn import_students(
             Some(u) if !u.trim().is_empty() => u.trim().to_string(),
             _ => format!("{}{:02}{:02}", item.grade, item.class_no, item.number),
         };
+        let password_hash = hash_password(&username)?;
+        processed.push(ImportProcessed {
+            username,
+            password_hash,
+            name: item.name.trim().to_string(),
+            grade: item.grade,
+            class_no: item.class_no,
+            number: item.number,
+        });
+    }
 
+    let mut tx = state.db.begin().await?;
+
+    for item in &processed {
         let result = sqlx::query(
-            "INSERT INTO students (username, name, grade, class_no, number) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO students (username, name, grade, class_no, number, password_hash) \
+             VALUES (?, ?, ?, ?, ?, ?)",
         )
-        .bind(&username)
-        .bind(item.name.trim())
+        .bind(&item.username)
+        .bind(&item.name)
         .bind(item.grade)
         .bind(item.class_no)
         .bind(item.number)
+        .bind(&item.password_hash)
         .execute(&mut *tx)
         .await
         .map_err(|e| {
@@ -408,6 +495,96 @@ pub async fn delete_student(
     Ok(Json(json!({ "ok": true })))
 }
 
+/// PUT /api/students/:id
+pub async fn update_student(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(student_id): Path<i64>,
+    Json(body): Json<UpdateStudentBody>,
+) -> Result<Json<Value>, ApiError> {
+    let session = parse_session(&headers, &state.db).await?;
+    let teacher_id = session.teacher_id.ok_or(ApiError::Forbidden)?;
+
+    if body.name.trim().is_empty() {
+        return Err(ApiError::BadRequest("ERR_STUDENT_NAME_REQUIRED".into()));
+    }
+    if body.grade < 1 || body.grade > 6 {
+        return Err(ApiError::BadRequest("ERR_STUDENT_GRADE_INVALID".into()));
+    }
+    if body.class_no < 1 || body.class_no > 99 {
+        return Err(ApiError::BadRequest("ERR_STUDENT_CLASS_NO_INVALID".into()));
+    }
+    if body.number < 1 || body.number > 99 {
+        return Err(ApiError::BadRequest("ERR_STUDENT_NUMBER_INVALID".into()));
+    }
+    let username = body.username.trim().to_string();
+    if username.is_empty() {
+        return Err(ApiError::BadRequest("ERR_STUDENT_USERNAME_REQUIRED".into()));
+    }
+
+    let exists: Option<i64> = sqlx::query_scalar("SELECT id FROM students WHERE id = ?")
+        .bind(student_id)
+        .fetch_optional(&state.db)
+        .await?;
+    if exists.is_none() {
+        return Err(ApiError::NotFound);
+    }
+
+    require_student_access(teacher_id, student_id, &state.db).await?;
+
+    // 비밀번호 변경 요청 시 tx 전 해싱
+    let password_hash: Option<String> = match &body.password {
+        Some(p) if !p.trim().is_empty() => Some(hash_password(p.trim())?),
+        _ => None,
+    };
+
+    let mut tx = state.db.begin().await?;
+
+    let update_result = if let Some(hash) = password_hash {
+        sqlx::query(
+            "UPDATE students \
+             SET name=?, grade=?, class_no=?, number=?, username=?, \
+                 password_hash=?, password_reset_required=0 \
+             WHERE id=?",
+        )
+        .bind(body.name.trim())
+        .bind(body.grade)
+        .bind(body.class_no)
+        .bind(body.number)
+        .bind(&username)
+        .bind(&hash)
+        .bind(student_id)
+        .execute(&mut *tx)
+        .await
+    } else {
+        sqlx::query(
+            "UPDATE students \
+             SET name=?, grade=?, class_no=?, number=?, username=? \
+             WHERE id=?",
+        )
+        .bind(body.name.trim())
+        .bind(body.grade)
+        .bind(body.class_no)
+        .bind(body.number)
+        .bind(&username)
+        .bind(student_id)
+        .execute(&mut *tx)
+        .await
+    };
+
+    update_result.map_err(|e| {
+        if let sqlx::Error::Database(ref db_err) = e {
+            if db_err.message().contains("UNIQUE constraint failed") {
+                return ApiError::BadRequest("ERR_STUDENT_ALREADY_EXISTS".into());
+            }
+        }
+        ApiError::Database(e)
+    })?;
+
+    tx.commit().await?;
+    Ok(Json(json!({ "ok": true })))
+}
+
 /// POST /api/students/:id/reset-password
 pub async fn reset_student_password(
     State(state): State<AppState>,
@@ -425,12 +602,8 @@ pub async fn reset_student_password(
 
     require_student_access(teacher_id, student_id, &state.db).await?;
 
-    // 해싱은 CPU 집약 작업이므로 트랜잭션 밖에서 수행 (커넥션 독점 방지)
-    let salt = SaltString::generate(&mut OsRng);
-    let hash = Argon2::default()
-        .hash_password(username.as_bytes(), &salt)
-        .map_err(|e| ApiError::Internal(format!("argon2: {e}")))?
-        .to_string();
+    // 해싱은 tx 밖에서 수행 (커넥션 독점 방지)
+    let hash = hash_password(&username)?;
 
     let mut tx = state.db.begin().await?;
     sqlx::query(

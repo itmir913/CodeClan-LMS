@@ -11,6 +11,10 @@
   "classNo": "Class",
   "number": "Number",
   "username": "Username",
+  "password": "Password",
+  "passwordPlaceholder": "Leave blank to use username",
+  "passwordEditPlaceholder": "Leave blank to keep unchanged",
+  "editStudent": "Edit Student",
   "resetPassword": "Reset Password",
   "resetPasswordConfirm": "Reset password for \"{name}\"?",
   "resetPasswordConfirmHint": "The password will be reset to the student's username.",
@@ -19,10 +23,12 @@
   "deleteConfirmHint": "The student will be permanently removed. This cannot be undone.",
   "searchPlaceholder": "Search by name or number",
   "adding": "Adding...",
+  "editing": "Saving...",
   "deleting": "Deleting...",
   "resetting": "Resetting...",
   "cancel": "Cancel",
   "add": "Add",
+  "save": "Save",
   "delete": "Delete",
   "reset": "Reset"
 }

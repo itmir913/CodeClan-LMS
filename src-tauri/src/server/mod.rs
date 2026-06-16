@@ -48,7 +48,10 @@ pub fn build_router(state: AppState) -> Router {
         )
         .route("/classes/:id/students/bulk", post(routes::students::bulk_add_students))
         .route("/classes/:id/students/import", post(routes::students::import_students))
-        .route("/students/:id", delete(routes::students::delete_student))
+        .route(
+            "/students/:id",
+            put(routes::students::update_student).delete(routes::students::delete_student),
+        )
         .route("/students/:id/reset-password", post(routes::students::reset_student_password))
         // Admin — app settings
         .route(
